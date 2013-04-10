@@ -1,0 +1,21 @@
+Just play!
+Sandbox
+Quit
+New level
+Resume
+Restart
+Skip
+Cheat
+Give up
+Resume
+Play it!
+Save
+Load
+Quit
+Resume
+Basic 1
+Basic 2
+Hard 1
+Hard 2
+Save it!
+Don't!

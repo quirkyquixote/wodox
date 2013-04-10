@@ -1,0 +1,4 @@
+Teclea tu nombre.
+Teclea tu circuito.
+Pulsa F1 para ayuda/menu
+Manual de usuario del dispositivo WODOX

@@ -1,0 +1,19 @@
+LINKING FOR DUMMIES (II)
+
+If you want the machine to be turned ON when several
+buttons are ON, write their numbers separated by "and"
+as follows:
+
+  123 and 456 and 789
+
+If you want the machine to be turned ON when one of 
+several buttons are ON and OFF when none of then are,
+write their numbers separated by "or":
+
+  123 or 456 or 789
+
+If you want the machine to be turned OFF when several
+buttons are ON, write their numbers separated by "and"
+but insert "not" before everything:
+
+  not (123 and 456 and 789)

@@ -1,0 +1,17 @@
+Your objective in each level is to reach the WARP POINT
+(that looks like a fountain of light) with the WODOX.
+
+The WODOX may perform a limited set of actions:
+  * Use the ARROW KEYS to move the wodox.
+  * Use SPACE to pick up or release a blob.
+
+In addition to this, you may exert a limited control on
+the level itself:
+  * Press P to pause the level.
+  * Press BACKSPACE to undo up to ten moves.
+  * Press R (or "restart" below) to restart the level.
+  * Press S (or "skip" below) to skip a level.
+  * Press C (or "cheat" below) to load a solution. (1)
+  * Press ESCAPE (or "give up" below) to quit.
+
+(1) Not implemented yet.

@@ -1,0 +1,18 @@
+LINKING FOR DUMMIES (I)
+
+Move your cursor over the machine (levitator, conveyor
+belt or moving block) you want to link and press ENTER.
+
+If you want the machine to be turned ON when some 
+button or switch is ON and OFF when not, just write 
+the number of that button and press ENTER again.
+
+If you want the machine to be turned OFF when the 
+button or switch is ON and ON when it is OFF, just 
+write "not" and then the number. Then press ENTER.
+
+Press ESCAPE to cancel all changes and go back to the 
+editor.
+
+If you want to unlink a machine, use BACKSPACE to 
+delete the complete line.

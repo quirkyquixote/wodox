@@ -1,0 +1,15 @@
+Tu objetivo en cada nivel es alzanzar la SALIDA (que
+parece una fuente de lucecitas) con el WODOX.
+
+El WODOX puede realizar una serie limitada de acciones:
+  * Usa los CURSORES para mover el WODOX.
+  * Use ESPACIO para coger o soltar un blob.
+
+Adicionalmente puedes controlar el propio nivel hasta
+cierto punto:
+  * Pulsa P para detener el juego.
+  * Pulsa BORRAR para deshacer hasta diez movimientos.
+  * Pulsa R (o "volver" abajo) para reiniciar el nivel.
+  * Pulsa S (o "saltar" abajo) para saltar el nivel.
+  * Pulsa C (o "solución" abajo) para cargar una solución.
+  * Pulsa ESCAPE (o "abandonar" abajo) para rendirte.

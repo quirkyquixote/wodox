@@ -1,0 +1,21 @@
+¡A jugar!
+Taller
+Abandonar
+Nuevo nivel
+Volver
+Reiniciar
+Saltar
+Solución
+Abandonar
+Volver
+¡Jugar!
+Salvar
+Cargar
+Abandonar
+Volver
+Fácil 1
+Fácil 2
+Avanzado 1
+Avanzado 2
+¡Sálvalo!
+¡No!

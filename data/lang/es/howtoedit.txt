@@ -1,0 +1,19 @@
+Usa los CURSORES, REPAG Y AVPAG para mover el cursor.
+  * Pulsa SHIFT para mover el nivel.
+  * Pulsa CONTROL para rotar el nivel.
+
+Pinta piezas con las siguientes teclas:
+  G - suelo, C - cajón, B - botón, S - interruptor,
+  M - bloque móvil, L - levitador, P - wodox, E - salida, 
+  Y, U, I, O - cintas transportadoras,
+  X - borrar.
+
+Pulsa ENTER para editar el circuito que activa una máquina.
+El manual completo para edición de circuitos puede ser 
+accedido pulsando F1 mientras se edita uno.
+
+Los siguientes atajos pueden ser útiles:
+  * Pulsa T (o "¡jugar!" abajo) para jugar el nivel.
+  * Pulsa W (o "guardar" abajo) para escribir a disco.
+  * Pulsa R (o "cargar" abajo) para leer de disco.
+  * Pulsa ESCAPE (o "abandonar" abajo) para abandonar.

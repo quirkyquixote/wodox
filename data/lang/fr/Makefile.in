@@ -1,0 +1,2 @@
+data_target=$(datadir)/$(package)/lang/fr
+data_files=actnames.txt credits.txt howtoedit.txt howtolink.txt howtolink2.txt howtolink3.txt howtolink4.txt howtoplay.txt levelnames.txt menus.txt messages.txt

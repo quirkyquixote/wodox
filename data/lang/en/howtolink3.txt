@@ -1,0 +1,19 @@
+ADVANCED LINKING (I)
+
+If you have two TRIGGERS A and B the output of a 
+given circuit is as follows (1 is ON and 0 is OFF):
+
+   A   B   A or B   A and B   A xor B
+  ------------------------------------
+   0   0     0         0         0 
+   0   1     1         0         1
+   1   0     1         0         1
+   1   1     1         1         0
+
+If you write "not" before anything, the output is the
+opposite of the input.
+
+Use parenthesis to group as desired "(A or B) and C"
+is not the same as "A or (B and C)". The first
+calculates "X : A or B" and then "X and C", the second 
+calculates "X : B and C" and then "A or X".

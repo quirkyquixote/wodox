@@ -1,0 +1,19 @@
+Use the ARROW KEYS, PAGEDOWN and PAGEUP to move the cursor.
+  * Press SHIFT to shift the level.
+  * Press CONTROL to rotate the level.
+
+Paint pieces with the following keys:
+  G - ground, C - crate, B - button, S - switch,
+  M - moving block, L - levitator, P - wodox, E - exit, 
+  Y, U, I, O - conveyor belt,
+  X - erase.
+
+Press RETURN to edit the circuit that activates a machine.
+The complete manual for this may be accessed by pressing
+F1 while editing any circuit.
+
+The following shortcuts are available:
+  * Press T (or "play it!" below) to try the level.
+  * Press W (or "save" below) to write to disk.
+  * Press R (or "load" below) to read from disk.
+  * Press ESCAPE (or "quit" below) to quit.
