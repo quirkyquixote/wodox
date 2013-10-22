@@ -7,6 +7,7 @@ target_link_libraries (
     ${SDLMIXER_LIBRARY}
     ${SDLTTF_LIBRARY}
     ${SDL_gfx_LIBRARY}
+    ${M_LIB}
 )
 
 install(TARGETS wodox DESTINATION bin)

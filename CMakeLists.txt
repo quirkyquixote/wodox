@@ -20,6 +20,8 @@ find_package(SDL_mixer)
 find_package(SDL_ttf)
 find_package(SDL_gfx)
 
+find_library(M_LIB m)
+
 include_directories (
   ${LLR_SOURCE_DIR}
   ${SDL_INCLUDE_DIR}
