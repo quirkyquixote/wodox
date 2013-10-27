@@ -102,9 +102,9 @@ run_level()
     while (game.keep_going) {
 	update();
 	draw_background();
-	draw_objects();	
+	render_objects();	
 	handle_player_input();
-	draw_foreground();
+	render_foreground();
 	sync();	
 	++game.cs.ticks;	
     }

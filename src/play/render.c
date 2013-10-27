@@ -6,7 +6,7 @@
 #include "types.h"
 
 
-static void draw_column(size_t i, size_t k);
+static void render_column(size_t i, size_t k);
 
 /*----------------------------------------------------------------------------
  * Draw all objects. Most objects have only a simple sprite with no alpha
@@ -14,13 +14,13 @@ static void draw_column(size_t i, size_t k);
  * exit is a particle system.
  *----------------------------------------------------------------------------*/
 void
-draw_objects(void)
+render_objects(void)
 {
     size_t i, k;
 
     for (i = 0; i < SIZE; ++i)
 	for (k = 0; k < SIZE; ++k) 
-	    draw_column(i, k);
+	    render_column(i, k);
 }
 
 /*----------------------------------------------------------------------------
@@ -34,7 +34,7 @@ draw_objects(void)
  * adjacent when they ought not to.
  *----------------------------------------------------------------------------*/
 void
-draw_column(size_t i, size_t k)
+render_column(size_t i, size_t k)
 {
     size_t j;
     struct object *o;
@@ -139,7 +139,7 @@ draw_column(size_t i, size_t k)
  * Show level name and other GUI stuff.
  *----------------------------------------------------------------------------*/
 void
-draw_foreground(void)
+render_foreground(void)
 {
     SDL_Rect dst;
 

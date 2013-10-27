@@ -6,5 +6,5 @@
 
 #pragma once
 
-void draw_objects(void);
-void draw_foreground(void);
+void render_objects(void);
+void render_foreground(void);
