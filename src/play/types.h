@@ -188,10 +188,6 @@ struct state {
     int8_t pushing;		// If the wodox is attempting to push something.
     int8_t dst_ang;		// Target angle for the wodox.
     int8_t cur_ang;		// Current angle for the wodox.
-
-    struct object *outside;	// Small object swapping places with the wodox.
-    struct object *inside;	// Small object inside the wodox.
-    int unlocked;		// Determines if small objects inside the wodox move with it.
 };
 
 /*----------------------------------------------------------------------------

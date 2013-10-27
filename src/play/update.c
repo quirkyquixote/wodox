@@ -16,6 +16,9 @@ static void update_objects(void);
 static void try_move_player(uint8_t dir);
 static int levitate(struct object *o);
 
+/*----------------------------------------------------------------------------
+ * Update all
+ *----------------------------------------------------------------------------*/
 void
 update(void)
 {
@@ -24,11 +27,9 @@ update(void)
     update_heavy_objects();
     update_player_object();
     update_objects();
-
 }
 
-
-/*
+/*----------------------------------------------------------------------------
  * Check the state for all static circuits. These may activate and deactivate
  * levitators and conveyor belts.
  *
@@ -36,7 +37,7 @@ update(void)
  * their presence is the fact that there is a static circuit pointing an empty
  * space; thus activating or deactivating levitators is done when there is no
  * other machine in place.
- */
+ *----------------------------------------------------------------------------*/
 void
 update_static_circuits(void)
 {
@@ -104,10 +105,10 @@ update_static_circuits(void)
     }
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Check state for all dynamic circuits. These may activate and deactivate
  * moving blocks.
- */
+ *----------------------------------------------------------------------------*/
 void
 update_dynamic_circuits(void)
 {
@@ -140,13 +141,13 @@ update_dynamic_circuits(void)
     }
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Heavy objects are subject to forces. Depending on the value of the space in
  * the forces map, they can go either up, down or nowhere, but if they ought to
  * go up and are unable to do so or the space has no force they might be
  * affected by a conveyor belt. For these checks we must iterate on the object
  * map because order matters: objects in higher layers have priority.
- */
+ *----------------------------------------------------------------------------*/
 void
 update_heavy_objects(void)
 {
@@ -189,9 +190,14 @@ update_heavy_objects(void)
     }
 }
 
-/*
- * Control for the player object.
- */
+/*----------------------------------------------------------------------------
+ * Handle player movement; In addition to being a heavy object, it...
+ *  - Can be moved by the player if there are no external forces.
+ *  - When moving it can push other heavy objects.
+ *  - It is affected by the 'warp force'.
+ *  - It is 'killed' if it reaches the lowermost layer of the level.
+ *  - It interacts in complex ways with small objects.
+ *----------------------------------------------------------------------------*/
 void
 update_player_object(void)
 {
@@ -217,74 +223,59 @@ update_player_object(void)
 	break;
     }
 
-    // Handle player movement; In addition to being a heavy object, the 
-    // player object:
-    //
-    //  - Can be moved by the player if there are no external forces.
-    //  - When moving it can push other heavy objects.
-    //  - It is affected by the 'warp force'.
-    //  - It is 'killed' if it reaches the lowermost layer of the level.
-    //  - It interacts in complex ways with small objects.
-    //
-    // I hate small objects.
+    if (game.po == NULL || game.po->dir != STILL)
+	return;
 
-    if (game.po && game.po->dir == STILL) {
-	if (Y(game.po->idx) == 0) {
-	    game.keep_going = 0;
-	}
-
-	if (FRC[game.po->idx] == WARP) {
-	    game.keep_going = 0;
-	    game.keep_playing = 0;
-	    game.warped = 1;
-	}
-
-	switch (game.keydn - game.keyup) {
-	case -1:
-	    game.cs.dst_ang = 0;
-	    if (X(game.po->idx) > MIN)
-		try_move_player(DIR_LF);
-	    break;
-	case 1:
-	    game.cs.dst_ang = 4;
-	    if (X(game.po->idx) < MAX)
-		try_move_player(DIR_RT);
-	    break;
-
-	default:
-	    switch (game.keylf - game.keyrt) {
-	    case -1:
-		game.cs.dst_ang = 2;
-		if (Z(game.po->idx) > MIN)
-		    try_move_player(DIR_BK);
-		break;
-	    case 1:
-		game.cs.dst_ang = 6;
-		if (Z(game.po->idx) < MAX)
-		    try_move_player(DIR_FT);
-		break;
-	    default:
-		game.cs.pushing = 0;
-		break;
-	    }
-	}
+    if (Y(game.po->idx) == 0) 
+	game.keep_going = 0;
+	
+    if (FRC[game.po->idx] == WARP) {
+	game.keep_going = 0;
+	game.keep_playing = 0;
+	game.warped = 1;
     }
+
+    switch (game.keydn - game.keyup) {
+    case -1:
+	game.cs.dst_ang = 0;
+	if (X(game.po->idx) > MIN)
+	    try_move_player(DIR_LF);
+	return;
+
+    case 1:
+	game.cs.dst_ang = 4;
+	if (X(game.po->idx) < MAX)
+	    try_move_player(DIR_RT);
+	return;
+    }
+
+    switch (game.keylf - game.keyrt) {
+    case -1:
+	game.cs.dst_ang = 2;
+	if (Z(game.po->idx) > MIN)
+	    try_move_player(DIR_BK);
+	return;
+    case 1:
+	game.cs.dst_ang = 6;
+	if (Z(game.po->idx) < MAX)
+	    try_move_player(DIR_FT);
+	return;
+    }
+
+    game.cs.pushing = 0;
 }
 
+/*----------------------------------------------------------------------------
+ * Try to move the player object in direction dir
+ *----------------------------------------------------------------------------*/
 void
 try_move_player(uint8_t dir)
 {
     struct object *o;
 
     if ((o = OBJ[game.po->idx + offset[dir]]) && o->dir == STILL) {
-	if (o->type == SMALL) {
-	    if (game.cs.unlocked) {
-		game.cs.outside = o;
-		/*object_remove (game.cs.outside); */
-	    }
-	} else if ((o->type & HEAVY) &&
-		   (o->idx / bounds[dir] ==
-		    (o->idx + offset[dir]) / bounds[dir])) {
+	if ((o->type & HEAVY) &&
+	    (o->idx / bounds[dir] == (o->idx + offset[dir]) / bounds[dir])) {
 	    if (game.cs.pushing++ > PUSH_DELAY && object_try_move(o, dir)) {
 		object_move(game.po, dir);
 		game.cs.pushing = 0;
@@ -292,25 +283,15 @@ try_move_player(uint8_t dir)
 	    return;
 	}
     }
-    if (object_try_move(game.po, dir) && game.cs.unlocked) {
-	if (game.cs.inside) {
-	    /*object_insert (game.cs.inside); */
-	    game.cs.inside = NULL;
-	}
-	if (game.cs.outside) {
-	    game.cs.inside = game.cs.outside;
-	    game.cs.outside = NULL;
-	}
-    } else if (game.cs.outside) {
-	/*object_insert (game.cs.outside); */
-    }
+
+    object_try_move(game.po, dir);
     game.cs.pushing = 0;
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Update every object. This time order doesn't matter and we can use the
  * object list.
- */
+ *----------------------------------------------------------------------------*/
 void
 update_objects(void)
 {
@@ -321,19 +302,16 @@ update_objects(void)
 	o = &game.cs.objects[i];
 
 	if (o->dir != STILL && ++o->dsp >= SPS) {
-	    if (MAP[o->idx] == GHOST) {
+	    if (MAP[o->idx] == GHOST) 
 		MAP[o->idx] = EMPTY;
-	    }
 
-	    if (o != game.po) {
+	    if (o != game.po) 
 		release_buttons(o);
-	    }
 
 	    o->idx += offset[o->dir];
 
-	    if (o != game.po) {
+	    if (o != game.po) 
 		press_buttons(o);
-	    }
 
 	    o->dir = STILL;
 	    o->dsp = 0;
@@ -342,17 +320,16 @@ update_objects(void)
 }
 
 
-/*
+/*----------------------------------------------------------------------------
  * Move an object up, pushing every other object on its way if possible.
- */
+ *----------------------------------------------------------------------------*/
 int
 levitate(struct object *o)
 {
     struct object *tmp;
 
-    if (Y(o->idx) == MAX) {
+    if (Y(o->idx) == MAX) 
 	return 0;
-    }
 
     if ((tmp = OBJ[idx_up(o->idx)]) && tmp->dir == STILL) {
 	if (levitate(tmp)) {
@@ -366,9 +343,9 @@ levitate(struct object *o)
     return object_try_move(o, DIR_UP);
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Save the state of the level in the state stack.
- */
+ *----------------------------------------------------------------------------*/
 void
 save_state()
 {
@@ -384,9 +361,9 @@ save_state()
     }
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Load the state of the level from the state stack.
- */
+ *----------------------------------------------------------------------------*/
 void
 load_state()
 {
@@ -400,9 +377,9 @@ load_state()
     memcpy(&game.cs, game.state_stack_top, sizeof(struct state));
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Some screen transition effects.
- */
+ *----------------------------------------------------------------------------*/
 void
 transition0(int32_t x, int32_t y, int k)
 {
@@ -423,6 +400,9 @@ transition0(int32_t x, int32_t y, int k)
     }
 }
 
+/*----------------------------------------------------------------------------
+ * Some screen transition effects.
+ *----------------------------------------------------------------------------*/
 void
 transition1(int32_t x, int32_t y, int k)
 {
@@ -443,6 +423,9 @@ transition1(int32_t x, int32_t y, int k)
     }
 }
 
+/*----------------------------------------------------------------------------
+ * Some screen transition effects.
+ *----------------------------------------------------------------------------*/
 void
 transition2(int32_t x, int32_t y, int k)
 {

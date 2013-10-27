@@ -82,10 +82,6 @@ run_level()
     game.cs.dst_ang = 0;
     game.cs.cur_ang = 0;
 
-    game.cs.outside = NULL;
-    game.cs.inside = NULL;
-    game.cs.unlocked = 1;
-
     game.cs.ticks = 0;
     game.cs.record_ptr = game.record_list;
 
