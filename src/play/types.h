@@ -89,7 +89,6 @@ static const Uint16 bounds[] =
  * scene and as a double linked list to easily iterate over them.
  */
 struct object {
-    struct object *next;	// Next in list
     Uint8 type;			// Type of object.
     Uint16 off;			// Position.
     Uint8 dir;			// Direction of movement.
@@ -151,8 +150,7 @@ struct record {
  * time, the state of the player object and the solution recording.
  */
 struct state {
-    struct object *objects;	// Objects in use.
-
+    struct object objects[OBJECT_POOL_SIZE];
     Uint8 static_map[SIZE][SIZE][SIZE];	// Static map.
     Uint8 forces_map[SIZE][SIZE][SIZE];	// Forces map.
     struct object *object_map[SIZE][SIZE][SIZE];	// Object map.
@@ -203,6 +201,7 @@ struct game {
 
     struct object *po;		// Player controlled object.
 
+    int object_count;		// Number of objects.
     struct static_circuit *static_circuits;	// Static circuits.
     struct dynamic_circuit *dynamic_circuits;	// Dynamic circuits.
 

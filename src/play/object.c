@@ -12,16 +12,17 @@
 struct object *
 object_new(Uint8 type, Uint16 off)
 {
-    struct object *o = malloc(sizeof(*o));
+    if (game.object_count > OBJECT_POOL_SIZE)
+	return NULL;
+
+    struct object *o = &game.cs.objects[game.object_count++];
 
     memset(o, 0, sizeof(struct object));
-    o->next = game.cs.objects;
     o->type = type;
     o->off = off;
     o->dir = STILL;
     o->dsp = 0;
 
-    game.cs.objects = o;
     OBJ[o->off] = o;
     MAP[o->off] = o->type;
     return o;
@@ -35,6 +36,5 @@ object_free (struct object * o)
 {
     OBJ[o->off] = NULL;
     MAP[o->off] = EMPTY;
-    free(o);
 } 
 

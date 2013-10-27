@@ -30,7 +30,7 @@ load_level(const char *path)
     memset(game.cs.forces_map, DIR_DN, sizeof(Uint8) * SIZE_3);
     memset(game.cs.object_map, 0, sizeof(struct object *) * SIZE_3);
 
-    game.cs.objects = NULL;
+    game.object_count = 0;
     game.static_circuits = NULL;
     game.dynamic_circuits = NULL;
 
@@ -142,8 +142,8 @@ load_level(const char *path)
 
     // Buttons under objects are pressed.
 
-    for (o = game.cs.objects; o; o = o->next) 
-	if (o != game.po) 
+    for (i = 0; i < game.object_count; ++i) 
+	if ((o = &game.cs.objects[i]) != game.po) 
 	    press_buttons(o);
 
     return 1;
@@ -155,16 +155,8 @@ load_level(const char *path)
 void
 free_level()
 {
-    struct object *o;
     struct static_circuit *s;
     struct dynamic_circuit *d;
-
-    while (game.cs.objects) {
-	o = game.cs.objects->next;
-	free(game.cs.objects);
-	game.cs.objects = o;
-	
-    }
 
     while (game.static_circuits) {
 	s = game.static_circuits->next;
