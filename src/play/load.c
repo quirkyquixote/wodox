@@ -31,9 +31,8 @@ load_level(const char *path)
     memset(game.cs.object_map, 0, sizeof(struct object *) * SIZE_3);
 
     game.cs.objects = NULL;
-
-    list_clear(&game.static_circuits);
-    list_clear(&game.dynamic_circuits);
+    game.static_circuits = NULL;
+    game.dynamic_circuits = NULL;
 
     game.po = NULL;
 
@@ -126,14 +125,16 @@ load_level(const char *path)
 	    fread(&d->size, sizeof(uint16_t), 1, f);
 	    d->tree = (uint16_t *) malloc(sizeof(uint16_t) * d->size);
 	    fread(d->tree, sizeof(uint16_t), d->size, f);
-	    list_push_back(&game.dynamic_circuits, &(d->node));
+	    d->next = game.dynamic_circuits;
+	    game.dynamic_circuits = d;
 	} else {
 	    s = malloc(sizeof(*s));
 	    s->off = i;
 	    fread(&s->size, sizeof(uint16_t), 1, f);
 	    s->tree = (uint16_t *) malloc(sizeof(uint16_t) * s->size);
 	    fread(s->tree, sizeof(uint16_t), s->size, f);
-	    list_push_back(&game.static_circuits, &(s->node));
+	    s->next = game.static_circuits;
+	    game.static_circuits = s;
 	}
     }
 
@@ -154,20 +155,28 @@ load_level(const char *path)
 void
 free_level()
 {
+    struct object *o;
     struct static_circuit *s;
     struct dynamic_circuit *d;
 
-    while (!list_empty(&game.static_circuits)) {
-	s = (struct static_circuit *) game.static_circuits.begin;
-	list_pop_front(&game.static_circuits);
-	free(s->tree);
-	free(s);
+    while (game.cs.objects) {
+	o = game.cs.objects->next;
+	free(game.cs.objects);
+	game.cs.objects = o;
+	
     }
 
-    while (!list_empty(&game.dynamic_circuits)) {
-	d = (struct dynamic_circuit *) game.dynamic_circuits.begin;
-	list_pop_front(&game.dynamic_circuits);
-	free(d->tree);
-	free(d);
+    while (game.static_circuits) {
+	s = game.static_circuits->next;
+	free(game.static_circuits->tree);
+	free(game.static_circuits);
+	game.static_circuits = s;
+    }
+
+    while (game.dynamic_circuits) {
+	d = game.dynamic_circuits->next;
+	free(game.dynamic_circuits->tree);
+	free(game.dynamic_circuits);
+	game.dynamic_circuits = d;
     }
 }

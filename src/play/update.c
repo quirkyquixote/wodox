@@ -39,13 +39,9 @@ update(void)
 void
 update_static_circuits(void)
 {
-    list_node *it;
     struct static_circuit *s;
 
-    for (it = game.static_circuits.begin; it != game.static_circuits.end;
-	 it = it->next) {
-	s = (struct static_circuit *) it;
-
+    for (s = game.static_circuits; s; s = s->next) {
 	if (calculate(s->tree, 0)) {
 	    switch (MAP_AT(s)) {
 	    case BELT_LF_0:
@@ -113,13 +109,9 @@ update_static_circuits(void)
 void
 update_dynamic_circuits(void)
 {
-    list_node *it;
     struct dynamic_circuit *d;
 
-    for (it = game.dynamic_circuits.begin; it != game.dynamic_circuits.end;
-	 it = it->next) {
-	d = (struct dynamic_circuit *) it;
-
+    for (d = game.dynamic_circuits; d; d = d->next) {
 	if (calculate(d->tree, 0)) {
 	    switch (d->obj->type) {
 	    case MOVING_0:

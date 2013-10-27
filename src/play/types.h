@@ -89,7 +89,7 @@ static const Uint16 bounds[] =
  * scene and as a double linked list to easily iterate over them.
  */
 struct object {
-    struct object *next;
+    struct object *next;	// Next in list
     Uint8 type;			// Type of object.
     Uint16 off;			// Position.
     Uint8 dir;			// Direction of movement.
@@ -100,7 +100,7 @@ struct object {
  * Static circuits connect buttons to positions on the map.
  */
 struct static_circuit {
-    list_node node;		// Previous and next objects.
+    struct static_circuit *next;// Next in list
     Uint16 size;		// Size of the tree.
     Uint16 *tree;		// Boolean operation.
     Uint16 off;			// Position.
@@ -110,7 +110,7 @@ struct static_circuit {
  * Dynamic circuits connect buttons to objects.
  */
 struct dynamic_circuit {
-    list_node node;		// Previous and next objects.
+    struct dynamic_circuit *next;// Next in list
     Uint16 size;		// Size of the tree.
     Uint16 *tree;		// Boolean operation.
     struct object *obj;		// Object.
@@ -203,8 +203,8 @@ struct game {
 
     struct object *po;		// Player controlled object.
 
-    list static_circuits;	// Static circuits.
-    list dynamic_circuits;	// Dynamic circuits.
+    struct static_circuit *static_circuits;	// Static circuits.
+    struct dynamic_circuit *dynamic_circuits;	// Dynamic circuits.
 
     struct state cs;		// Current state.
 
