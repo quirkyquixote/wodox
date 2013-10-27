@@ -8,3 +8,8 @@
 
 void render_objects(void);
 void render_foreground(void);
+
+typedef void transition_func (int32_t, int32_t, int);
+
+extern transition_func * TRANSITION_FUNC[];
+

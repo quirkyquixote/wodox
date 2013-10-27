@@ -4,9 +4,21 @@
  */
 
 #include "types.h"
+#include "render.h"
 
 
 static void render_column(size_t i, size_t k);
+
+static void transition0(int32_t x, int32_t y, int k);
+static void transition1(int32_t x, int32_t y, int k);
+static void transition2(int32_t x, int32_t y, int k);
+
+transition_func *TRANSITION_FUNC[] = {
+    transition0,
+    transition1,
+    transition2
+};
+
 
 /*----------------------------------------------------------------------------
  * Draw all objects. Most objects have only a simple sprite with no alpha
@@ -152,4 +164,81 @@ render_foreground(void)
     SDL_BlitSurface(surface_levelname, NULL, canvas, &dst);
 
     SDL_BlitSurface(surface_frame, NULL, canvas, NULL);
+}
+
+
+/*----------------------------------------------------------------------------
+ * Some screen transition effects.
+ *----------------------------------------------------------------------------*/
+void
+transition0(int32_t x, int32_t y, int k)
+{
+    SDL_Rect rect;
+    int state;
+    int i;
+
+    for (i = 0; i < canvas->w + 32; i += 32) {
+	state = 2 * k + (i - canvas->w) / 32;
+
+	if (state > 0) {
+	    rect.x = i - state / 2;
+	    rect.y = 0;
+	    rect.w = state;
+	    rect.h = canvas->h;
+	    SDL_FillRect(canvas, &rect, 0);
+	}
+    }
+}
+
+/*----------------------------------------------------------------------------
+ * Some screen transition effects.
+ *----------------------------------------------------------------------------*/
+void
+transition1(int32_t x, int32_t y, int k)
+{
+    SDL_Rect rect;
+    int state;
+    int j;
+
+    for (j = 0; j < canvas->h + 32; j += 32) {
+	state = 2 * k + (j - canvas->h) / 32;
+
+	if (state > 0) {
+	    rect.x = 0;
+	    rect.y = j - state / 2;
+	    rect.w = canvas->w;
+	    rect.h = state;
+	    SDL_FillRect(canvas, &rect, 0);
+	}
+    }
+}
+
+/*----------------------------------------------------------------------------
+ * Some screen transition effects.
+ *----------------------------------------------------------------------------*/
+void
+transition2(int32_t x, int32_t y, int k)
+{
+    int32_t i, j;
+    int32_t state;
+    int16_t vx[4];
+    int16_t vy[4];
+
+    for (i = 0; i < canvas->w + 32; i += 32) {
+	for (j = 0; j < canvas->h + 32; j += 32) {
+	    state = k - 16 + hypot(i - x, j - y) / 32;
+
+	    if (state > 0) {
+		vx[0] = i;
+		vx[1] = i + 2 * state;
+		vx[2] = i;
+		vx[3] = i - 2 * state;
+		vy[0] = j + 2 * state;
+		vy[1] = j;
+		vy[2] = j - 2 * state;
+		vy[3] = j;
+		filledPolygonRGBA(canvas, vx, vy, 4, 0, 0, 0, 255);
+	    }
+	}
+    }
 }
