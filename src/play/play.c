@@ -29,9 +29,9 @@ static void transition2(int32_t x, int32_t y, int k);
  */
 SDL_Surface *surface_levelname = NULL;
 
-/*
+/*----------------------------------------------------------------------------
  * Play a level.
- */
+ *----------------------------------------------------------------------------*/
 int
 play(const char *path, const char *name)
 {
@@ -48,13 +48,7 @@ play(const char *path, const char *name)
 	run_level();
 	free_level();
     }
-/*
-  if (warped && load_level (path))
-    {
-       run_level (1, &warped);
-       free_level ();
-    }
-*/
+
     SDL_FreeSurface(surface_levelname);
     SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,
 			SDL_DEFAULT_REPEAT_INTERVAL);
@@ -63,20 +57,16 @@ play(const char *path, const char *name)
 }
 
 
-/*
+/*----------------------------------------------------------------------------
  * To run a level. This is almost your garden variety main game loop,
  * delegating most of the work in other methods but in order to correctly
  * handle resources and flow when undoing movements while aborting the level
  * the normal flow is broken by a GOTO.
- */
+ *----------------------------------------------------------------------------*/
 void
 run_level()
 {
-    // SDL stuff.
-
     SDL_Event event;
-
-    // Current game state.
 
     game.cs.pushing = 0;
     game.cs.dst_ang = 0;
@@ -85,11 +75,10 @@ run_level()
     game.cs.ticks = 0;
     game.cs.record_ptr = game.record_list;
 
-    // If the state stack is empty, record the initial state.
-
     if (game.state_stack_top == game.state_stack_bottom) {
 	save_state();
     }
+
     // And here's the aberration. It is said that Djikstra headbangs his coffin
     // once per each one of those. I guess that he will do mine around year 2500
     // or so.
@@ -112,25 +101,17 @@ run_level()
 
     while (game.keep_going) {
 	update();
-
-	draw_background();	// Background texture.
-	draw_objects();		// Draw all objects and features of the level.
-
-	handle_player_input();	// Handle events and more.
-
-	draw_foreground();	// Draw some GUI data. This is done
-	// after the event handling because
-	// these messages should not appear
-	// when freezing the game.
-
-	sync();			// Update screen.
-
-	++game.cs.ticks;	// On to the next iteration.
+	draw_background();
+	draw_objects();	
+	handle_player_input();
+	draw_foreground();
+	sync();	
+	++game.cs.ticks;	
     }
 
-    if (enable_audio) {
+    if (enable_audio) 
 	Mix_HaltChannel(CHANNEL_WODOX);
-    }
+
     // Before terminating we perform a screen transition to close the level but
     // we must still check playr input to recognize some things. Pressing
     // BACKSPACE during transition returns the wodox to the last safe position.
@@ -191,15 +172,13 @@ run_level()
 	sync();
     }
 
-    // Return.
-
     return;
 }
 
 
-/*
- * Handle events and more.
- */
+/*----------------------------------------------------------------------------
+ * Handle events and save states.
+ *----------------------------------------------------------------------------*/
 void
 handle_player_input()
 {
@@ -240,16 +219,13 @@ handle_player_input()
 		game.keyrt = 0;
 		break;
 
-	    case 0:
-		//PICK_OR_RELEASE();
-		break;
-
 	    default:
 		break;
 	    }
 	    ++game.cs.record_ptr;
 	}
     }
+
     // Handle player input.
 
     while (SDL_PollEvent(&event)) {
@@ -284,11 +260,6 @@ handle_player_input()
 		RECORD_MOVE(game.keylf ? 3 : -3);
 		RECORD_MOVE(game.keyrt ? 4 : -4);
 		game.po->dir = STILL;
-		break;
-
-	    case SDLK_SPACE:
-		//PICK_OR_RELEASE();
-		//RECORD_MOVE(0);
 		break;
 
 	    case SDLK_F1:
@@ -396,9 +367,9 @@ handle_player_input()
     }
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Save the state of the level in the state stack.
- */
+ *----------------------------------------------------------------------------*/
 void
 save_state()
 {
@@ -414,9 +385,9 @@ save_state()
     }
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Load the state of the level from the state stack.
- */
+ *----------------------------------------------------------------------------*/
 void
 load_state()
 {
@@ -430,9 +401,9 @@ load_state()
     memcpy(&game.cs, game.state_stack_top, sizeof(struct state));
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Some screen transition effects.
- */
+ *----------------------------------------------------------------------------*/
 void
 transition0(int32_t x, int32_t y, int k)
 {
@@ -453,6 +424,9 @@ transition0(int32_t x, int32_t y, int k)
     }
 }
 
+/*----------------------------------------------------------------------------
+ * Some screen transition effects.
+ *----------------------------------------------------------------------------*/
 void
 transition1(int32_t x, int32_t y, int k)
 {
@@ -473,6 +447,9 @@ transition1(int32_t x, int32_t y, int k)
     }
 }
 
+/*----------------------------------------------------------------------------
+ * Some screen transition effects.
+ *----------------------------------------------------------------------------*/
 void
 transition2(int32_t x, int32_t y, int k)
 {

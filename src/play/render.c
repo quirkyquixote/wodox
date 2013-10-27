@@ -8,34 +8,39 @@
 
 static void draw_column(size_t i, size_t k);
 
-
-/*
+/*----------------------------------------------------------------------------
  * Draw all objects. Most objects have only a simple sprite with no alpha
  * channel, but levitators have alpha transparency and a "warp" effect, and the
  * exit is a particle system.
- */
+ *----------------------------------------------------------------------------*/
 void
-draw_objects()
+draw_objects(void)
 {
     size_t i, k;
 
     for (i = 0; i < SIZE; ++i)
-	for (k = 0; k < SIZE; ++k) {
+	for (k = 0; k < SIZE; ++k) 
 	    draw_column(i, k);
-	}
 }
 
+/*----------------------------------------------------------------------------
+ * Render a complete vertical column of objects.
+ *
+ * Apply a 'warp' effect where there are levitators. The entire column is done
+ * at once to make the transitions smooth.
+ *
+ * FIXME: Note the horribly complicated way to draw moving objects. Order
+ * matters a lot and yet, some objects appear in front of others that are
+ * adjacent when they ought not to.
+ *----------------------------------------------------------------------------*/
 void
 draw_column(size_t i, size_t k)
 {
     size_t j;
-
     struct object *o;
     SDL_Rect dst;
 
     for (j = 0; j < SIZE; ++j) {
-	// If there is a levitator, draw it.
-
 	if (game.cs.forces_map[j][i][k] == DIR_UP) {
 	    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 	    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
@@ -47,18 +52,12 @@ draw_column(size_t i, size_t k)
 
 	    draw_effect(0, 0, &dst);
 	}
-	// If there is an exit, draw it.
 
 	if (game.cs.forces_map[j][i][k] == WARP) {
 	    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 	    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
 	    draw_particles(canvas, &dst);
 	}
-	// If there is an object, draw it. 
-	//
-	// FIXME: Note the horribly complicated way to draw moving
-	// objects. Order matters a lot and yet, some objects appear in
-	// front of others that are adjacent when they ought not to.
 
 	if (((o = game.cs.object_map[j][i][k]) &&
 	     (o->dir == STILL || o->dir == DIR_UP || o->dir == DIR_RT ||
@@ -105,7 +104,6 @@ draw_column(size_t i, size_t k)
 		draw_object(o->type & SPRITE, 0, &dst);
 	    }
 	}
-	// If there is a feature, draw it.
 
 	else if (game.cs.static_map[j][i][k] & VISIBLE) {
 	    switch (game.cs.static_map[j][i][k]) {
@@ -128,9 +126,6 @@ draw_column(size_t i, size_t k)
 	}
     }
 
-    // Apply a 'warp' effect where there are levitators. The entire
-    // column is done at once to make the transitions smooth.
-
     for (j = 0; j < SIZE; ++j) {
 	if (game.cs.forces_map[j][i][k] == DIR_UP) {
 	    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
@@ -140,11 +135,11 @@ draw_column(size_t i, size_t k)
     }
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Show level name and other GUI stuff.
- */
+ *----------------------------------------------------------------------------*/
 void
-draw_foreground()
+draw_foreground(void)
 {
     SDL_Rect dst;
 
