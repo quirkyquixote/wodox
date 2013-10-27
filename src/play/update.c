@@ -7,11 +7,11 @@
 #include "object.h"
 #include "circuit.h"
 
-static void update_static_circuits(void);
-static void update_dynamic_circuits(void);
-static void update_heavy_objects(void);
+static void update_static_circuit(struct static_circuit *s);
+static void update_dynamic_circuit(struct dynamic_circuit *d);
+static void update_heavy_object(struct object *o);
 static void update_player_object(void);
-static void update_objects(void);
+static void update_object(struct object *o);
 
 static void try_move_player(uint8_t dir);
 static int levitate(struct object *o);
@@ -22,11 +22,25 @@ static int levitate(struct object *o);
 void
 update(void)
 {
-    update_static_circuits();
-    update_dynamic_circuits();
-    update_heavy_objects();
+    struct static_circuit *s;
+    struct dynamic_circuit *d;
+    struct object *o;
+    int i;
+
+    for (s = game.static_circuits; s; s = s->next)
+	update_static_circuit(s);
+
+    for (d = game.dynamic_circuits; d; d = d->next)
+	update_dynamic_circuit(d);
+
+    for (i = SIZE_3 - 1; i >= 0; --i)
+	if ((o = OBJ[i]) && (o->type & HEAVY))
+	    update_heavy_object(o);
+
     update_player_object();
-    update_objects();
+
+    for (i = 0; i < game.object_count; ++i)
+	update_object(&game.cs.objects[i]);
 }
 
 /*----------------------------------------------------------------------------
@@ -39,68 +53,64 @@ update(void)
  * other machine in place.
  *----------------------------------------------------------------------------*/
 void
-update_static_circuits(void)
+update_static_circuit(struct static_circuit *s)
 {
-    struct static_circuit *s;
+    if (calculate(s->tree, 0)) {
+	switch (MAP[s->idx]) {
+	case BELT_LF_0:
+	    MAP[s->idx] = BELT_LF_1;
+	    break;
+	case BELT_RT_0:
+	    MAP[s->idx] = BELT_RT_1;
+	    break;
+	case BELT_BK_0:
+	    MAP[s->idx] = BELT_BK_1;
+	    break;
+	case BELT_FT_0:
+	    MAP[s->idx] = BELT_FT_1;
+	    break;
 
-    for (s = game.static_circuits; s; s = s->next) {
-	if (calculate(s->tree, 0)) {
-	    switch (MAP[s->idx]) {
-	    case BELT_LF_0:
-		MAP[s->idx] = BELT_LF_1;
-		break;
-	    case BELT_RT_0:
-		MAP[s->idx] = BELT_RT_1;
-		break;
-	    case BELT_BK_0:
-		MAP[s->idx] = BELT_BK_1;
-		break;
-	    case BELT_FT_0:
-		MAP[s->idx] = BELT_FT_1;
-		break;
+	case BELT_LF_1:
+	case BELT_RT_1:
+	case BELT_BK_1:
+	case BELT_FT_1:
+	    break;
 
-	    case BELT_LF_1:
-	    case BELT_RT_1:
-	    case BELT_BK_1:
-	    case BELT_FT_1:
-		break;
+	default:
+	    FRC[s->idx] = DIR_UP;
+	    if (FRC[idx_up(s->idx)] == DIR_DN)
+		FRC[idx_up(s->idx)] = STILL;
+	    break;
+	}
+    } else {
+	switch (MAP[s->idx]) {
+	case BELT_LF_1:
+	    MAP[s->idx] = BELT_LF_0;
+	    break;
+	case BELT_RT_1:
+	    MAP[s->idx] = BELT_RT_0;
+	    break;
+	case BELT_BK_1:
+	    MAP[s->idx] = BELT_BK_0;
+	    break;
+	case BELT_FT_1:
+	    MAP[s->idx] = BELT_FT_0;
+	    break;
 
-	    default:
-		FRC[s->idx] = DIR_UP;
-		if (FRC[idx_up(s->idx)] == DIR_DN)
-		    FRC[idx_up(s->idx)] = STILL;
-		break;
-	    }
-	} else {
-	    switch (MAP[s->idx]) {
-	    case BELT_LF_1:
-		MAP[s->idx] = BELT_LF_0;
-		break;
-	    case BELT_RT_1:
-		MAP[s->idx] = BELT_RT_0;
-		break;
-	    case BELT_BK_1:
-		MAP[s->idx] = BELT_BK_0;
-		break;
-	    case BELT_FT_1:
-		MAP[s->idx] = BELT_FT_0;
-		break;
+	case BELT_LF_0:
+	case BELT_RT_0:
+	case BELT_BK_0:
+	case BELT_FT_0:
+	    break;
 
-	    case BELT_LF_0:
-	    case BELT_RT_0:
-	    case BELT_BK_0:
-	    case BELT_FT_0:
-		break;
-
-	    default:
-		if (FRC[idx_dn(s->idx)] == DIR_UP)
-		    FRC[s->idx] = STILL;
-		else
-		    FRC[s->idx] = DIR_DN;
-		if (FRC[idx_up(s->idx)] == STILL)
-		    FRC[idx_up(s->idx)] = DIR_DN;
-		break;
-	    }
+	default:
+	    if (FRC[idx_dn(s->idx)] == DIR_UP)
+		FRC[s->idx] = STILL;
+	    else
+		FRC[s->idx] = DIR_DN;
+	    if (FRC[idx_up(s->idx)] == STILL)
+		FRC[idx_up(s->idx)] = DIR_DN;
+	    break;
 	}
     }
 }
@@ -110,33 +120,29 @@ update_static_circuits(void)
  * moving blocks.
  *----------------------------------------------------------------------------*/
 void
-update_dynamic_circuits(void)
+update_dynamic_circuit(struct dynamic_circuit *d)
 {
-    struct dynamic_circuit *d;
-
-    for (d = game.dynamic_circuits; d; d = d->next) {
-	if (calculate(d->tree, 0)) {
-	    switch (d->obj->type) {
-	    case MOVING_0:
-		if (object_try_move(d->obj, DIR_DN)) {
-		    MAP[idx_dn(d->obj->idx)] = MOVING_1;
-		    d->obj->type = MOVING_1;
-		    if (enable_audio)
-			Mix_PlayChannel(CHANNEL_OPEN, chunk_open, 0);
-		}
-		break;
+    if (calculate(d->tree, 0)) {
+	switch (d->obj->type) {
+	case MOVING_0:
+	    if (object_try_move(d->obj, DIR_DN)) {
+		MAP[idx_dn(d->obj->idx)] = MOVING_1;
+		d->obj->type = MOVING_1;
+		if (enable_audio)
+		    Mix_PlayChannel(CHANNEL_OPEN, chunk_open, 0);
 	    }
-	} else {
-	    switch (d->obj->type) {
-	    case MOVING_1:
-		if (levitate(d->obj)) {
-		    MAP[idx_up(d->obj->idx)] = MOVING_0;
-		    d->obj->type = MOVING_0;
-		    if (enable_audio)
-			Mix_PlayChannel(CHANNEL_OPEN, chunk_open, 0);
-		}
-		break;
+	    break;
+	}
+    } else {
+	switch (d->obj->type) {
+	case MOVING_1:
+	    if (levitate(d->obj)) {
+		MAP[idx_up(d->obj->idx)] = MOVING_0;
+		d->obj->type = MOVING_0;
+		if (enable_audio)
+		    Mix_PlayChannel(CHANNEL_OPEN, chunk_open, 0);
 	    }
+	    break;
 	}
     }
 }
@@ -149,44 +155,39 @@ update_dynamic_circuits(void)
  * map because order matters: objects in higher layers have priority.
  *----------------------------------------------------------------------------*/
 void
-update_heavy_objects(void)
+update_heavy_object(struct object *o)
 {
-    uint16_t idx;
-    struct object *o;
+    if (o->dir != STILL)
+	return;
 
-    for (idx = SIZE_3 - 1; idx < SIZE_3; --idx) {
-	if ((o = OBJ[idx]) && (o->type & HEAVY) && (o->dir == STILL)) {
-	    switch (FRC[idx]) {
-	    case DIR_DN:
-		if (Y(o->idx) > MIN)
-		    object_try_move(o, DIR_DN);
-		break;
-	    case DIR_UP:
-		if (levitate(o))
-		    break;	// Levitators are mightily strong.
-	    }
+    switch (FRC[o->idx]) {
+    case DIR_DN:
+	if (Y(o->idx) > MIN && object_try_move(o, DIR_DN))
+	    return;
+	break;
+    case DIR_UP:
+	if (levitate(o))
+	    return;
+	break;
+    }
 
-	    if (o->dir == STILL) {
-		switch (MAP[idx_dn(idx)]) {
-		case BELT_LF_1:
-		    if (X(o->idx) > MIN)
-			object_try_move(o, DIR_LF);
-		    break;
-		case BELT_RT_1:
-		    if (X(o->idx) < MAX)
-			object_try_move(o, DIR_RT);
-		    break;
-		case BELT_BK_1:
-		    if (Z(o->idx) > MIN)
-			object_try_move(o, DIR_BK);
-		    break;
-		case BELT_FT_1:
-		    if (Z(o->idx) < MAX)
-			object_try_move(o, DIR_FT);
-		    break;
-		}
-	    }
-	}
+    switch (MAP[idx_dn(o->idx)]) {
+    case BELT_LF_1:
+	if (X(o->idx) > MIN)
+	    object_try_move(o, DIR_LF);
+	break;
+    case BELT_RT_1:
+	if (X(o->idx) < MAX)
+	    object_try_move(o, DIR_RT);
+	break;
+    case BELT_BK_1:
+	if (Z(o->idx) > MIN)
+	    object_try_move(o, DIR_BK);
+	break;
+    case BELT_FT_1:
+	if (Z(o->idx) < MAX)
+	    object_try_move(o, DIR_FT);
+	break;
     }
 }
 
@@ -197,12 +198,12 @@ update_heavy_objects(void)
  *  - It is affected by the 'warp force'.
  *  - It is 'killed' if it reaches the lowermost layer of the level.
  *  - It interacts in complex ways with small objects.
+ *
+ * Also handle wodox rotation. This is for purely decorative purposes.
  *----------------------------------------------------------------------------*/
 void
 update_player_object(void)
 {
-    // Handle wodox rotation. This is for purely decorative purposes.
-
     switch (game.cs.cur_ang - game.cs.dst_ang) {
     case -8 ... -5:
 	if (--game.cs.cur_ang < 0)
@@ -226,9 +227,9 @@ update_player_object(void)
     if (game.po == NULL || game.po->dir != STILL)
 	return;
 
-    if (Y(game.po->idx) == 0) 
+    if (Y(game.po->idx) == 0)
 	game.keep_going = 0;
-	
+
     if (FRC[game.po->idx] == WARP) {
 	game.keep_going = 0;
 	game.keep_playing = 0;
@@ -275,7 +276,8 @@ try_move_player(uint8_t dir)
 
     if ((o = OBJ[game.po->idx + offset[dir]]) && o->dir == STILL) {
 	if ((o->type & HEAVY) &&
-	    (o->idx / bounds[dir] == (o->idx + offset[dir]) / bounds[dir])) {
+	    (o->idx / bounds[dir] ==
+	     (o->idx + offset[dir]) / bounds[dir])) {
 	    if (game.cs.pushing++ > PUSH_DELAY && object_try_move(o, dir)) {
 		object_move(game.po, dir);
 		game.cs.pushing = 0;
@@ -293,30 +295,24 @@ try_move_player(uint8_t dir)
  * object list.
  *----------------------------------------------------------------------------*/
 void
-update_objects(void)
+update_object(struct object *o)
 {
-    int i;
-    struct object *o;
+    if (o->dir == STILL || ++o->dsp < SPS)
+	return;
 
-    for (i = 0; i < game.object_count; ++i) {
-	o = &game.cs.objects[i];
+    if (MAP[o->idx] == GHOST)
+	MAP[o->idx] = EMPTY;
 
-	if (o->dir != STILL && ++o->dsp >= SPS) {
-	    if (MAP[o->idx] == GHOST) 
-		MAP[o->idx] = EMPTY;
+    if (o != game.po)
+	release_buttons(o);
 
-	    if (o != game.po) 
-		release_buttons(o);
+    o->idx += offset[o->dir];
 
-	    o->idx += offset[o->dir];
+    if (o != game.po)
+	press_buttons(o);
 
-	    if (o != game.po) 
-		press_buttons(o);
-
-	    o->dir = STILL;
-	    o->dsp = 0;
-	}
-    }
+    o->dir = STILL;
+    o->dsp = 0;
 }
 
 
@@ -328,7 +324,7 @@ levitate(struct object *o)
 {
     struct object *tmp;
 
-    if (Y(o->idx) == MAX) 
+    if (Y(o->idx) == MAX)
 	return 0;
 
     if ((tmp = OBJ[idx_up(o->idx)]) && tmp->dir == STILL) {
