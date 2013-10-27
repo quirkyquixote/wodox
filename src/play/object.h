@@ -7,7 +7,7 @@
 
 #include "types.h"
 
-struct object *object_new(Uint8 type, Uint16 off);
+struct object *object_new(uint8_t type, uint16_t off);
 void object_free (struct object * o);
 void object_insert(struct object *o);
 void object_remove(struct object *o);

@@ -14,9 +14,9 @@
 #include <errno.h>
 #include <stdint.h>
 
-/* 
+/*----------------------------------------------------------------------------
  * These define object flags.
- */
+ *----------------------------------------------------------------------------*/
 enum {
     SPRITE		= 0x0f,	// Mask for the sprite.
     VISIBLE		= 0x10,	// If visible, there must be a sprite.
@@ -25,9 +25,9 @@ enum {
     ACTIVE		= 0x80,	// Generates a signal.
 };
 
-/*
+/*----------------------------------------------------------------------------
  * These define object types.
- */
+ *----------------------------------------------------------------------------*/
 enum {
     EMPTY	=  (0x0),
     GHOST	=  (0x0 | SOLID),
@@ -51,9 +51,9 @@ enum {
     SWITCH_1	=  (0xb | VISIBLE | SOLID | ACTIVE),
 };
 
-/*
+/*----------------------------------------------------------------------------
  * These define object movement.
- */
+ *----------------------------------------------------------------------------*/
 enum {
     STILL		= 0,	// Not moving.
     DIR_DN		= 1,	// Moving down.
@@ -65,17 +65,34 @@ enum {
     WARP		= 7,	// Warping outside the level.
 };
 
-/*
+/*----------------------------------------------------------------------------
  * These define the displacement and bounds to operate on raw data.
- */
-static const Sint16 offset[] =
-    { 0, -SIZE_2, SIZE_2, -SIZE, SIZE, -1, 1, 0 };
-static const Uint16 bounds[] =
-    { 0, SIZE_3, SIZE_3, SIZE_2, SIZE_2, SIZE, SIZE, 0 };
+ *----------------------------------------------------------------------------*/
+static const int16_t offset[] = { 
+    [STILL] = 0,
+    [DIR_DN] =  -SIZE_2,
+    [DIR_UP] =  SIZE_2,
+    [DIR_LF] = -SIZE,
+    [DIR_RT] =  SIZE,
+    [DIR_BK] = -1, 
+    [DIR_FT] = 1, 
+    [WARP] = 0 
+};
 
-/*
+static const uint16_t bounds[] = {
+    [STILL] = 0,
+    [DIR_DN] =  SIZE_3,
+    [DIR_UP] =  SIZE_3,
+    [DIR_LF] = SIZE_2,
+    [DIR_RT] =  SIZE_2,
+    [DIR_BK] = SIZE, 
+    [DIR_FT] = SIZE, 
+    [WARP] = 0 
+};
+
+/*----------------------------------------------------------------------------
  * Some more things...
- */
+ *----------------------------------------------------------------------------*/
 #define PUSH_DELAY 1		// Number of frames before the wodox can push another object.
 #define OBJECT_POOL_SIZE 1000	// Number of allocated objects.
 #define STATE_STACK_LEN 10	// Size of the "undo" stack.
@@ -83,47 +100,47 @@ static const Uint16 bounds[] =
 				// Number of moves that may be remembered to replay a level (unimplemented). 
 
 
-/*
+/*----------------------------------------------------------------------------
  * Objects are movable and have states. The player, the crates, moving blocks,
  * etc. are objects. They are indexed in a grid to easily locate them in the
  * scene and as a double linked list to easily iterate over them.
- */
+ *----------------------------------------------------------------------------*/
 struct object {
-    Uint8 type;			// Type of object.
-    Uint16 off;			// Position.
-    Uint8 dir;			// Direction of movement.
-    Uint8 dsp;			// How many steps has the object moved between spaces.
+    uint8_t type;			// Type of object.
+    uint16_t off;			// Position.
+    uint8_t dir;			// Direction of movement.
+    uint8_t dsp;			// How many steps has the object moved between spaces.
 };
 
-/*
+/*----------------------------------------------------------------------------
  * Static circuits connect buttons to positions on the map.
- */
+ *----------------------------------------------------------------------------*/
 struct static_circuit {
     struct static_circuit *next;// Next in list
-    Uint16 size;		// Size of the tree.
-    Uint16 *tree;		// Boolean operation.
-    Uint16 off;			// Position.
+    uint16_t size;		// Size of the tree.
+    uint16_t *tree;		// Boolean operation.
+    uint16_t off;			// Position.
 };
 
-/*
+/*----------------------------------------------------------------------------
  * Dynamic circuits connect buttons to objects.
- */
+ *----------------------------------------------------------------------------*/
 struct dynamic_circuit {
     struct dynamic_circuit *next;// Next in list
-    Uint16 size;		// Size of the tree.
-    Uint16 *tree;		// Boolean operation.
+    uint16_t size;		// Size of the tree.
+    uint16_t *tree;		// Boolean operation.
     struct object *obj;		// Object.
 };
 
-/*
+/*----------------------------------------------------------------------------
  * The level records are basically pairs <time,key>.
- */
+ *----------------------------------------------------------------------------*/
 struct record {
-    Uint32 time;		// When the key was pushed.
-    Sint8 key;			// Whick key.
+    uint32_t time;		// When the key was pushed.
+    int8_t key;			// Whick key.
 };
 
-/*
+/*----------------------------------------------------------------------------
  * The scene is represented by all the following.
  *
  * First we have the objects. They are allocated in a "pool" that has space
@@ -148,26 +165,26 @@ struct record {
  *
  * The state contains also a number of other control variables that handle
  * time, the state of the player object and the solution recording.
- */
+ *----------------------------------------------------------------------------*/
 struct state {
     struct object objects[OBJECT_POOL_SIZE];
-    Uint8 static_map[SIZE][SIZE][SIZE];	// Static map.
-    Uint8 forces_map[SIZE][SIZE][SIZE];	// Forces map.
+    uint8_t static_map[SIZE][SIZE][SIZE];	// Static map.
+    uint8_t forces_map[SIZE][SIZE][SIZE];	// Forces map.
     struct object *object_map[SIZE][SIZE][SIZE];	// Object map.
 
-    Uint32 ticks;		// Number of iterations since the level began.
+    uint32_t ticks;		// Number of iterations since the level began.
     struct record *record_ptr;	// The current record.
 
-    Sint8 pushing;		// If the wodox is attempting to push something.
-    Sint8 dst_ang;		// Target angle for the wodox.
-    Sint8 cur_ang;		// Current angle for the wodox.
+    int8_t pushing;		// If the wodox is attempting to push something.
+    int8_t dst_ang;		// Target angle for the wodox.
+    int8_t cur_ang;		// Current angle for the wodox.
 
     struct object *outside;	// Small object swapping places with the wodox.
     struct object *inside;	// Small object inside the wodox.
     int unlocked;		// Determines if small objects inside the wodox move with it.
 };
 
-/*
+/*----------------------------------------------------------------------------
  * And now... the game itself. 
  *
  * The keyxx and keepxx variables are control for the user input and main
@@ -186,7 +203,7 @@ struct state {
  * 
  * TODO: Up to ten thousand moves may be recorded per level. Until now, this
  * only gave problems with specially dense people playing the 40th. 
- */
+ *----------------------------------------------------------------------------*/
 struct game {
     int keyup;			// Key for movng up.
     int keydn;			// Key for movng down.
@@ -222,8 +239,8 @@ extern struct game game;
 /*
  * Aliases for quick iteration on all elements and low level manipulation.
  */
-#define MAP ((Uint8 *)game.cs.static_map)
-#define FRC ((Uint8 *)game.cs.forces_map)
+#define MAP ((uint8_t *)game.cs.static_map)
+#define FRC ((uint8_t *)game.cs.forces_map)
 #define OBJ ((struct object **)game.cs.object_map)
 
 /*

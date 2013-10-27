@@ -369,7 +369,7 @@ load_state()
  * Some screen transition effects.
  */
 void
-transition0(Sint32 x, Sint32 y, int k)
+transition0(int32_t x, int32_t y, int k)
 {
     SDL_Rect rect;
     int state;
@@ -389,7 +389,7 @@ transition0(Sint32 x, Sint32 y, int k)
 }
 
 void
-transition1(Sint32 x, Sint32 y, int k)
+transition1(int32_t x, int32_t y, int k)
 {
     SDL_Rect rect;
     int state;
@@ -409,12 +409,12 @@ transition1(Sint32 x, Sint32 y, int k)
 }
 
 void
-transition2(Sint32 x, Sint32 y, int k)
+transition2(int32_t x, int32_t y, int k)
 {
-    Sint32 i, j;
-    Sint32 state;
-    Sint16 vx[4];
-    Sint16 vy[4];
+    int32_t i, j;
+    int32_t state;
+    int16_t vx[4];
+    int16_t vy[4];
 
     for (i = 0; i < canvas->w + 32; i += 32) {
 	for (j = 0; j < canvas->h + 32; j += 32) {

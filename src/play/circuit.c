@@ -53,7 +53,7 @@ press_buttons(struct object *o)
  * Calculate the output of a circuit.
  */
 int
-calculate(Uint16 * tree, size_t off)
+calculate(uint16_t * tree, size_t off)
 {
     switch (tree[off]) {
     case NOT:

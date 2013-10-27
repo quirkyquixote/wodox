@@ -9,5 +9,5 @@
 void release_buttons(struct object *o);
 void press_buttons(struct object *o);
 
-int calculate(Uint16 * tree, size_t off);
+int calculate(uint16_t * tree, size_t off);
 

@@ -69,9 +69,9 @@ draw_column(size_t i, size_t k)
 		o->dir == DIR_LF)
 	    || (k > 0 && (o = game.cs.object_map[j][i][k - 1]) &&
 		o->dir == DIR_BK)) {
-	    Uint32 x = i * SPS;
-	    Uint32 y = j * SPS;
-	    Uint32 z = k * SPS;
+	    uint32_t x = i * SPS;
+	    uint32_t y = j * SPS;
+	    uint32_t z = k * SPS;
 
 	    switch (o->dir) {
 	    case DIR_LF:

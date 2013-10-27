@@ -26,8 +26,8 @@ load_level(const char *path)
     }
     // Clean up the current state.
 
-    memset(game.cs.static_map, GROUND, sizeof(Uint8) * SIZE_3);
-    memset(game.cs.forces_map, DIR_DN, sizeof(Uint8) * SIZE_3);
+    memset(game.cs.static_map, GROUND, sizeof(uint8_t) * SIZE_3);
+    memset(game.cs.forces_map, DIR_DN, sizeof(uint8_t) * SIZE_3);
     memset(game.cs.object_map, 0, sizeof(struct object *) * SIZE_3);
 
     game.object_count = 0;

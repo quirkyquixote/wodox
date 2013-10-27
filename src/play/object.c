@@ -10,7 +10,7 @@
  * Grab an object from the unused list and initialize it.
  */
 struct object *
-object_new(Uint8 type, Uint16 off)
+object_new(uint8_t type, uint16_t off)
 {
     if (game.object_count > OBJECT_POOL_SIZE)
 	return NULL;
