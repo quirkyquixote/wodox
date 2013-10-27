@@ -13,6 +13,7 @@ static void update_heavy_objects(void);
 static void update_player_object(void);
 static void update_objects(void);
 
+static void try_move_player(uint8_t dir);
 static int levitate(struct object *o);
 
 void
@@ -65,7 +66,7 @@ update_static_circuits(void)
 
 	    default:
 		FRC[s->idx] = DIR_UP;
-		if (FRC[idx_up(s->idx)] == DIR_DN) 
+		if (FRC[idx_up(s->idx)] == DIR_DN)
 		    FRC[idx_up(s->idx)] = STILL;
 		break;
 	    }
@@ -95,7 +96,7 @@ update_static_circuits(void)
 		    FRC[s->idx] = STILL;
 		else
 		    FRC[s->idx] = DIR_DN;
-		if (FRC[idx_up(s->idx)] == STILL) 
+		if (FRC[idx_up(s->idx)] == STILL)
 		    FRC[idx_up(s->idx)] = DIR_DN;
 		break;
 	    }
@@ -119,7 +120,7 @@ update_dynamic_circuits(void)
 		if (object_try_move(d->obj, DIR_DN)) {
 		    MAP[idx_dn(d->obj->idx)] = MOVING_1;
 		    d->obj->type = MOVING_1;
-		    if (enable_audio) 
+		    if (enable_audio)
 			Mix_PlayChannel(CHANNEL_OPEN, chunk_open, 0);
 		}
 		break;
@@ -130,7 +131,7 @@ update_dynamic_circuits(void)
 		if (levitate(d->obj)) {
 		    MAP[idx_up(d->obj->idx)] = MOVING_0;
 		    d->obj->type = MOVING_0;
-		    if (enable_audio) 
+		    if (enable_audio)
 			Mix_PlayChannel(CHANNEL_OPEN, chunk_open, 0);
 		}
 		break;
@@ -242,12 +243,12 @@ update_player_object(void)
 	case -1:
 	    game.cs.dst_ang = 0;
 	    if (X(game.po->idx) > MIN)
-		TRY_MOVE_PLAYER(DIR_LF);
+		try_move_player(DIR_LF);
 	    break;
 	case 1:
 	    game.cs.dst_ang = 4;
 	    if (X(game.po->idx) < MAX)
-		TRY_MOVE_PLAYER(DIR_RT);
+		try_move_player(DIR_RT);
 	    break;
 
 	default:
@@ -255,12 +256,12 @@ update_player_object(void)
 	    case -1:
 		game.cs.dst_ang = 2;
 		if (Z(game.po->idx) > MIN)
-		    TRY_MOVE_PLAYER(DIR_BK);
+		    try_move_player(DIR_BK);
 		break;
 	    case 1:
 		game.cs.dst_ang = 6;
 		if (Z(game.po->idx) < MAX)
-		    TRY_MOVE_PLAYER(DIR_FT);
+		    try_move_player(DIR_FT);
 		break;
 	    default:
 		game.cs.pushing = 0;
@@ -268,6 +269,42 @@ update_player_object(void)
 	    }
 	}
     }
+}
+
+void
+try_move_player(uint8_t dir)
+{
+    struct object *o;
+
+    if ((o = OBJ[game.po->idx + offset[dir]]) && o->dir == STILL) {
+	if (o->type == SMALL) {
+	    if (game.cs.unlocked) {
+		game.cs.outside = o;
+		/*object_remove (game.cs.outside); */
+	    }
+	} else if ((o->type & HEAVY) &&
+		   (o->idx / bounds[dir] ==
+		    (o->idx + offset[dir]) / bounds[dir])) {
+	    if (game.cs.pushing++ > PUSH_DELAY && object_try_move(o, dir)) {
+		object_move(game.po, dir);
+		game.cs.pushing = 0;
+	    }
+	    return;
+	}
+    }
+    if (object_try_move(game.po, dir) && game.cs.unlocked) {
+	if (game.cs.inside) {
+	    /*object_insert (game.cs.inside); */
+	    game.cs.inside = NULL;
+	}
+	if (game.cs.outside) {
+	    game.cs.inside = game.cs.outside;
+	    game.cs.outside = NULL;
+	}
+    } else if (game.cs.outside) {
+	/*object_insert (game.cs.outside); */
+    }
+    game.cs.pushing = 0;
 }
 
 /*
