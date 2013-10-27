@@ -3,9 +3,9 @@
  * This code copyright (c) Luis Javier Sanz 2009 
  */
 
-#include "edit.h"	
-#include "menu.h"
-#include "play.h"
+#include "../edit/edit.h"	
+#include "../menu/menu.h"
+#include "../play/play.h"
 
 #include <string.h>		// For memset, strerror
 #include <errno.h>		// for errno

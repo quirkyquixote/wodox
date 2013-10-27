@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "draw.h"		// Basic stuff.
+#include "../media/draw.h"		// Basic stuff.
 
-int play (const char * path, const char * name);
+int edit (char * path);
 

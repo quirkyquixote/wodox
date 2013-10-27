@@ -6,9 +6,9 @@
 #include <string.h>		// For memset, strerror
 #include <errno.h>		// for errno
 
-#include "play.h"		// Game engine.
-#include "edit.h"		// Level editor.
-#include "menu.h"	
+#include "../play/play.h"		// Game engine.
+#include "../edit/edit.h"		// Level editor.
+#include "../menu/menu.h"	
 	       
 struct level;
 

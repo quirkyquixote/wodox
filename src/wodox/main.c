@@ -3,9 +3,9 @@
  * This code copyright (c) Luis Javier Sanz 2009 
  */
 
-#include "menu.h"		// Menus.
-#include "play.h"		// Game engine.
-#include "edit.h"		// Level editor.
+#include "../menu/menu.h"		// Menus.
+#include "../play/play.h"		// Game engine.
+#include "../edit/edit.h"		// Level editor.
 
 #include <getopt.h>		// For getopt
 
