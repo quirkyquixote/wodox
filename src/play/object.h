@@ -9,6 +9,7 @@
 
 struct object *object_new(uint8_t type, uint16_t off);
 void object_free (struct object * o);
-void object_insert(struct object *o);
-void object_remove(struct object *o);
+
+void object_move(struct object *o, int dir);
+int object_try_move(struct object *o, int dir);
 

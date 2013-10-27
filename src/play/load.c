@@ -45,7 +45,7 @@ load_level(const char *path)
 	    break;
 	case 1:
 	    MAP[i] = GROUND;
-	    FRC[i + OFF_UP] = STILL;
+	    FRC[idx_up(i)] = STILL;
 	    break;
 	case 2:
 	    object_new(CRATE, i);
@@ -58,39 +58,39 @@ load_level(const char *path)
 	    break;
 	case 5:
 	    MAP[i] = BELT_LF_1;
-	    FRC[i + OFF_UP] = STILL;
+	    FRC[idx_up(i)] = STILL;
 	    break;
 	case 6:
 	    MAP[i] = BELT_BK_1;
-	    FRC[i + OFF_UP] = STILL;
+	    FRC[idx_up(i)] = STILL;
 	    break;
 	case 7:
 	    MAP[i] = BELT_RT_1;
-	    FRC[i + OFF_UP] = STILL;
+	    FRC[idx_up(i)] = STILL;
 	    break;
 	case 8:
 	    MAP[i] = BELT_FT_1;
-	    FRC[i + OFF_UP] = STILL;
+	    FRC[idx_up(i)] = STILL;
 	    break;
 	case 9:
 	    object_new(MOVING_0, i);
 	    break;
 	case 10:
 	    MAP[i] = BUTTON_0;
-	    FRC[i + OFF_UP] = STILL;
+	    FRC[idx_up(i)] = STILL;
 	    break;
 	case 11:
 	    MAP[i] = SWITCH_0;
-	    FRC[i + OFF_UP] = STILL;
+	    FRC[idx_up(i)] = STILL;
 	    break;
 	case 12:
 	    MAP[i] = SWITCH_1;
-	    FRC[i + OFF_UP] = STILL;
+	    FRC[idx_up(i)] = STILL;
 	    break;
 	case 17:
 	    MAP[i] = EMPTY;
 	    FRC[i] = DIR_UP;
-	    FRC[i + OFF_UP] = STILL;
+	    FRC[idx_up(i)] = STILL;
 	    break;
 	case 18:
 	    MAP[i] = EMPTY;
@@ -129,7 +129,7 @@ load_level(const char *path)
 	    game.dynamic_circuits = d;
 	} else {
 	    s = malloc(sizeof(*s));
-	    s->off = i;
+	    s->idx = i;
 	    fread(&s->size, sizeof(uint16_t), 1, f);
 	    s->tree = (uint16_t *) malloc(sizeof(uint16_t) * s->size);
 	    fread(s->tree, sizeof(uint16_t), s->size, f);

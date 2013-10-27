@@ -146,10 +146,10 @@ run_level()
     uint32_t i, j, k;
 
     if (game.po) {
-	i = SCREENX(SPS * X(game.po->off), SPS * Y(game.po->off),
-		    SPS * Z(game.po->off)) + 28;
-	j = SCREENY(SPS * X(game.po->off), SPS * Y(game.po->off),
-		    SPS * Z(game.po->off)) + 32;
+	i = SCREENX(SPS * X(game.po->idx), SPS * Y(game.po->idx),
+		    SPS * Z(game.po->idx)) + 28;
+	j = SCREENY(SPS * X(game.po->idx), SPS * Y(game.po->idx),
+		    SPS * Z(game.po->idx)) + 32;
     } else {
 	i = canvas->w / 2;
 	j = canvas->h / 2;
@@ -381,8 +381,8 @@ handle_player_input()
     // grid and standing on the right kind of tile, save state.
 
     if (game.must_save && game.po->dsp == 0 && game.po->dir != DIR_DN &&
-	FRC_AT(game.po) != DIR_UP) {
-	switch (MAP_DN(game.po)) {
+	FRC[game.po->idx] != DIR_UP) {
+	switch (MAP[idx_dn(game.po->idx)]) {
 	case GROUND:
 	case CRATE:
 	case BELT_LF_0:

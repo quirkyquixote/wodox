@@ -15,6 +15,16 @@
 #include <stdint.h>
 
 /*----------------------------------------------------------------------------
+ * Table indices
+ *----------------------------------------------------------------------------*/
+static inline uint16_t idx_bk (uint16_t idx) { return idx - 1; }
+static inline uint16_t idx_ft (uint16_t idx) { return idx + 1; }
+static inline uint16_t idx_lf (uint16_t idx) { return idx - SIZE; }
+static inline uint16_t idx_rt (uint16_t idx) { return idx + SIZE; }
+static inline uint16_t idx_dn (uint16_t idx) { return idx - SIZE_2; }
+static inline uint16_t idx_up (uint16_t idx) { return idx + SIZE_2; }
+
+/*----------------------------------------------------------------------------
  * These define object flags.
  *----------------------------------------------------------------------------*/
 enum {
@@ -107,7 +117,7 @@ static const uint16_t bounds[] = {
  *----------------------------------------------------------------------------*/
 struct object {
     uint8_t type;			// Type of object.
-    uint16_t off;			// Position.
+    uint16_t idx;			// Position.
     uint8_t dir;			// Direction of movement.
     uint8_t dsp;			// How many steps has the object moved between spaces.
 };
@@ -119,7 +129,7 @@ struct static_circuit {
     struct static_circuit *next;// Next in list
     uint16_t size;		// Size of the tree.
     uint16_t *tree;		// Boolean operation.
-    uint16_t off;			// Position.
+    uint16_t idx;			// Position.
 };
 
 /*----------------------------------------------------------------------------
@@ -244,94 +254,13 @@ extern struct game game;
 #define OBJ ((struct object **)game.cs.object_map)
 
 /*
- * Offsets by direction.
- */
-#define OFF_DN (-SIZE_2)
-#define OFF_UP (SIZE_2)
-#define OFF_LF (-SIZE)
-#define OFF_RT (SIZE)
-#define OFF_BK (-1)
-#define OFF_FT (1)
-
-/*
- * Macros to access the static map around an object.
- */
-#define MAP_AT(__o) (MAP[(__o)->off])
-#define MAP_NEXT(__o,__off) (MAP[(__o)->off + (__off)])
-
-#define MAP_DN(__o) MAP_NEXT(__o,OFF_DN)
-#define MAP_UP(__o) MAP_NEXT(__o,OFF_UP)
-#define MAP_LF(__o) MAP_NEXT(__o,OFF_LF)
-#define MAP_RT(__o) MAP_NEXT(__o,OFF_RT)
-#define MAP_BK(__o) MAP_NEXT(__o,OFF_BK)
-#define MAP_FT(__o) MAP_NEXT(__o,OFF_FT)
-
-/*
- * Macros to access the object map around an object.
- */
-#define OBJ_AT(__o) (OBJ[(__o)->off])
-#define OBJ_NEXT(__o,__off) (OBJ[(__o)->off + (__off)])
-
-#define OBJ_DN(__o) OBJ_NEXT(__o,OFF_DN)
-#define OBJ_UP(__o) OBJ_NEXT(__o,OFF_UP)
-#define OBJ_LF(__o) OBJ_NEXT(__o,OFF_LF)
-#define OBJ_RT(__o) OBJ_NEXT(__o,OFF_RT)
-#define OBJ_BK(__o) OBJ_NEXT(__o,OFF_BK)
-#define OBJ_FT(__o) OBJ_NEXT(__o,OFF_FT)
-
-/*
- * Macros to access the forces map around an object.
- */
-#define FRC_AT(__o) (FRC[(__o)->off])
-#define FRC_NEXT(__o,__off) (FRC[(__o)->off + (__off)])
-
-#define FRC_DN(__o) FRC_NEXT(__o,OFF_DN)
-#define FRC_UP(__o) FRC_NEXT(__o,OFF_UP)
-#define FRC_LF(__o) FRC_NEXT(__o,OFF_LF)
-#define FRC_RT(__o) FRC_NEXT(__o,OFF_RT)
-#define FRC_BK(__o) FRC_NEXT(__o,OFF_BK)
-#define FRC_FT(__o) FRC_NEXT(__o,OFF_FT)
-
-/*
- * Macros to move objects.
- */
-#define MOVE(__o,__dir,__off) ( \
-  (__o)->dir = __dir, \
-  MAP_NEXT(__o,__off) = (__o)->type, \
-  MAP_AT(__o) = GHOST, \
-  OBJ_NEXT(__o,__off) = (__o), \
-  OBJ_AT(__o) = NULL)
-
-#define MOVE_DN(__o) MOVE(__o, DIR_DN, OFF_DN)
-#define MOVE_UP(__o) MOVE(__o, DIR_UP, OFF_UP)
-#define MOVE_LF(__o) MOVE(__o, DIR_LF, OFF_LF)
-#define MOVE_RT(__o) MOVE(__o, DIR_RT, OFF_RT)
-#define MOVE_BK(__o) MOVE(__o, DIR_BK, OFF_BK)
-#define MOVE_FT(__o) MOVE(__o, DIR_FT, OFF_FT)
-
-/*
- * Macros to attempt to move objects.
- */
-#define TRY_MOVE(__o,__dir,__off) ( \
-  (MAP_NEXT(__o,__off) & SOLID) \
-    ? STILL \
-    : (MOVE(__o,__dir,__off), __dir))
-
-#define TRY_MOVE_DN(__o) TRY_MOVE(__o, DIR_DN, OFF_DN)
-#define TRY_MOVE_UP(__o) TRY_MOVE(__o, DIR_UP, OFF_UP)
-#define TRY_MOVE_LF(__o) TRY_MOVE(__o, DIR_LF, OFF_LF)
-#define TRY_MOVE_RT(__o) TRY_MOVE(__o, DIR_RT, OFF_RT)
-#define TRY_MOVE_BK(__o) TRY_MOVE(__o, DIR_BK, OFF_BK)
-#define TRY_MOVE_FT(__o) TRY_MOVE(__o, DIR_FT, OFF_FT)
-
-/*
  * This macro moves the player in one direction. 
  */
-#define TRY_MOVE_PLAYER(__dir,__off) \
+#define TRY_MOVE_PLAYER(__dir) \
 do \
   { \
     struct object * __o; \
-    if ((__o = OBJ_NEXT(game.po,__off)) && __o->dir == STILL) \
+    if ((__o = OBJ[game.po->idx + offset[__dir]]) && __o->dir == STILL) \
       { \
         if (__o->type == SMALL) \
 	  { \
@@ -341,17 +270,17 @@ do \
 	        /*object_remove (game.cs.outside);*/ \
 	      } \
           } \
-        else if ((__o->type & HEAVY) && (__o->off / bounds[__dir] == (__o->off + __off) / bounds[__dir])) \
+        else if ((__o->type & HEAVY) && (__o->idx / bounds[__dir] == (__o->idx + offset[__dir]) / bounds[__dir])) \
           { \
-            if (game.cs.pushing++ > PUSH_DELAY && TRY_MOVE (__o, __dir, __off)) \
+            if (game.cs.pushing++ > PUSH_DELAY && object_try_move (__o, __dir)) \
 	      {  \
-	        MOVE (game.po, __dir, __off);  \
+	        object_move (game.po, __dir);  \
 	        game.cs.pushing = 0; \
 	      } \
 	    break; \
           } \
       } \
-    if (TRY_MOVE (game.po, __dir, __off) && game.cs.unlocked) \
+    if (object_try_move (game.po, __dir) && game.cs.unlocked) \
       { \
         if (game.cs.inside) \
           { \
@@ -387,7 +316,7 @@ do \
 	  } \
 	else \
           { \
-	    game.cs.inside->off = game.po->off; \
+	    game.cs.inside->idx = game.po->idx; \
 	    press_buttons (game.cs.inside); \
 	    game.cs.unlocked = 1; \
 	  } \

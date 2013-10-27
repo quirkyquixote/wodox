@@ -11,12 +11,13 @@
 void
 release_buttons(struct object *o)
 {
-    switch (MAP_DN(o)) {
+    uint16_t idx = idx_dn(o->idx);
+
+    switch (MAP[idx]) {
     case BUTTON_1:
-	MAP_DN(o) = BUTTON_0;
-	if (enable_audio) {
+	MAP[idx] = BUTTON_0;
+	if (enable_audio) 
 	    Mix_PlayChannel(CHANNEL_RELEASE, chunk_release, 0);
-	}
 	break;
     }
 }
@@ -27,24 +28,23 @@ release_buttons(struct object *o)
 void
 press_buttons(struct object *o)
 {
-    switch (MAP_DN(o)) {
+    uint16_t idx = idx_dn(o->idx);
+
+    switch (MAP[idx]) {
     case BUTTON_0:
-	MAP_DN(o) = BUTTON_1;
-	if (enable_audio) {
+	MAP[idx] = BUTTON_1;
+	if (enable_audio) 
 	    Mix_PlayChannel(CHANNEL_PRESS, chunk_press, 0);
-	}
 	break;
     case SWITCH_0:
-	MAP_DN(o) = SWITCH_1;
-	if (enable_audio) {
+	MAP[idx] = SWITCH_1;
+	if (enable_audio) 
 	    Mix_PlayChannel(CHANNEL_PRESS, chunk_press, 0);
-	}
 	break;
     case SWITCH_1:
-	MAP_DN(o) = SWITCH_0;
-	if (enable_audio) {
+	MAP[idx] = SWITCH_0;
+	if (enable_audio) 
 	    Mix_PlayChannel(CHANNEL_PRESS, chunk_press, 0);
-	}
 	break;
     }
 }

@@ -19,12 +19,12 @@ object_new(uint8_t type, uint16_t off)
 
     memset(o, 0, sizeof(struct object));
     o->type = type;
-    o->off = off;
+    o->idx = off;
     o->dir = STILL;
     o->dsp = 0;
 
-    OBJ[o->off] = o;
-    MAP[o->off] = o->type;
+    OBJ[o->idx] = o;
+    MAP[o->idx] = o->type;
     return o;
 }
 
@@ -34,7 +34,29 @@ object_new(uint8_t type, uint16_t off)
 void
 object_free (struct object * o)
 {
-    OBJ[o->off] = NULL;
-    MAP[o->off] = EMPTY;
+    OBJ[o->idx] = NULL;
+    MAP[o->idx] = EMPTY;
 } 
+
+/*
+ * Macros to move objects.
+ */
+void
+object_move(struct object *o, int dir)
+{
+  o->dir = dir;
+  MAP[o->idx + offset[dir]] = o->type;
+  MAP[o->idx] = GHOST;
+  OBJ[o->idx + offset[dir]] = o;
+  OBJ[o->idx] = NULL;
+}
+
+int
+object_try_move(struct object *o, int dir)
+{
+    if (MAP[o->idx + offset[dir]] & SOLID)
+	return STILL;
+    object_move(o, dir);
+    return dir;
+}
 
