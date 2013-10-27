@@ -18,7 +18,7 @@ load_level(const char *path)
     int c;
     struct static_circuit *s;
     struct dynamic_circuit *d;
-    list_node *it;
+    struct object *o;
 
     if ((f = fopen(path, "r")) == NULL) {
 	fprintf(stderr, "couldn't open %s; %s\n", path, strerror(errno));
@@ -29,16 +29,8 @@ load_level(const char *path)
     memset(game.cs.static_map, GROUND, sizeof(Uint8) * SIZE_3);
     memset(game.cs.forces_map, DIR_DN, sizeof(Uint8) * SIZE_3);
     memset(game.cs.object_map, 0, sizeof(struct object *) * SIZE_3);
-    memset(game.cs.object_pool, 0,
-	   sizeof(struct object) * OBJECT_POOL_SIZE);
 
-    list_clear(&game.cs.objects);
-    list_clear(&game.cs.unused_objects);
-
-    for (i = 0; i < OBJECT_POOL_SIZE; ++i) {
-	list_push_back(&game.cs.unused_objects,
-		       (list_node *) (game.cs.object_pool + i));
-    }
+    game.cs.objects = NULL;
 
     list_clear(&game.static_circuits);
     list_clear(&game.dynamic_circuits);
@@ -57,13 +49,13 @@ load_level(const char *path)
 	    FRC[i + OFF_UP] = STILL;
 	    break;
 	case 2:
-	    object_insert(object_grab(CRATE, i));
+	    object_new(CRATE, i);
 	    break;
 	case 3:
-	    object_insert((game.po = object_grab(PLAYER, i)));
+	    game.po = object_new(PLAYER, i);
 	    break;
 	case 4:
-	    object_insert(object_grab(SMALL, i));
+	    object_new(SMALL, i);
 	    break;
 	case 5:
 	    MAP[i] = BELT_LF_1;
@@ -82,7 +74,7 @@ load_level(const char *path)
 	    FRC[i + OFF_UP] = STILL;
 	    break;
 	case 9:
-	    object_insert(object_grab(MOVING_0, i));
+	    object_new(MOVING_0, i);
 	    break;
 	case 10:
 	    MAP[i] = BUTTON_0;
@@ -123,21 +115,20 @@ load_level(const char *path)
     if (game.po == NULL) {
 	fprintf(stderr, "there is no wodox in %s\n", path);
     }
+
     // Read circuits. They will be static or dynamic depending on what kind of
     // piece has been previously loaded in the space they are pointing to.
 
     while (fread(&i, sizeof(uint16_t), 1, f) == 1 && i < SIZE_3) {
 	if (OBJ[i]) {
-	    d = (struct dynamic_circuit *)
-		malloc(sizeof(struct dynamic_circuit));
+	    d = malloc(sizeof(*d));
 	    d->obj = OBJ[i];
 	    fread(&d->size, sizeof(uint16_t), 1, f);
 	    d->tree = (uint16_t *) malloc(sizeof(uint16_t) * d->size);
 	    fread(d->tree, sizeof(uint16_t), d->size, f);
 	    list_push_back(&game.dynamic_circuits, &(d->node));
 	} else {
-	    s = (struct static_circuit *)
-		malloc(sizeof(struct static_circuit));
+	    s = malloc(sizeof(*s));
 	    s->off = i;
 	    fread(&s->size, sizeof(uint16_t), 1, f);
 	    s->tree = (uint16_t *) malloc(sizeof(uint16_t) * s->size);
@@ -150,12 +141,9 @@ load_level(const char *path)
 
     // Buttons under objects are pressed.
 
-    for (it = game.cs.objects.begin; it != game.cs.objects.end;
-	 it = it->next) {
-	if ((struct object *) it != game.po) {
-	    press_buttons((struct object *) it);
-	}
-    }
+    for (o = game.cs.objects; o; o = o->next) 
+	if (o != game.po) 
+	    press_buttons(o);
 
     return 1;
 }

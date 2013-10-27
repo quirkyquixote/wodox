@@ -287,13 +287,9 @@ update_player_object(void)
 void
 update_objects(void)
 {
-    list_node *it;
     struct object *o;
 
-    for (it = game.cs.objects.begin; it != game.cs.objects.end;
-	 it = it->next) {
-	o = (struct object *) it;
-
+    for (o = game.cs.objects; o; o = o->next) {
 	if (o->dir != STILL && ++o->dsp >= SPS) {
 	    if (MAP_AT(o) == GHOST) {
 		MAP_AT(o) = EMPTY;

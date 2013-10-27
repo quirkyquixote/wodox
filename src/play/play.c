@@ -8,6 +8,8 @@
 #include "update.h"
 #include "render.h"
 
+struct game game;
+
 /*
  * All static functions declared here.
  */

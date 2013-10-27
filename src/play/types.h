@@ -17,47 +17,53 @@
 /* 
  * These define object flags.
  */
-#define SPRITE		0x0f	// Mask for the sprite.
-#define VISIBLE		0x10	// If visible, there must be a sprite.
-#define SOLID		0x20	// Prevents objects from entering its space.
-#define HEAVY		0x40	// Affected by forces.
-#define ACTIVE		0x80	// Generates a signal.
+enum {
+    SPRITE		= 0x0f,	// Mask for the sprite.
+    VISIBLE		= 0x10,	// If visible, there must be a sprite.
+    SOLID		= 0x20,	// Prevents objects from entering its space.
+    HEAVY		= 0x40,	// Affected by forces.
+    ACTIVE		= 0x80,	// Generates a signal.
+};
 
 /*
  * These define object types.
  */
-#define EMPTY		0x00	// (0x0)
-#define GHOST		0x20	// (0x0 | SOLID)
-#define GROUND		0x30	// (0x0 | VISIBLE | SOLID)
-#define CRATE		0x61	// (0x1 | SOLID | HEAVY)
-#define PLAYER		0x62	// (0x2 | SOLID | HEAVY)
-#define SMALL		0x43	// (0x3 | HEAVY)
-#define BELT_LF_0	0x34	// (0x4 | VISIBLE | SOLID)
-#define BELT_LF_1	0xb4	// (0x4 | VISIBLE | SOLID | ACTIVE)
-#define BELT_BK_0	0x35	// (0x5 | VISIBLE | SOLID)
-#define BELT_BK_1	0xb5	// (0x5 | VISIBLE | SOLID | ACTIVE)
-#define BELT_RT_0	0x36	// (0x6 | VISIBLE | SOLID)
-#define BELT_RT_1	0xb6	// (0x6 | VISIBLE | SOLID | ACTIVE)
-#define BELT_FT_0	0x37	// (0x7 | VISIBLE | SOLID)
-#define BELT_FT_1	0xb7	// (0x7 | VISIBLE | SOLID | ACTIVE)
-#define MOVING_0	0x28	// (0x8 | SOLID)
-#define MOVING_1	0xa8	// (0x8 | SOLID | ACTIVE)
-#define BUTTON_0	0x39	// (0x9 | VISIBLE | SOLID)
-#define BUTTON_1	0xb9	// (0x9 | VISIBLE | SOLID | ACTIVE)
-#define SWITCH_0	0x3a	// (0xa | VISIBLE | SOLID)
-#define SWITCH_1	0xbb	// (0xb | VISIBLE | SOLID | ACTIVE)
+enum {
+    EMPTY	=  (0x0),
+    GHOST	=  (0x0 | SOLID),
+    GROUND	=  (0x0 | VISIBLE | SOLID),
+    CRATE	=  (0x1 | SOLID | HEAVY),
+    PLAYER	=  (0x2 | SOLID | HEAVY),
+    SMALL	=  (0x3 | HEAVY),
+    BELT_LF_0	=  (0x4 | VISIBLE | SOLID),
+    BELT_LF_1	=  (0x4 | VISIBLE | SOLID | ACTIVE),
+    BELT_BK_0	=  (0x5 | VISIBLE | SOLID),
+    BELT_BK_1	=  (0x5 | VISIBLE | SOLID | ACTIVE),
+    BELT_RT_0	=  (0x6 | VISIBLE | SOLID),
+    BELT_RT_1	=  (0x6 | VISIBLE | SOLID | ACTIVE),
+    BELT_FT_0	=  (0x7 | VISIBLE | SOLID),
+    BELT_FT_1	=  (0x7 | VISIBLE | SOLID | ACTIVE),
+    MOVING_0	=  (0x8 | SOLID),
+    MOVING_1	=  (0x8 | SOLID | ACTIVE),
+    BUTTON_0	=  (0x9 | VISIBLE | SOLID),
+    BUTTON_1	=  (0x9 | VISIBLE | SOLID | ACTIVE),
+    SWITCH_0	=  (0xa | VISIBLE | SOLID),
+    SWITCH_1	=  (0xb | VISIBLE | SOLID | ACTIVE),
+};
 
 /*
  * These define object movement.
  */
-#define STILL		0	// Not moving.
-#define DIR_DN		1	// Moving down.
-#define DIR_UP		2	// Moving up.
-#define DIR_LF		3	// Moving left.
-#define DIR_RT		4	// Moving right.
-#define DIR_BK		5	// Moving back.
-#define DIR_FT		6	// Moving front.
-#define WARP		7	// Warping outside the level.
+enum {
+    STILL		= 0,	// Not moving.
+    DIR_DN		= 1,	// Moving down.
+    DIR_UP		= 2,	// Moving up.
+    DIR_LF		= 3,	// Moving left.
+    DIR_RT		= 4,	// Moving right.
+    DIR_BK		= 5,	// Moving back.
+    DIR_FT		= 6,	// Moving front.
+    WARP		= 7,	// Warping outside the level.
+};
 
 /*
  * These define the displacement and bounds to operate on raw data.
@@ -83,7 +89,7 @@ static const Uint16 bounds[] =
  * scene and as a double linked list to easily iterate over them.
  */
 struct object {
-    list_node node;		// Previous and nest objects.
+    struct object *next;
     Uint8 type;			// Type of object.
     Uint16 off;			// Position.
     Uint8 dir;			// Direction of movement.
@@ -145,9 +151,7 @@ struct record {
  * time, the state of the player object and the solution recording.
  */
 struct state {
-    struct object object_pool[OBJECT_POOL_SIZE];	// All objects allocated here.
-    list unused_objects;	// Objects not created.
-    list objects;		// Objects in use.
+    struct object *objects;	// Objects in use.
 
     Uint8 static_map[SIZE][SIZE][SIZE];	// Static map.
     Uint8 forces_map[SIZE][SIZE][SIZE];	// Forces map.
@@ -214,7 +218,7 @@ struct game {
 /*
  * There can be only one!
  */
-static struct game game;
+extern struct game game;
 
 /*
  * Aliases for quick iteration on all elements and low level manipulation.
@@ -318,7 +322,7 @@ do \
             if (game.cs.unlocked) \
 	      { \
                 game.cs.outside = __o; \
-	        object_remove (game.cs.outside); \
+	        /*object_remove (game.cs.outside);*/ \
 	      } \
           } \
         else if ((__o->type & HEAVY) && (__o->off / bounds[__dir] == (__o->off + __off) / bounds[__dir])) \
@@ -335,7 +339,7 @@ do \
       { \
         if (game.cs.inside) \
           { \
-            object_insert (game.cs.inside); \
+            /*object_insert (game.cs.inside);*/ \
    	    game.cs.inside = NULL; \
           } \
         if (game.cs.outside) \
@@ -346,7 +350,7 @@ do \
       } \
     else if (game.cs.outside)\
       { \
-        object_insert (game.cs.outside); \
+        /*object_insert (game.cs.outside);*/ \
       } \
     game.cs.pushing = 0; \
   } \
