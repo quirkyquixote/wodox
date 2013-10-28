@@ -162,7 +162,7 @@ update_heavy_object(struct object *o)
 
     switch (FRC[o->idx]) {
     case DIR_DN:
-	if (Y(o->idx) > MIN && object_try_move(o, DIR_DN))
+	if (idx_y(o->idx) > MIN && object_try_move(o, DIR_DN))
 	    return;
 	break;
     case DIR_UP:
@@ -173,19 +173,19 @@ update_heavy_object(struct object *o)
 
     switch (MAP[idx_dn(o->idx)]) {
     case BELT_LF_1:
-	if (X(o->idx) > MIN)
+	if (idx_x(o->idx) > MIN)
 	    object_try_move(o, DIR_LF);
 	break;
     case BELT_RT_1:
-	if (X(o->idx) < MAX)
+	if (idx_x(o->idx) < MAX)
 	    object_try_move(o, DIR_RT);
 	break;
     case BELT_BK_1:
-	if (Z(o->idx) > MIN)
+	if (idx_z(o->idx) > MIN)
 	    object_try_move(o, DIR_BK);
 	break;
     case BELT_FT_1:
-	if (Z(o->idx) < MAX)
+	if (idx_z(o->idx) < MAX)
 	    object_try_move(o, DIR_FT);
 	break;
     }
@@ -227,7 +227,7 @@ update_player_object(void)
     if (game.po == NULL || game.po->dir != STILL)
 	return;
 
-    if (Y(game.po->idx) == 0)
+    if (idx_y(game.po->idx) == 0)
 	game.keep_going = 0;
 
     if (FRC[game.po->idx] == WARP) {
@@ -239,13 +239,13 @@ update_player_object(void)
     switch (game.keydn - game.keyup) {
     case -1:
 	game.cs.dst_ang = 0;
-	if (X(game.po->idx) > MIN)
+	if (idx_x(game.po->idx) > MIN)
 	    try_move_player(DIR_LF);
 	return;
 
     case 1:
 	game.cs.dst_ang = 4;
-	if (X(game.po->idx) < MAX)
+	if (idx_x(game.po->idx) < MAX)
 	    try_move_player(DIR_RT);
 	return;
     }
@@ -253,12 +253,12 @@ update_player_object(void)
     switch (game.keylf - game.keyrt) {
     case -1:
 	game.cs.dst_ang = 2;
-	if (Z(game.po->idx) > MIN)
+	if (idx_z(game.po->idx) > MIN)
 	    try_move_player(DIR_BK);
 	return;
     case 1:
 	game.cs.dst_ang = 6;
-	if (Z(game.po->idx) < MAX)
+	if (idx_z(game.po->idx) < MAX)
 	    try_move_player(DIR_FT);
 	return;
     }
@@ -324,7 +324,7 @@ levitate(struct object *o)
 {
     struct object *tmp;
 
-    if (Y(o->idx) == MAX)
+    if (idx_y(o->idx) == MAX)
 	return 0;
 
     if ((tmp = OBJ[idx_up(o->idx)]) && tmp->dir == STILL) {

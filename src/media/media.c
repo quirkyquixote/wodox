@@ -607,20 +607,20 @@ render_foreground(void)
  * Blit object.
  *----------------------------------------------------------------------------*/
 void
-render_object(Uint32 sprite, Uint32 frame, SDL_Rect * dst)
+render_object(Uint32 sprite, Uint32 frame, SDL_Rect *dst)
 {
-    SDL_BlitSurface(media.surface_objects, &rects_55_63[sprite][frame], media.canvas,
-		    dst);
+    SDL_BlitSurface(media.surface_objects, &rects_55_63[sprite][frame],
+		    media.canvas, dst);
 }
 
 /*----------------------------------------------------------------------------
  * Blit effect.
  *----------------------------------------------------------------------------*/
 void
-render_effect(Uint32 sprite, Uint32 frame, SDL_Rect * dst)
+render_effect(Uint32 sprite, Uint32 frame, SDL_Rect *dst)
 {
-    SDL_BlitSurface(media.surface_effects, &rects_55_63[sprite][frame], media.canvas,
-		    dst);
+    SDL_BlitSurface(media.surface_effects, &rects_55_63[sprite][frame],
+		    media.canvas, dst);
 }
 
 /*----------------------------------------------------------------------------
@@ -699,7 +699,7 @@ warp_surface(SDL_Surface * s, SDL_Rect * rect)
  * Wave effect for menus.
  *----------------------------------------------------------------------------*/
 void
-render_spark(SDL_Surface * s, SDL_Rect * rect)
+render_spark(SDL_Surface * s, SDL_Rect *rect)
 {
     int bpp = s->format->BytesPerPixel;
     int pitch = s->pitch;
@@ -756,19 +756,17 @@ render_spark(SDL_Surface * s, SDL_Rect * rect)
  * The exit particle system
  *----------------------------------------------------------------------------*/
 void
-render_particles(SDL_Surface * s, SDL_Rect * dst)
+render_particles(SDL_Surface * s, SDL_Rect *dst)
 {
-    struct particle_t {
+    struct particle {
 	Uint8 sprite;
 	Sint16 x, y, v;
 	Uint8 ttl;
     };
 
-    typedef struct particle_t *particle;
+    static struct particle particles[64] = { {0} };
 
-    static struct particle_t particles[64] = { {0} };
-
-    particle p;
+    struct particle *p;
     SDL_Rect pdst;
 
     for (p = particles; p < particles + 64; ++p) {

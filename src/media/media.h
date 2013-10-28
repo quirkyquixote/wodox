@@ -57,6 +57,17 @@ struct media {
 extern struct media media;
 
 /*----------------------------------------------------------------------------
+ * Screen coordinates
+ *----------------------------------------------------------------------------*/
+static inline struct SDL_Rect
+world_to_screen(int x, int y, int z)
+{
+    return (SDL_Rect) { media.canvas->w / 2 + 100 + 4 * x - 10 * z,
+			media.canvas->h / 2 - 8 * y + 6 * x + 2 * z,
+			0, 0 };
+}
+
+/*----------------------------------------------------------------------------
  * Some constants
  *----------------------------------------------------------------------------*/
 extern SDL_Color color_white;	// Some used and reused values.
@@ -95,13 +106,13 @@ int properties(char *path);
  *----------------------------------------------------------------------------*/
 void render_background(void);
 void render_foreground(void);
-void render_object(Uint32 sprite, Uint32 frame, SDL_Rect * dst);
-void render_effect(Uint32 sprite, Uint32 frame, SDL_Rect * dst);
+void render_object(Uint32 sprite, Uint32 frame, SDL_Rect *dst);
+void render_effect(Uint32 sprite, Uint32 frame, SDL_Rect *dst);
 void render_text(TTF_Font * font, const char *text, Sint16 x, Sint16 y);
 
-void warp_surface(SDL_Surface * s, SDL_Rect * rect);
-void render_spark(SDL_Surface * s, SDL_Rect * rect);
-void render_particles(SDL_Surface *, SDL_Rect * dst);
+void warp_surface(SDL_Surface * s, SDL_Rect *dst);
+void render_spark(SDL_Surface * s, SDL_Rect *dst);
+void render_particles(SDL_Surface *, SDL_Rect *dst);
 
 void sepia_surface(SDL_Surface * s);
 

@@ -36,7 +36,7 @@ edit(char *path)
     media.surface_levelname = NULL;
 
     level.keep_going = 1;
-    level.cursor = OFF(0, 0, 0);
+    level.cursor = 0;
     level.object = -1;
 
     edit_load(path);
@@ -65,60 +65,6 @@ void
 handle_event(SDL_Event * event)
 {
     switch (event->type) {
-    case SDL_MOUSEMOTION:
-	do {
-	    int y = Y(level.cursor);
-	    int x =
-		(WORLDX(event->motion.x, event->motion.y, SPS * y) -
-		 SPS / 2) / SPS;
-	    int z =
-		(WORLDZ(event->motion.x, event->motion.y, SPS * y) +
-		 SPS / 2) / SPS;
-
-	    if (x < 0) {
-		x = 0;
-	    } else if (x >= SIZE) {
-		x = SIZE - 1;
-	    }
-	    if (z < 0) {
-		z = 0;
-	    } else if (z >= SIZE) {
-		z = SIZE - 1;
-	    }
-
-	    level.cursor = OFF(x, y, z);
-	}
-	while (0);
-	break;
-
-    case SDL_MOUSEBUTTONDOWN:
-	switch (event->button.button) {
-	case SDL_BUTTON_LEFT:
-	    level.object = GROUND;
-	    break;
-	case SDL_BUTTON_WHEELDOWN:
-	    if (Y(level.cursor) > MIN)
-		level.cursor -= SIZE_2;
-	    break;
-	case SDL_BUTTON_WHEELUP:
-	    if (Y(level.cursor) < MAX)
-		level.cursor += SIZE_2;
-	    break;
-	default:
-	    break;
-	}
-	break;
-
-    case SDL_MOUSEBUTTONUP:
-	switch (event->button.button) {
-	case SDL_BUTTON_LEFT:
-	    level.object = -1;
-	    break;
-	default:
-	    break;
-	}
-	break;
-
     case SDL_KEYUP:
 	switch (event->key.keysym.sym) {
 	case SDLK_g:
@@ -223,27 +169,27 @@ handle_event(SDL_Event * event)
 	}
 	switch (event->key.keysym.sym) {
 	case SDLK_PAGEDOWN:
-	    if (Y(level.cursor) > MIN)
+	    if (idx_y(level.cursor) > MIN)
 		level.cursor -= SIZE_2;
 	    break;
 	case SDLK_PAGEUP:
-	    if (Y(level.cursor) < MAX)
+	    if (idx_y(level.cursor) < MAX)
 		level.cursor += SIZE_2;
 	    break;
 	case SDLK_UP:
-	    if (X(level.cursor) > MIN)
+	    if (idx_x(level.cursor) > MIN)
 		level.cursor -= SIZE;
 	    break;
 	case SDLK_DOWN:
-	    if (X(level.cursor) < MAX)
+	    if (idx_x(level.cursor) < MAX)
 		level.cursor += SIZE;
 	    break;
 	case SDLK_RIGHT:
-	    if (Z(level.cursor) > MIN)
+	    if (idx_z(level.cursor) > MIN)
 		level.cursor -= 1;
 	    break;
 	case SDLK_LEFT:
-	    if (Z(level.cursor) < MAX)
+	    if (idx_z(level.cursor) < MAX)
 		level.cursor += 1;
 	    break;
 	case SDLK_g:

@@ -8,7 +8,7 @@
 
 void render_objects(void);
 
-typedef void transition_func (int32_t, int32_t, int);
+typedef void transition_func (SDL_Rect *, int);
 
 extern transition_func * TRANSITION_FUNC[];
 

@@ -9,9 +9,9 @@
 
 static void render_column(size_t i, size_t k);
 
-static void transition0(int32_t x, int32_t y, int k);
-static void transition1(int32_t x, int32_t y, int k);
-static void transition2(int32_t x, int32_t y, int k);
+static void transition0(SDL_Rect *dst, int k);
+static void transition1(SDL_Rect *dst, int k);
+static void transition2(SDL_Rect *dst, int k);
 
 transition_func *TRANSITION_FUNC[] = {
     transition0,
@@ -54,8 +54,7 @@ render_column(size_t i, size_t k)
 
     for (j = 0; j < SIZE; ++j) {
 	if (game.cs.forces_map[j][i][k] == DIR_UP) {
-	    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
-	    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
+	    dst = world_to_screen (SPS * i, SPS * j, SPS * k);
 
 	    if (game.cs.forces_map[j + 1][i][k] !=
 		game.cs.forces_map[j][i][k]) {
@@ -66,8 +65,7 @@ render_column(size_t i, size_t k)
 	}
 
 	if (game.cs.forces_map[j][i][k] == WARP) {
-	    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
-	    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
+	    dst = world_to_screen (SPS * i, SPS * j, SPS * k);
 	    render_particles(media.canvas, &dst);
 	}
 
@@ -80,33 +78,29 @@ render_column(size_t i, size_t k)
 		o->dir == DIR_LF)
 	    || (k > 0 && (o = game.cs.object_map[j][i][k - 1]) &&
 		o->dir == DIR_BK)) {
-	    uint32_t x = i * SPS;
-	    uint32_t y = j * SPS;
-	    uint32_t z = k * SPS;
-
 	    switch (o->dir) {
 	    case DIR_LF:
-		x -= o->dsp;
+	        dst = world_to_screen (i * SPS - o->dsp, j * SPS, k * SPS);
 		break;
 	    case DIR_RT:
-		x += o->dsp - SPS;
+	        dst = world_to_screen ((i - 1) * SPS + o->dsp, j * SPS, k * SPS);
 		break;
 	    case DIR_DN:
-		y -= o->dsp;
+	        dst = world_to_screen (i * SPS, j * SPS - o->dsp, k * SPS);
 		break;
 	    case DIR_UP:
-		y += o->dsp - SPS;
+	        dst = world_to_screen (i * SPS, (j - 1) * SPS + o->dsp, k * SPS);
 		break;
 	    case DIR_BK:
-		z -= o->dsp;
+	        dst = world_to_screen (i * SPS, j * SPS, k * SPS - o->dsp);
 		break;
 	    case DIR_FT:
-		z += o->dsp - SPS;
+	        dst = world_to_screen (i * SPS, j * SPS, (k - 1) * SPS + o->dsp);
+		break;
+	    default:
+	        dst = world_to_screen (i * SPS, j * SPS, k * SPS);
 		break;
 	    }
-
-	    dst.x = SCREENX(x, y, z);
-	    dst.y = SCREENY(x, y, z);
 
 	    if (o == game.po) {
 		if (game.keep_going || game.warped) {
@@ -123,15 +117,13 @@ render_column(size_t i, size_t k)
 	    case BELT_FT_1:
 	    case BELT_RT_1:
 	    case BELT_BK_1:
-		dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
-		dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
+		dst = world_to_screen (SPS * i, SPS * j, SPS * k);
 		render_object(game.cs.static_map[j][i][k] & SPRITE,
 			    1 + game.cs.ticks % 3, &dst);
 		break;
 
 	    default:
-		dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
-		dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
+		dst = world_to_screen (SPS * i, SPS * j, SPS * k);
 		render_object(game.cs.static_map[j][i][k] & SPRITE, 0, &dst);
 		break;
 	    }
@@ -140,8 +132,7 @@ render_column(size_t i, size_t k)
 
     for (j = 0; j < SIZE; ++j) {
 	if (game.cs.forces_map[j][i][k] == DIR_UP) {
-	    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
-	    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
+	    dst = world_to_screen (SPS * i, SPS * j, SPS * k);
 	    warp_surface(media.canvas, &dst);
 	}
     }
@@ -152,7 +143,7 @@ render_column(size_t i, size_t k)
  * Some screen transition effects.
  *----------------------------------------------------------------------------*/
 void
-transition0(int32_t x, int32_t y, int k)
+transition0(SDL_Rect *dst, int k)
 {
     SDL_Rect rect;
     int state;
@@ -175,7 +166,7 @@ transition0(int32_t x, int32_t y, int k)
  * Some screen transition effects.
  *----------------------------------------------------------------------------*/
 void
-transition1(int32_t x, int32_t y, int k)
+transition1(SDL_Rect *dst, int k)
 {
     SDL_Rect rect;
     int state;
@@ -198,7 +189,7 @@ transition1(int32_t x, int32_t y, int k)
  * Some screen transition effects.
  *----------------------------------------------------------------------------*/
 void
-transition2(int32_t x, int32_t y, int k)
+transition2(SDL_Rect *dst, int k)
 {
     int32_t i, j;
     int32_t state;
@@ -207,7 +198,7 @@ transition2(int32_t x, int32_t y, int k)
 
     for (i = 0; i < media.canvas->w + 32; i += 32) {
 	for (j = 0; j < media.canvas->h + 32; j += 32) {
-	    state = k - 16 + hypot(i - x, j - y) / 32;
+	    state = k - 16 + hypot(i - dst->x, j - dst->y) / 32;
 
 	    if (state > 0) {
 		vx[0] = i;

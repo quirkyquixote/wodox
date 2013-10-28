@@ -116,16 +116,17 @@ run_level()
 
     // Determine transition focus and function.
 
-    uint32_t i, j, k;
+    SDL_Rect dst;
+    uint32_t k;
 
     if (game.po) {
-	i = SCREENX(SPS * X(game.po->idx), SPS * Y(game.po->idx),
-		    SPS * Z(game.po->idx)) + 28;
-	j = SCREENY(SPS * X(game.po->idx), SPS * Y(game.po->idx),
-		    SPS * Z(game.po->idx)) + 32;
+	struct coord c = idx_to_coord(game.po->idx);
+	dst = world_to_screen(c.x * SPS, c.y * SPS, c.z * SPS);
+	dst.x += 28;
+	dst.y += 32;
     } else {
-	i = media.canvas->w / 2;
-	j = media.canvas->h / 2;
+	dst.x = media.canvas->w / 2;
+	dst.y = media.canvas->h / 2;
     }
 
     transition_func *transition =
@@ -153,7 +154,7 @@ run_level()
 	    }
 	}
 
-	transition(i, j, k);
+	transition(&dst, k);
 	media_sync();
     }
 

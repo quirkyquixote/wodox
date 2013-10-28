@@ -15,16 +15,6 @@
 #include <stdint.h>
 
 /*----------------------------------------------------------------------------
- * Table indices
- *----------------------------------------------------------------------------*/
-static inline uint16_t idx_bk (uint16_t idx) { return idx - 1; }
-static inline uint16_t idx_ft (uint16_t idx) { return idx + 1; }
-static inline uint16_t idx_lf (uint16_t idx) { return idx - SIZE; }
-static inline uint16_t idx_rt (uint16_t idx) { return idx + SIZE; }
-static inline uint16_t idx_dn (uint16_t idx) { return idx - SIZE_2; }
-static inline uint16_t idx_up (uint16_t idx) { return idx + SIZE_2; }
-
-/*----------------------------------------------------------------------------
  * These define object flags.
  *----------------------------------------------------------------------------*/
 enum {

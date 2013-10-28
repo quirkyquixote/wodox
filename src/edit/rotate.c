@@ -26,6 +26,7 @@ rotate_lf(void)
 {
     uint8_t i, j, k, m, n, tmp;
     struct circuit tmp2;
+
     for (j = 0; j < SIZE; ++j) {
 	for (i = MIN, m = MAX; i < m; ++i, --m)
 	    for (k = MIN, n = MAX; k < n; ++k, --n) {
@@ -49,6 +50,7 @@ rotate_rt(void)
 {
     uint8_t i, j, k, m, n, tmp;
     struct circuit tmp2;
+
     for (j = 0; j < SIZE; ++j) {
 	for (i = MIN, m = MAX; i < m; ++i, --m)
 	    for (k = MIN, n = MAX; k < n; ++k, --n) {
@@ -109,15 +111,17 @@ struct circuit
 rotate_circuit_lf(struct circuit n)
 {
     uint16_t *it;
-    uint8_t i, j, k;
-    if (n.tree)
-	for (it = n.tree; it < n.tree + n.size; ++it)
+    struct coord c;
+
+    if (n.tree) {
+	for (it = n.tree; it < n.tree + n.size; ++it) {
 	    if (*it < NONE) {
-		i = X(*it);
-		j = Y(*it);
-		k = Z(*it);
-		*it = OFF(k, j, MAX - i);
+		c = idx_to_coord(*it);
+		*it = coord_to_idx(coord(c.z, c.y, MAX - c.x));
 	    }
+	}
+    }
+
     return n;
 }
 
@@ -125,15 +129,17 @@ struct circuit
 rotate_circuit_rt(struct circuit n)
 {
     uint16_t *it;
-    uint8_t i, j, k;
-    if (n.tree)
-	for (it = n.tree; it < n.tree + n.size; ++it)
+    struct coord c;
+
+    if (n.tree) {
+	for (it = n.tree; it < n.tree + n.size; ++it) {
 	    if (*it < NONE) {
-		i = X(*it);
-		j = Y(*it);
-		k = Z(*it);
-		*it = OFF(MAX - k, j, i);
+		c = idx_to_coord(*it);
+		*it = coord_to_idx(coord(MAX - c.z, c.y, c.x));
 	    }
+	}
+    }
+
     return n;
 }
 
