@@ -98,18 +98,19 @@ coordcmp(struct coord a, struct coord b)
  * the left child for position x is 2x + 1 and the right is 2x + 2. 
  * Each node of the tree contains either a world position or an operator.
  *----------------------------------------------------------------------------*/
-
-#define NOT  0xffff
-#define AND  0xfffe
-#define OR   0xfffd
-#define XOR  0xfffc
-#define NONE 0xfffb
+enum {
+    NOT  = 0xffff,
+    AND  = 0xfffe,
+    OR   = 0xfffd,
+    XOR  = 0xfffc,
+    NONE = 0xfffb,
+};
 
 #define TREE_SIZE 16
 
-#define PARENT(off) (((off) - 1) / 2)
-#define LCHILD(off) (2 * (off) + 1)
-#define RCHILD(off) (2 * (off) + 2)
+static inline uint16_t tree_up(uint16_t idx) { return (idx - 1) / 2; }
+static inline uint16_t tree_lf(uint16_t idx) { return (2 * idx) + 1; }
+static inline uint16_t tree_rt(uint16_t idx) { return (2 * idx) + 2; }
 
 /*----------------------------------------------------------------------------
  * Steps per square. Abbreviated because it is used so often. This is the

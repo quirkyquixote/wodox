@@ -26,9 +26,9 @@ circuit_to_text(char *buf, struct circuit *c, uint16_t node, int is_right)
 	    if (is_right) {
 		ret += sprintf(buf, "(");
 	    }
-	    ret += circuit_to_text(buf + ret, c, LCHILD(node), 0);
+	    ret += circuit_to_text(buf + ret, c, tree_lf(node), 0);
 	    ret += sprintf(buf + ret, " and ");
-	    ret += circuit_to_text(buf + ret, c, RCHILD(node), 1);
+	    ret += circuit_to_text(buf + ret, c, tree_rt(node), 1);
 	    if (is_right) {
 		ret += sprintf(buf + ret, ")");
 	    }
@@ -38,9 +38,9 @@ circuit_to_text(char *buf, struct circuit *c, uint16_t node, int is_right)
 	    if (is_right) {
 		ret += sprintf(buf, "(");
 	    }
-	    ret += circuit_to_text(buf + ret, c, LCHILD(node), 0);
+	    ret += circuit_to_text(buf + ret, c, tree_lf(node), 0);
 	    ret += sprintf(buf + ret, " or ");
-	    ret += circuit_to_text(buf + ret, c, RCHILD(node), 1);
+	    ret += circuit_to_text(buf + ret, c, tree_rt(node), 1);
 	    if (is_right) {
 		ret += sprintf(buf + ret, ")");
 	    }
@@ -50,9 +50,9 @@ circuit_to_text(char *buf, struct circuit *c, uint16_t node, int is_right)
 	    if (is_right) {
 		ret += sprintf(buf, "(");
 	    }
-	    ret += circuit_to_text(buf + ret, c, LCHILD(node), 0);
+	    ret += circuit_to_text(buf + ret, c, tree_lf(node), 0);
 	    ret += sprintf(buf + ret, " xor ");
-	    ret += circuit_to_text(buf + ret, c, RCHILD(node), 1);
+	    ret += circuit_to_text(buf + ret, c, tree_rt(node), 1);
 	    if (is_right) {
 		ret += sprintf(buf + ret, ")");
 	    }
@@ -60,7 +60,7 @@ circuit_to_text(char *buf, struct circuit *c, uint16_t node, int is_right)
 
 	case NOT:
 	    ret += sprintf(buf, "not ");
-	    ret += circuit_to_text(buf + ret, c, LCHILD(node), 1);
+	    ret += circuit_to_text(buf + ret, c, tree_lf(node), 1);
 	    break;
 
 	case NONE:
@@ -97,19 +97,21 @@ tree_to_circuit(struct tree *t, struct circuit *c, uint16_t node)
 	    c->tree = realloc(c->tree, sizeof(uint16_t) * c->size);
 	}
 	c->tree[node] = t->token;
-	tree_to_circuit(t->l, c, LCHILD(node));
-	tree_to_circuit(t->r, c, RCHILD(node));
+	tree_to_circuit(t->l, c, tree_lf(node));
+	tree_to_circuit(t->r, c, tree_rt(node));
 	free(t);
     }
 }
 
-#define TOKEN_AND	1000
-#define TOKEN_OR	1001
-#define TOKEN_XOR	1002
-#define TOKEN_NOT	1003
-#define TOKEN_LPAREN	1004
-#define TOKEN_RPAREN	1005
-#define TOKEN_EOF	1006
+enum {
+    TOKEN_AND	=1000,
+    TOKEN_OR	=1001,
+    TOKEN_XOR	=1002,
+    TOKEN_NOT	=1003,
+    TOKEN_LPAREN=1004,
+    TOKEN_RPAREN=1005,
+    TOKEN_EOF	=1006,
+};
 
 struct tree *
 parse_expr_1(char **buf)
