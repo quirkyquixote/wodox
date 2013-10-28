@@ -1,6 +1,6 @@
 /*
  * Wodox reimplemented again.
- * This code copyright (c) Luis Javier Sanz 2009 
+ * This code copyright (c) Luis Javier Sanz 2009-2013
  */
 
 #include "../edit/edit.h"
@@ -10,6 +10,7 @@
 #include <errno.h>
 #include "types.h"
 #include "circuit.h"
+#include "object.h"
 
 struct level level;
 
@@ -44,13 +45,6 @@ static void shift_dn();
  */
 static void rotate_lf();
 static void rotate_rt();
-
-/*
- * Rotate an object in some direction. This basically swaps one type of
- * conveyor belt for another.
- */
-static uint8_t rotate_object_lf(uint8_t p);
-static uint8_t rotate_object_rt(uint8_t p);
 
 /*
  * The cursor.
@@ -939,40 +933,5 @@ rotate_rt()
 		level.circuit_map[j][n][i] = rotate_circuit_rt(tmp2);
 	    }
     }
-}
-
-/*
- * These rotate objects whose orientation matters.
- */
-uint8_t
-rotate_object_lf(uint8_t p)
-{
-    switch (p) {
-    case BELTLF:
-	return BELTFT;
-    case BELTBK:
-	return BELTLF;
-    case BELTRT:
-	return BELTBK;
-    case BELTFT:
-	return BELTRT;
-    }
-    return p;
-}
-
-uint8_t
-rotate_object_rt(uint8_t p)
-{
-    switch (p) {
-    case BELTLF:
-	return BELTBK;
-    case BELTBK:
-	return BELTRT;
-    case BELTRT:
-	return BELTFT;
-    case BELTFT:
-	return BELTLF;
-    }
-    return p;
 }
 
