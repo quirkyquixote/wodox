@@ -28,41 +28,41 @@ render_level(void)
 		if (level.circuit_map[j][i][k].tree) {
 		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		    draw_effect(1, 1, &dst);
+		    render_effect(1, 1, &dst);
 		}
 		switch (level.static_map[j][i][k]) {
 		case GROUND ... SWITCH:
 		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		    draw_object(level.static_map[j][i][k] - 1, 0, &dst);
+		    render_object(level.static_map[j][i][k] - 1, 0, &dst);
 		    break;
 
 		case TUBE:
 		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
 		    if (level.static_map[j + 1][i][k] != TUBE) {
-			draw_effect(1, 0, &dst);
+			render_effect(1, 0, &dst);
 		    }
-		    draw_effect(0, 0, &dst);
+		    render_effect(0, 0, &dst);
 		    break;
 
 		case WARP:
 		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		    draw_particles(media.canvas, &dst);
+		    render_particles(media.canvas, &dst);
 		    break;
 
 		default:
 		    if (j == Y(level.cursor)) {
 			dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 			dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-			draw_effect(3, 1, &dst);
+			render_effect(3, 1, &dst);
 		    }
 		}
 		if (level.cursor == OFF(i, j, k)) {
 		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		    draw_effect(0, 1, &dst);
+		    render_effect(0, 1, &dst);
 		}
 	    }
 	    for (j = 0; j < SIZE; ++j) {
@@ -76,7 +76,7 @@ render_level(void)
 		if (level.circuit_map[j][i][k].tree) {
 		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		    draw_effect(2, 1, &dst);
+		    render_effect(2, 1, &dst);
 		}
 	    }
 	}
@@ -115,7 +115,7 @@ render_level(void)
     /*
        dst.x = SCREENX (SPS * X (level.cursor), SPS * Y (level.cursor), SPS * Z (level.cursor));
        dst.y = SCREENY (SPS * X (level.cursor), SPS * Y (level.cursor), SPS * Z (level.cursor));
-       draw_object (0, 1, &dst);
+       render_object (0, 1, &dst);
      */
 }
 

@@ -59,16 +59,16 @@ render_column(size_t i, size_t k)
 
 	    if (game.cs.forces_map[j + 1][i][k] !=
 		game.cs.forces_map[j][i][k]) {
-		draw_effect(1, 0, &dst);
+		render_effect(1, 0, &dst);
 	    }
 
-	    draw_effect(0, 0, &dst);
+	    render_effect(0, 0, &dst);
 	}
 
 	if (game.cs.forces_map[j][i][k] == WARP) {
 	    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 	    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-	    draw_particles(media.canvas, &dst);
+	    render_particles(media.canvas, &dst);
 	}
 
 	if (((o = game.cs.object_map[j][i][k]) &&
@@ -110,10 +110,10 @@ render_column(size_t i, size_t k)
 
 	    if (o == game.po) {
 		if (game.keep_going || game.warped) {
-		    draw_object(2, game.cs.cur_ang % 4, &dst);
+		    render_object(2, game.cs.cur_ang % 4, &dst);
 		}
 	    } else {
-		draw_object(o->type & SPRITE, 0, &dst);
+		render_object(o->type & SPRITE, 0, &dst);
 	    }
 	}
 
@@ -125,14 +125,14 @@ render_column(size_t i, size_t k)
 	    case BELT_BK_1:
 		dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 		dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		draw_object(game.cs.static_map[j][i][k] & SPRITE,
+		render_object(game.cs.static_map[j][i][k] & SPRITE,
 			    1 + game.cs.ticks % 3, &dst);
 		break;
 
 	    default:
 		dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 		dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		draw_object(game.cs.static_map[j][i][k] & SPRITE, 0, &dst);
+		render_object(game.cs.static_map[j][i][k] & SPRITE, 0, &dst);
 		break;
 	    }
 	}

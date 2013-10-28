@@ -46,7 +46,7 @@ edit(char *path)
 	path = strjoin(PATH_SEPARATOR, USER_DIR, "sandbox", NULL);
 
     while (level.keep_going) {
-	draw_background();
+	render_background();
 	render_level();
 	render_circuit();
 	handle_player_input();
@@ -406,7 +406,7 @@ edit_circuit(uint16_t offset)
 
     // Freeze the background.
 
-    draw_background();
+    render_background();
     render_level();
     sepia_surface(media.canvas);
     bkgr = SDL_ConvertSurface(media.canvas, media.canvas->format, media.canvas->flags);

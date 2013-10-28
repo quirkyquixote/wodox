@@ -89,7 +89,7 @@ run_level()
 
     while (game.keep_going) {
 	update();
-	draw_background();
+	render_background();
 	render_objects();	
 	handle_player_input();
 	render_foreground();

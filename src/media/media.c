@@ -523,7 +523,7 @@ properties(char *path)
  * Start drawing.
  */
 void
-draw_background()
+render_background()
 {
     int bpp = media.canvas->format->BytesPerPixel;
     int pitch = media.canvas->pitch;
@@ -615,7 +615,7 @@ render_foreground(void)
  * Blit object.
  */
 void
-draw_object(Uint32 sprite, Uint32 frame, SDL_Rect * dst)
+render_object(Uint32 sprite, Uint32 frame, SDL_Rect * dst)
 {
     SDL_BlitSurface(media.surface_objects, &rects_55_63[sprite][frame], media.canvas,
 		    dst);
@@ -625,7 +625,7 @@ draw_object(Uint32 sprite, Uint32 frame, SDL_Rect * dst)
  * Blit effect.
  */
 void
-draw_effect(Uint32 sprite, Uint32 frame, SDL_Rect * dst)
+render_effect(Uint32 sprite, Uint32 frame, SDL_Rect * dst)
 {
     SDL_BlitSurface(media.surface_effects, &rects_55_63[sprite][frame], media.canvas,
 		    dst);
@@ -635,7 +635,7 @@ draw_effect(Uint32 sprite, Uint32 frame, SDL_Rect * dst)
  * Blit text.
  */
 void
-draw_text(TTF_Font * font, const char *text, Sint16 x, Sint16 y)
+render_text(TTF_Font * font, const char *text, Sint16 x, Sint16 y)
 {
     static SDL_Color color = { 255, 255, 255 };
 
@@ -707,7 +707,7 @@ warp_surface(SDL_Surface * s, SDL_Rect * rect)
  * Wave effect for menus.
  */
 void
-draw_spark(SDL_Surface * s, SDL_Rect * rect)
+render_spark(SDL_Surface * s, SDL_Rect * rect)
 {
     int bpp = s->format->BytesPerPixel;
     int pitch = s->pitch;
@@ -764,7 +764,7 @@ draw_spark(SDL_Surface * s, SDL_Rect * rect)
  * The exit particle system
  */
 void
-draw_particles(SDL_Surface * s, SDL_Rect * dst)
+render_particles(SDL_Surface * s, SDL_Rect * dst)
 {
     struct particle_t {
 	Uint8 sprite;

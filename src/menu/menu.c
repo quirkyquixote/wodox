@@ -20,10 +20,10 @@ struct context ctx;
 
 static int select_user();
 
-static int draw_main_menu();
+static int render_main_menu();
 static int run_main_menu();
 
-static int draw_sandbox_menu();
+static int render_sandbox_menu();
 static int run_sandbox_menu();
 
 static void shift_menu(int new_offset);
@@ -98,7 +98,7 @@ select_user()
     memset(&user, 0, sizeof(user_profile));
 
     while (keep_going) {
-	draw_background();
+	render_background();
 
 	blit_menu();
 
@@ -170,7 +170,7 @@ select_user()
  * Main menu.
  */
 int
-draw_main_menu()
+render_main_menu()
 {
     SDL_Rect rect;
     SDL_Surface *tmp;
@@ -222,14 +222,14 @@ run_main_menu()
 	user.max_level = ctx.level_count - 1;
     }
 
-    max_option = draw_main_menu();
+    max_option = render_main_menu();
     shift_menu(top_main);
     play_music(0);
 
     // Go on.
 
     while (keep_going) {
-	draw_background();
+	render_background();
 	blit_menu();
 
 	for (;;) {
@@ -265,7 +265,7 @@ run_main_menu()
 	    } else
 		break;
 	}
-	draw_spark(media.canvas, &rect);
+	render_spark(media.canvas, &rect);
 
 	// Handle player input.
 
@@ -318,7 +318,7 @@ run_main_menu()
 		    }
 		    SDL_FreeSurface(ctx.surface_menu);
 		    load_background();
-		    max_option = draw_main_menu();
+		    max_option = render_main_menu();
 		    break;
 
 		case SDLK_ESCAPE:
@@ -351,7 +351,7 @@ run_main_menu()
  * The sandbox menu.
  */
 int
-draw_sandbox_menu()
+render_sandbox_menu()
 {
     int i;
     SDL_Rect rect;
@@ -394,11 +394,11 @@ run_sandbox_menu()
     dir = strjoin(PATH_SEPARATOR, USER_DIR, "sandbox", NULL);
 
     ctx.sandbox_count = list_folder(dir, &ctx.sandbox_list);
-    draw_sandbox_menu();
+    render_sandbox_menu();
     shift_menu(top_sandbox);
 
     while (keep_going) {
-	draw_background();
+	render_background();
 	blit_menu();
 
 	for (;;) {
@@ -427,7 +427,7 @@ run_sandbox_menu()
 	    } else
 		break;
 	}
-	draw_spark(media.canvas, &rect);
+	render_spark(media.canvas, &rect);
 
 	while (SDL_PollEvent(&event) != 0) {
 	    switch (event.type) {
@@ -475,8 +475,8 @@ run_sandbox_menu()
 
 		    ctx.sandbox_count = list_folder(dir, &ctx.sandbox_list);
 		    load_background();
-		    draw_main_menu();
-		    draw_sandbox_menu();
+		    render_main_menu();
+		    render_sandbox_menu();
 		    break;
 
 		case SDLK_ESCAPE:
@@ -514,7 +514,7 @@ shift_menu(int new_offset)
 
     for (k = ctx.offset - new_offset; k != 0; k /= 2) {
 	ctx.offset = new_offset + k;
-	draw_background();
+	render_background();
 	blit_menu();
 	media_sync();
     }

@@ -87,15 +87,15 @@ int properties(char *path);
 /*
  * To draw things.
  */
-void draw_background();
+void render_background();
 void render_foreground(void);
-void draw_object(Uint32 sprite, Uint32 frame, SDL_Rect * dst);
-void draw_effect(Uint32 sprite, Uint32 frame, SDL_Rect * dst);
-void draw_text(TTF_Font * font, const char *text, Sint16 x, Sint16 y);
+void render_object(Uint32 sprite, Uint32 frame, SDL_Rect * dst);
+void render_effect(Uint32 sprite, Uint32 frame, SDL_Rect * dst);
+void render_text(TTF_Font * font, const char *text, Sint16 x, Sint16 y);
 
 void warp_surface(SDL_Surface * s, SDL_Rect * rect);
-void draw_spark(SDL_Surface * s, SDL_Rect * rect);
-void draw_particles(SDL_Surface *, SDL_Rect * dst);
+void render_spark(SDL_Surface * s, SDL_Rect * rect);
+void render_particles(SDL_Surface *, SDL_Rect * dst);
 
 void sepia_surface(SDL_Surface * s);
 
