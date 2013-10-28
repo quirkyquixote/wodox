@@ -13,6 +13,7 @@
 #include "shift.h"
 #include "rotate.h"
 #include "render.h"
+#include "file.h"
 
 struct level level;
 
@@ -20,12 +21,6 @@ struct level level;
  * Edit links.
  */
 static int edit_circuit(uint16_t offset);
-
-/*
- * Load and save a level.
- */
-static int load(const char *path);
-static int save(const char *path);
 
 /*
  * To edit a level.
@@ -592,53 +587,4 @@ edit_circuit(uint16_t offset)
     return 0;
 }
 
-
-/*
- * Load level.
- */
-int
-load(const char *path)
-{
-    FILE *f;
-    uint16_t n;
-    memset(level.static_map, EMPTY, sizeof(uint8_t) * SIZE_3);
-    memset(level.circuit_map, 0, sizeof(struct circuit) * SIZE_3);
-    if ((f = fopen(path, "rb"))) {
-	fread(level.static_map, sizeof(uint8_t), SIZE_3, f);
-	while (fread(&n, sizeof(uint16_t), 1, f) == 1 && n < SIZE_3) {
-	    fread(&C_MAP[n].size, sizeof(uint16_t), 1, f);
-	    //C_MAP[n].size = TREE_SIZE;
-	    C_MAP[n].tree =
-		(uint16_t *) malloc(sizeof(uint16_t) * C_MAP[n].size);
-	    fread(C_MAP[n].tree, sizeof(uint16_t), C_MAP[n].size, f);
-	}
-	fclose(f);
-	return 1;
-    }
-    fprintf(stderr, "%s: %s\n", path, strerror(errno));
-    return 0;
-}
-
-/*
- * Save level.
- */
-int
-save(const char *path)
-{
-    FILE *f;
-    uint16_t n;
-    if ((f = fopen(path, "wb"))) {
-	fwrite(level.static_map, sizeof(uint8_t), SIZE_3, f);
-	for (n = 0; n < SIZE_3; ++n)
-	    if (C_MAP[n].tree) {
-		fwrite(&n, sizeof(uint16_t), 1, f);
-		fwrite(&C_MAP[n].size, sizeof(uint16_t), 1, f);
-		fwrite(C_MAP[n].tree, sizeof(uint16_t), C_MAP[n].size, f);
-	    }
-	fclose(f);
-	return 1;
-    }
-    fprintf(stderr, "%s: %s\n", path, strerror(errno));
-    return 0;
-}
 
