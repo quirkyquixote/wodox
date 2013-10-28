@@ -1,1 +1,1 @@
-add_library(edit edit.c)
+add_library(edit edit.c circuit.c)
