@@ -5,6 +5,7 @@
 
 #pragma once
 
-int load(const char *path);
-int save(const char *path);
+int edit_load(const char *path);
+int edit_save(const char *path);
+void edit_free(void);
 

@@ -147,25 +147,6 @@ render_column(size_t i, size_t k)
     }
 }
 
-/*----------------------------------------------------------------------------
- * Show level name and other GUI stuff.
- *----------------------------------------------------------------------------*/
-void
-render_foreground(void)
-{
-    SDL_Rect dst;
-
-    dst.x = (canvas->w - surface_hforhelp->w) / 2;
-    dst.y = canvas->h - surface_hforhelp->h;
-    SDL_BlitSurface(surface_hforhelp, NULL, canvas, &dst);
-
-    dst.x = (canvas->w - surface_levelname->w) / 2;
-    dst.y = 0;
-    SDL_BlitSurface(surface_levelname, NULL, canvas, &dst);
-
-    SDL_BlitSurface(surface_frame, NULL, canvas, NULL);
-}
-
 
 /*----------------------------------------------------------------------------
  * Some screen transition effects.

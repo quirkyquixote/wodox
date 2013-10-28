@@ -19,6 +19,7 @@ SDL_Surface *	surface_frame	= NULL;
 SDL_Surface *	surface_title	= NULL;
 SDL_Surface * 	surface_hforhelp= NULL;
 SDL_Surface * 	surface_circle	= NULL;
+SDL_Surface *surface_levelname = NULL;
 
 TTF_Font *	font_small	= NULL;
 TTF_Font *	font_normal	= NULL;
@@ -611,6 +612,28 @@ draw_background ()
   SDL_UnlockSurface (canvas);
   
   ++current_frame;
+}
+
+
+/*----------------------------------------------------------------------------
+ * Show level name and other GUI stuff.
+ *----------------------------------------------------------------------------*/
+void
+render_foreground(void)
+{
+    SDL_Rect dst;
+
+    dst.x = (canvas->w - surface_hforhelp->w) / 2;
+    dst.y = canvas->h - surface_hforhelp->h;
+    SDL_BlitSurface(surface_hforhelp, NULL, canvas, &dst);
+
+    if (surface_levelname) {
+        dst.x = (canvas->w - surface_levelname->w) / 2;
+        dst.y = 0;
+	SDL_BlitSurface(surface_levelname, NULL, canvas, &dst);
+    }
+
+    SDL_BlitSurface(surface_frame, NULL, canvas, NULL);
 }
 
 /*

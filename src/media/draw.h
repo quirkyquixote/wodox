@@ -28,6 +28,7 @@ extern SDL_Surface * canvas;		// The window.
 extern SDL_Surface * surface_frame;	// The frame.
 extern SDL_Surface * surface_title;	// The menu.
 extern SDL_Surface * surface_hforhelp;	// Press H for help.
+extern SDL_Surface * surface_levelname;
 
 extern TTF_Font * font_small;		// Small sized font.
 extern TTF_Font * font_normal;		// Normal sized font.
@@ -78,6 +79,7 @@ int properties (char * path);
  * To draw things.
  */
 void draw_background ();
+void render_foreground(void);
 void draw_object (Uint32 sprite, Uint32 frame, SDL_Rect * dst);
 void draw_effect (Uint32 sprite, Uint32 frame, SDL_Rect * dst);
 void draw_text (TTF_Font * font, const char * text, Sint16 x, Sint16 y);

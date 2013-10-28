@@ -17,11 +17,6 @@ struct game game;
  */
 static void run_level();
 
-/*
- * A surface for the level name.
- */
-SDL_Surface *surface_levelname = NULL;
-
 /*----------------------------------------------------------------------------
  * Play a level.
  *----------------------------------------------------------------------------*/

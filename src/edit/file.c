@@ -13,11 +13,12 @@
  * Load level.
  */
 int
-load(const char *path)
+edit_load(const char *path)
 {
     FILE *f;
     uint16_t n;
-
+ 
+    level.path = path;
     memset(level.static_map, EMPTY, sizeof(uint8_t) * SIZE_3);
     memset(level.circuit_map, 0, sizeof(struct circuit) * SIZE_3);
 
@@ -42,7 +43,7 @@ load(const char *path)
  * Save level.
  */
 int
-save(const char *path)
+edit_save(const char *path)
 {
     FILE *f;
     uint16_t n;
@@ -65,3 +66,14 @@ save(const char *path)
     fclose(f);
     return 1;
 }
+
+void
+edit_free(void)
+{
+    int i;
+
+    for (i = 0; i < SIZE_3; ++i) 
+	if (C_MAP[i].tree) 
+	    free(C_MAP[i].tree);
+}
+

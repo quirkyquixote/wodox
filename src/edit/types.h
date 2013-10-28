@@ -55,10 +55,13 @@ struct tree {
  * The circuit map holds pointers to the circuits that connect each space
  *----------------------------------------------------------------------------*/
 struct level {
+    const char *path;
     uint8_t static_map[SIZE][SIZE][SIZE];
     struct circuit circuit_map[SIZE][SIZE][SIZE];
 
     uint16_t cursor;
+    int8_t object;
+    int keep_going;
 };
 
 extern struct level level;
