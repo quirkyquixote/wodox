@@ -7,49 +7,10 @@
 #include "../menu/menu.h"
 #include "../play/play.h"
 
-#include <string.h>		// For memset, strerror
-#include <errno.h>		// for errno
+#include <errno.h>
+#include "types.h"
 
-/*
- * Define the terrain objects.
- */
-#define EMPTY	0x00
-#define GROUND	0x01
-#define CRATE	0x02
-#define WODOX	0x03
-#define SMALL	0x04
-#define BELTLF	0x05
-#define BELTBK	0x06
-#define BELTRT	0x07
-#define BELTFT	0x08
-#define MOVING	0x09
-#define BUTTON	0x0a
-#define SWITCH	0x0b
-#define TUBE    0x11
-#define WARP    0x12
-
-struct circuit {
-    Uint16 size;
-    Uint16 *tree;
-};
-
-/*
- * The scene is represented by two different maps:
- *
- * The static map defines the type of item in each space. During the game 
- * itself more than one object can occupy the same space, but not in the 
- * editor.
- *
- * The circuit map holds pointers to the circuits that connect each space
- */
-static Uint8 s_map[SIZE][SIZE][SIZE];
-static struct circuit c_map[SIZE][SIZE][SIZE];
-
-/*
- * Aliases for quick iteration on all elements and low level manipulation.
- */
-#define S_MAP ((Uint8 *)s_map)
-#define C_MAP ((struct circuit *)c_map)
+struct level level;
 
 /*
  * Edit links.
@@ -97,8 +58,8 @@ static void rotate_rt();
  * Rotate an object in some direction. This basically swaps one type of
  * conveyor belt for another.
  */
-static Uint8 rotate_object_lf(Uint8 p);
-static Uint8 rotate_object_rt(Uint8 p);
+static uint8_t rotate_object_lf(uint8_t p);
+static uint8_t rotate_object_rt(uint8_t p);
 
 /*
  * Rotate a circuit in some direction.
@@ -112,12 +73,6 @@ static struct circuit rotate_circuit_rt(struct circuit c);
 static int circuit_to_text(char *buf, struct circuit *c, size_t node,
 			   int is_right);
 static int text_to_circuit(char *buf, struct circuit *c, size_t node);
-
-struct tree {
-    int token;
-    struct tree *l;
-    struct tree *r;
-};
 
 static void tree_to_circuit(struct tree *t, struct circuit *c,
 			    size_t node);
@@ -135,7 +90,7 @@ static int token;
 /*
  * The cursor.
  */
-static Uint16 cursor;
+static uint16_t cursor;
 
 /*
  * To edit a level.
@@ -147,7 +102,7 @@ edit(char *path)
 
     size_t i;
     size_t offset = 0;
-    Sint8 object = -1;
+    int8_t object = -1;
 
     // SDL stuff
 
@@ -721,22 +676,22 @@ draw()
     for (i = 0; i < SIZE; ++i)
 	for (k = 0; k < SIZE; ++k) {
 	    for (j = 0; j < SIZE; ++j) {
-		if (c_map[j][i][k].tree) {
+		if (level.circuit_map[j][i][k].tree) {
 		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
 		    draw_effect(1, 1, &dst);
 		}
-		switch (s_map[j][i][k]) {
+		switch (level.static_map[j][i][k]) {
 		case GROUND ... SWITCH:
 		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		    draw_object(s_map[j][i][k] - 1, 0, &dst);
+		    draw_object(level.static_map[j][i][k] - 1, 0, &dst);
 		    break;
 
 		case TUBE:
 		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		    if (s_map[j + 1][i][k] != TUBE) {
+		    if (level.static_map[j + 1][i][k] != TUBE) {
 			draw_effect(1, 0, &dst);
 		    }
 		    draw_effect(0, 0, &dst);
@@ -762,14 +717,14 @@ draw()
 		}
 	    }
 	    for (j = 0; j < SIZE; ++j) {
-		if (s_map[j][i][k] == TUBE) {
+		if (level.static_map[j][i][k] == TUBE) {
 		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
 		    warp_surface(canvas, &dst);
 		}
 	    }
 	    for (j = 0; j < SIZE; ++j) {
-		if (c_map[j][i][k].tree) {
+		if (level.circuit_map[j][i][k].tree) {
 		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
 		    draw_effect(2, 1, &dst);
@@ -782,7 +737,7 @@ draw()
     for (i = 0; i < SIZE; ++i)
 	for (j = 0; j < SIZE; ++j)
 	    for (k = 0; k < SIZE; ++k)
-		switch (s_map[i][j][k]) {
+		switch (level.static_map[i][j][k]) {
 		case BUTTON:
 		case SWITCH:
 		    sprintf(lil_buf, "%d%d%d", i, j, k);
@@ -819,17 +774,17 @@ int
 load(const char *path)
 {
     FILE *f;
-    Uint16 n;
-    memset(s_map, EMPTY, sizeof(Uint8) * SIZE_3);
-    memset(c_map, 0, sizeof(struct circuit) * SIZE_3);
+    uint16_t n;
+    memset(level.static_map, EMPTY, sizeof(uint8_t) * SIZE_3);
+    memset(level.circuit_map, 0, sizeof(struct circuit) * SIZE_3);
     if ((f = fopen(path, "rb"))) {
-	fread(s_map, sizeof(Uint8), SIZE_3, f);
-	while (fread(&n, sizeof(Uint16), 1, f) == 1 && n < SIZE_3) {
-	    fread(&C_MAP[n].size, sizeof(Uint16), 1, f);
+	fread(level.static_map, sizeof(uint8_t), SIZE_3, f);
+	while (fread(&n, sizeof(uint16_t), 1, f) == 1 && n < SIZE_3) {
+	    fread(&C_MAP[n].size, sizeof(uint16_t), 1, f);
 	    //C_MAP[n].size = TREE_SIZE;
 	    C_MAP[n].tree =
-		(Uint16 *) malloc(sizeof(Uint16) * C_MAP[n].size);
-	    fread(C_MAP[n].tree, sizeof(Uint16), C_MAP[n].size, f);
+		(uint16_t *) malloc(sizeof(uint16_t) * C_MAP[n].size);
+	    fread(C_MAP[n].tree, sizeof(uint16_t), C_MAP[n].size, f);
 	}
 	fclose(f);
 	return 1;
@@ -845,14 +800,14 @@ int
 save(const char *path)
 {
     FILE *f;
-    Uint16 n;
+    uint16_t n;
     if ((f = fopen(path, "wb"))) {
-	fwrite(s_map, sizeof(Uint8), SIZE_3, f);
+	fwrite(level.static_map, sizeof(uint8_t), SIZE_3, f);
 	for (n = 0; n < SIZE_3; ++n)
 	    if (C_MAP[n].tree) {
-		fwrite(&n, sizeof(Uint16), 1, f);
-		fwrite(&C_MAP[n].size, sizeof(Uint16), 1, f);
-		fwrite(C_MAP[n].tree, sizeof(Uint16), C_MAP[n].size, f);
+		fwrite(&n, sizeof(uint16_t), 1, f);
+		fwrite(&C_MAP[n].size, sizeof(uint16_t), 1, f);
+		fwrite(C_MAP[n].tree, sizeof(uint16_t), C_MAP[n].size, f);
 	    }
 	fclose(f);
 	return 1;
@@ -867,108 +822,108 @@ save(const char *path)
 void
 shift_bk()
 {
-    Uint8 i, j, k, tmp;
+    uint8_t i, j, k, tmp;
     struct circuit tmp2;
     for (i = 0; i < SIZE; ++i)
 	for (j = 0; j < SIZE; ++j) {
-	    tmp = s_map[j][i][MIN];
-	    tmp2 = c_map[j][i][MIN];
+	    tmp = level.static_map[j][i][MIN];
+	    tmp2 = level.circuit_map[j][i][MIN];
 	    for (k = MIN; k < MAX; ++k) {
-		s_map[j][i][k] = s_map[j][i][k + 1];
-		c_map[j][i][k] = shift_circuit_bk(c_map[j][i][k + 1]);
+		level.static_map[j][i][k] = level.static_map[j][i][k + 1];
+		level.circuit_map[j][i][k] = shift_circuit_bk(level.circuit_map[j][i][k + 1]);
 	    }
-	    s_map[j][i][MAX] = tmp;
-	    c_map[j][i][MAX] = shift_circuit_bk(tmp2);
+	    level.static_map[j][i][MAX] = tmp;
+	    level.circuit_map[j][i][MAX] = shift_circuit_bk(tmp2);
 	}
 }
 
 void
 shift_ft()
 {
-    Uint8 i, j, k, tmp;
+    uint8_t i, j, k, tmp;
     struct circuit tmp2;
     for (i = 0; i < SIZE; ++i)
 	for (j = 0; j < SIZE; ++j) {
-	    tmp = s_map[j][i][MAX];
-	    tmp2 = c_map[j][i][MAX];
+	    tmp = level.static_map[j][i][MAX];
+	    tmp2 = level.circuit_map[j][i][MAX];
 	    for (k = MAX; k > MIN; --k) {
-		s_map[j][i][k] = s_map[j][i][k - 1];
-		c_map[j][i][k] = shift_circuit_ft(c_map[j][i][k - 1]);
+		level.static_map[j][i][k] = level.static_map[j][i][k - 1];
+		level.circuit_map[j][i][k] = shift_circuit_ft(level.circuit_map[j][i][k - 1]);
 	    }
-	    s_map[j][i][MIN] = tmp;
-	    c_map[j][i][MIN] = shift_circuit_ft(tmp2);
+	    level.static_map[j][i][MIN] = tmp;
+	    level.circuit_map[j][i][MIN] = shift_circuit_ft(tmp2);
 	}
 }
 
 void
 shift_lf()
 {
-    Uint8 i, j, k, tmp;
+    uint8_t i, j, k, tmp;
     struct circuit tmp2;
     for (k = 0; k < SIZE; ++k)
 	for (j = 0; j < SIZE; ++j) {
-	    tmp = s_map[j][MIN][k];
-	    tmp2 = c_map[j][MIN][k];
+	    tmp = level.static_map[j][MIN][k];
+	    tmp2 = level.circuit_map[j][MIN][k];
 	    for (i = MIN; i < MAX; ++i) {
-		s_map[j][i][k] = s_map[j][i + 1][k];
-		c_map[j][i][k] = shift_circuit_lf(c_map[j][i + 1][k]);
+		level.static_map[j][i][k] = level.static_map[j][i + 1][k];
+		level.circuit_map[j][i][k] = shift_circuit_lf(level.circuit_map[j][i + 1][k]);
 	    }
-	    s_map[j][MAX][k] = tmp;
-	    c_map[j][MAX][k] = shift_circuit_lf(tmp2);
+	    level.static_map[j][MAX][k] = tmp;
+	    level.circuit_map[j][MAX][k] = shift_circuit_lf(tmp2);
 	}
 }
 
 void
 shift_rt()
 {
-    Uint8 i, j, k, tmp;
+    uint8_t i, j, k, tmp;
     struct circuit tmp2;
     for (k = 0; k < SIZE; ++k)
 	for (j = 0; j < SIZE; ++j) {
-	    tmp = s_map[j][MAX][k];
-	    tmp2 = c_map[j][MAX][k];
+	    tmp = level.static_map[j][MAX][k];
+	    tmp2 = level.circuit_map[j][MAX][k];
 	    for (i = MAX; i > MIN; --i) {
-		s_map[j][i][k] = s_map[j][i - 1][k];
-		c_map[j][i][k] = shift_circuit_rt(c_map[j][i - 1][k]);
+		level.static_map[j][i][k] = level.static_map[j][i - 1][k];
+		level.circuit_map[j][i][k] = shift_circuit_rt(level.circuit_map[j][i - 1][k]);
 	    }
-	    s_map[j][MIN][k] = tmp;
-	    c_map[j][MIN][k] = shift_circuit_rt(tmp2);
+	    level.static_map[j][MIN][k] = tmp;
+	    level.circuit_map[j][MIN][k] = shift_circuit_rt(tmp2);
 	}
 }
 
 void
 shift_dn()
 {
-    Uint8 i, j, k, tmp;
+    uint8_t i, j, k, tmp;
     struct circuit tmp2;
     for (i = 0; i < SIZE; ++i)
 	for (k = 0; k < SIZE; ++k) {
-	    tmp = s_map[MIN][i][k];
-	    tmp2 = c_map[MIN][i][k];
+	    tmp = level.static_map[MIN][i][k];
+	    tmp2 = level.circuit_map[MIN][i][k];
 	    for (j = MIN; j < MAX; ++j) {
-		s_map[j][i][k] = s_map[j + 1][i][k];
-		c_map[j][i][k] = shift_circuit_dn(c_map[j + 1][i][k]);
+		level.static_map[j][i][k] = level.static_map[j + 1][i][k];
+		level.circuit_map[j][i][k] = shift_circuit_dn(level.circuit_map[j + 1][i][k]);
 	    }
-	    s_map[MAX][i][k] = tmp;
-	    c_map[MAX][i][k] = shift_circuit_dn(tmp2);
+	    level.static_map[MAX][i][k] = tmp;
+	    level.circuit_map[MAX][i][k] = shift_circuit_dn(tmp2);
 	}
 }
 
 void
 shift_up()
 {
-    Uint8 i, j, k, tmp;
+    uint8_t i, j, k, tmp;
     struct circuit tmp2;
     for (i = 0; i < SIZE; ++i)
 	for (k = 0; k < SIZE; ++k) {
-	    tmp = s_map[MAX][i][k];
-	    tmp2 = c_map[MAX][i][k];
+	    tmp = level.static_map[MAX][i][k];
+	    tmp2 = level.circuit_map[MAX][i][k];
 	    for (j = MAX; j > MIN; --j) {
-		s_map[j][i][k] = s_map[j - 1][i][k];
-		c_map[j][i][k] = shift_circuit_up(c_map[j - 1][i][k]);
+		level.static_map[j][i][k] = level.static_map[j - 1][i][k];
+		level.circuit_map[j][i][k] = shift_circuit_up(level.circuit_map[j - 1][i][k]);
 	    }
-	    s_map[MIN][i][k] = tmp;
-	    c_map[MIN][i][k] = shift_circuit_up(tmp2);
+	    level.static_map[MIN][i][k] = tmp;
+	    level.circuit_map[MIN][i][k] = shift_circuit_up(tmp2);
 	}
 }
 
@@ -978,7 +933,7 @@ shift_up()
 struct circuit
 shift_circuit_ft(struct circuit n)
 {
-    Uint16 *it;
+    uint16_t *it;
     if (n.tree)
 	for (it = n.tree; it < n.tree + n.size; ++it)
 	    if (*it < NONE) {
@@ -990,7 +945,7 @@ shift_circuit_ft(struct circuit n)
 struct circuit
 shift_circuit_bk(struct circuit n)
 {
-    Uint16 *it;
+    uint16_t *it;
     if (n.tree)
 	for (it = n.tree; it < n.tree + n.size; ++it)
 	    if (*it < NONE) {
@@ -1004,7 +959,7 @@ shift_circuit_bk(struct circuit n)
 struct circuit
 shift_circuit_up(struct circuit n)
 {
-    Uint16 *it;
+    uint16_t *it;
     if (n.tree)
 	for (it = n.tree; it < n.tree + n.size; ++it)
 	    if (*it < NONE) {
@@ -1016,7 +971,7 @@ shift_circuit_up(struct circuit n)
 struct circuit
 shift_circuit_dn(struct circuit n)
 {
-    Uint16 *it;
+    uint16_t *it;
     if (n.tree)
 	for (it = n.tree; it < n.tree + n.size; ++it)
 	    if (*it < NONE) {
@@ -1028,7 +983,7 @@ shift_circuit_dn(struct circuit n)
 struct circuit
 shift_circuit_rt(struct circuit n)
 {
-    Uint16 *it;
+    uint16_t *it;
     if (n.tree)
 	for (it = n.tree; it < n.tree + n.size; ++it)
 	    if (*it < NONE) {
@@ -1042,7 +997,7 @@ shift_circuit_rt(struct circuit n)
 struct circuit
 shift_circuit_lf(struct circuit n)
 {
-    Uint16 *it;
+    uint16_t *it;
     if (n.tree)
 	for (it = n.tree; it < n.tree + n.size; ++it)
 	    if (*it < NONE) {
@@ -1059,22 +1014,22 @@ shift_circuit_lf(struct circuit n)
 void
 rotate_lf()
 {
-    Uint8 i, j, k, m, n, tmp;
+    uint8_t i, j, k, m, n, tmp;
     struct circuit tmp2;
     for (j = 0; j < SIZE; ++j) {
 	for (i = MIN, m = MAX; i < m; ++i, --m)
 	    for (k = MIN, n = MAX; k < n; ++k, --n) {
-		tmp = s_map[j][i][k];
-		s_map[j][i][k] = rotate_object_lf(s_map[j][n][i]);
-		s_map[j][n][i] = rotate_object_lf(s_map[j][m][n]);
-		s_map[j][m][n] = rotate_object_lf(s_map[j][k][m]);
-		s_map[j][k][m] = rotate_object_lf(tmp);
+		tmp = level.static_map[j][i][k];
+		level.static_map[j][i][k] = rotate_object_lf(level.static_map[j][n][i]);
+		level.static_map[j][n][i] = rotate_object_lf(level.static_map[j][m][n]);
+		level.static_map[j][m][n] = rotate_object_lf(level.static_map[j][k][m]);
+		level.static_map[j][k][m] = rotate_object_lf(tmp);
 
-		tmp2 = c_map[j][i][k];
-		c_map[j][i][k] = rotate_circuit_lf(c_map[j][n][i]);
-		c_map[j][n][i] = rotate_circuit_lf(c_map[j][m][n]);
-		c_map[j][m][n] = rotate_circuit_lf(c_map[j][k][m]);
-		c_map[j][k][m] = rotate_circuit_lf(tmp2);
+		tmp2 = level.circuit_map[j][i][k];
+		level.circuit_map[j][i][k] = rotate_circuit_lf(level.circuit_map[j][n][i]);
+		level.circuit_map[j][n][i] = rotate_circuit_lf(level.circuit_map[j][m][n]);
+		level.circuit_map[j][m][n] = rotate_circuit_lf(level.circuit_map[j][k][m]);
+		level.circuit_map[j][k][m] = rotate_circuit_lf(tmp2);
 	    }
     }
 }
@@ -1082,22 +1037,22 @@ rotate_lf()
 void
 rotate_rt()
 {
-    Uint8 i, j, k, m, n, tmp;
+    uint8_t i, j, k, m, n, tmp;
     struct circuit tmp2;
     for (j = 0; j < SIZE; ++j) {
 	for (i = MIN, m = MAX; i < m; ++i, --m)
 	    for (k = MIN, n = MAX; k < n; ++k, --n) {
-		tmp = s_map[j][i][k];
-		s_map[j][i][k] = rotate_object_rt(s_map[j][k][m]);
-		s_map[j][k][m] = rotate_object_rt(s_map[j][m][n]);
-		s_map[j][m][n] = rotate_object_rt(s_map[j][n][i]);
-		s_map[j][n][i] = rotate_object_rt(tmp);
+		tmp = level.static_map[j][i][k];
+		level.static_map[j][i][k] = rotate_object_rt(level.static_map[j][k][m]);
+		level.static_map[j][k][m] = rotate_object_rt(level.static_map[j][m][n]);
+		level.static_map[j][m][n] = rotate_object_rt(level.static_map[j][n][i]);
+		level.static_map[j][n][i] = rotate_object_rt(tmp);
 
-		tmp2 = c_map[j][i][k];
-		c_map[j][i][k] = rotate_circuit_rt(c_map[j][k][m]);
-		c_map[j][k][m] = rotate_circuit_rt(c_map[j][m][n]);
-		c_map[j][m][n] = rotate_circuit_rt(c_map[j][n][i]);
-		c_map[j][n][i] = rotate_circuit_rt(tmp2);
+		tmp2 = level.circuit_map[j][i][k];
+		level.circuit_map[j][i][k] = rotate_circuit_rt(level.circuit_map[j][k][m]);
+		level.circuit_map[j][k][m] = rotate_circuit_rt(level.circuit_map[j][m][n]);
+		level.circuit_map[j][m][n] = rotate_circuit_rt(level.circuit_map[j][n][i]);
+		level.circuit_map[j][n][i] = rotate_circuit_rt(tmp2);
 	    }
     }
 }
@@ -1105,8 +1060,8 @@ rotate_rt()
 /*
  * These rotate objects whose orientation matters.
  */
-Uint8
-rotate_object_lf(Uint8 p)
+uint8_t
+rotate_object_lf(uint8_t p)
 {
     switch (p) {
     case BELTLF:
@@ -1121,8 +1076,8 @@ rotate_object_lf(Uint8 p)
     return p;
 }
 
-Uint8
-rotate_object_rt(Uint8 p)
+uint8_t
+rotate_object_rt(uint8_t p)
 {
     switch (p) {
     case BELTLF:
@@ -1143,8 +1098,8 @@ rotate_object_rt(Uint8 p)
 struct circuit
 rotate_circuit_lf(struct circuit n)
 {
-    Uint16 *it;
-    Uint8 i, j, k;
+    uint16_t *it;
+    uint8_t i, j, k;
     if (n.tree)
 	for (it = n.tree; it < n.tree + n.size; ++it)
 	    if (*it < NONE) {
@@ -1159,8 +1114,8 @@ rotate_circuit_lf(struct circuit n)
 struct circuit
 rotate_circuit_rt(struct circuit n)
 {
-    Uint16 *it;
-    Uint8 i, j, k;
+    uint16_t *it;
+    uint8_t i, j, k;
     if (n.tree)
 	for (it = n.tree; it < n.tree + n.size; ++it)
 	    if (*it < NONE) {
@@ -1243,7 +1198,7 @@ int
 text_to_circuit(char *buf, struct circuit *c, size_t node)
 {
     c->size = TREE_SIZE;
-    c->tree = realloc(c->tree, sizeof(Uint16) * c->size);
+    c->tree = realloc(c->tree, sizeof(uint16_t) * c->size);
     consume(&buf);
     tree_to_circuit(parse_expr_1(&buf), c, node);
     return 0;
@@ -1255,7 +1210,7 @@ tree_to_circuit(struct tree *t, struct circuit *c, size_t node)
     if (t) {
 	if (node > c->size) {
 	    c->size *= 2;
-	    c->tree = realloc(c->tree, sizeof(Uint16) * c->size);
+	    c->tree = realloc(c->tree, sizeof(uint16_t) * c->size);
 	}
 	c->tree[node] = t->token;
 	tree_to_circuit(t->l, c, LCHILD(node));
