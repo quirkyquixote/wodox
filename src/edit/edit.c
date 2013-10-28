@@ -3,38 +3,29 @@
  * This code copyright (c) Luis Javier Sanz 2009-2013
  */
 
-#include "../edit/edit.h"
-#include "../menu/menu.h"
+#include <errno.h>
+
+#include "../media/draw.h"
 #include "../play/play.h"
 
-#include <errno.h>
 #include "types.h"
 #include "circuit.h"
 #include "shift.h"
 #include "rotate.h"
+#include "render.h"
 
 struct level level;
 
 /*
  * Edit links.
  */
-static int edit_circuit(size_t offset);
-
-/*
- * Draw objects.
- */
-int draw();
+static int edit_circuit(uint16_t offset);
 
 /*
  * Load and save a level.
  */
 static int load(const char *path);
 static int save(const char *path);
-
-/*
- * The cursor.
- */
-static uint16_t cursor;
 
 /*
  * To edit a level.
@@ -44,8 +35,8 @@ edit(char *path)
 {
     // Variables to iterate.
 
-    size_t i;
-    size_t offset = 0;
+    uint16_t i;
+    uint16_t offset = 0;
     int8_t object = -1;
 
     // SDL stuff
@@ -64,7 +55,7 @@ edit(char *path)
 
     // Let's go.
 
-    cursor = OFF(0, 0, 0);
+    level.cursor = OFF(0, 0, 0);
 
     load(path);
 
@@ -92,7 +83,7 @@ edit(char *path)
 		}
 	    }
 
-	    S_MAP[cursor] = object;
+	    S_MAP[level.cursor] = object;
 	}
 	// Start drawing.
 
@@ -100,11 +91,11 @@ edit(char *path)
 
 	// Draw level.
 
-	draw();
+	render();
 
 	// Draw circuit under cursor.
 
-	switch (S_MAP[cursor]) {
+	switch (S_MAP[level.cursor]) {
 	case TUBE:
 	case BELTLF:
 	case BELTRT:
@@ -112,7 +103,7 @@ edit(char *path)
 	case BELTFT:
 	case MOVING:
 	    memset(buf, 0, sizeof(buf));
-	    circuit_to_text(buf, C_MAP + cursor, 0, 0);
+	    circuit_to_text(buf, C_MAP + level.cursor, 0, 0);
 
 	    if ((surface =
 		 TTF_RenderUTF8_Blended(font_equation, buf,
@@ -130,7 +121,7 @@ edit(char *path)
 	    switch (event.type) {
 	    case SDL_MOUSEMOTION:
 		do {
-		    int y = Y(cursor);
+		    int y = Y(level.cursor);
 		    int x =
 			(WORLDX(event.motion.x, event.motion.y, SPS * y) -
 			 SPS / 2) / SPS;
@@ -149,7 +140,7 @@ edit(char *path)
 			z = SIZE - 1;
 		    }
 
-		    cursor = OFF(x, y, z);
+		    level.cursor = OFF(x, y, z);
 		}
 		while (0);
 		break;
@@ -160,12 +151,12 @@ edit(char *path)
 		    object = GROUND;
 		    break;
 		case SDL_BUTTON_WHEELDOWN:
-		    if (Y(cursor) > MIN)
-			cursor -= SIZE_2;
+		    if (Y(level.cursor) > MIN)
+			level.cursor -= SIZE_2;
 		    break;
 		case SDL_BUTTON_WHEELUP:
-		    if (Y(cursor) < MAX)
-			cursor += SIZE_2;
+		    if (Y(level.cursor) < MAX)
+			level.cursor += SIZE_2;
 		    break;
 		default:
 		    break;
@@ -286,28 +277,28 @@ edit(char *path)
 		}
 		switch (event.key.keysym.sym) {
 		case SDLK_PAGEDOWN:
-		    if (Y(cursor) > MIN)
-			cursor -= SIZE_2;
+		    if (Y(level.cursor) > MIN)
+			level.cursor -= SIZE_2;
 		    break;
 		case SDLK_PAGEUP:
-		    if (Y(cursor) < MAX)
-			cursor += SIZE_2;
+		    if (Y(level.cursor) < MAX)
+			level.cursor += SIZE_2;
 		    break;
 		case SDLK_UP:
-		    if (X(cursor) > MIN)
-			cursor -= SIZE;
+		    if (X(level.cursor) > MIN)
+			level.cursor -= SIZE;
 		    break;
 		case SDLK_DOWN:
-		    if (X(cursor) < MAX)
-			cursor += SIZE;
+		    if (X(level.cursor) < MAX)
+			level.cursor += SIZE;
 		    break;
 		case SDLK_RIGHT:
-		    if (Z(cursor) > MIN)
-			cursor -= 1;
+		    if (Z(level.cursor) > MIN)
+			level.cursor -= 1;
 		    break;
 		case SDLK_LEFT:
-		    if (Z(cursor) < MAX)
-			cursor += 1;
+		    if (Z(level.cursor) < MAX)
+			level.cursor += 1;
 		    break;
 		case SDLK_g:
 		    object = GROUND;
@@ -385,7 +376,7 @@ edit(char *path)
 		    }
 		    break;
 		case SDLK_RETURN:
-		    edit_circuit(cursor);
+		    edit_circuit(level.cursor);
 		default:
 		    break;
 		}
@@ -424,7 +415,7 @@ edit(char *path)
  * Edit circuit.
  */
 int
-edit_circuit(size_t offset)
+edit_circuit(uint16_t offset)
 {
     // Only edit if what we want to link is a machine.
 
@@ -469,7 +460,7 @@ edit_circuit(size_t offset)
     // Freeze the background.
 
     draw_background();
-    draw();
+    render();
     sepia_surface(canvas);
     bkgr = SDL_ConvertSurface(canvas, canvas->format, canvas->flags);
 
@@ -601,115 +592,6 @@ edit_circuit(size_t offset)
     return 0;
 }
 
-
-/*
- * Draw objects.
- */
-int
-draw()
-{
-    size_t i, j, k;
-    SDL_Rect dst;
-    SDL_Surface *surface;
-    char lil_buf[4];
-
-    // Draw all objects. Most objects have only a simple sprite with no 
-    // alpha channel, but levitators have alpha transparency and a "warp"
-    // effect, and the exit is a particle system.
-
-    for (i = 0; i < SIZE; ++i)
-	for (k = 0; k < SIZE; ++k) {
-	    for (j = 0; j < SIZE; ++j) {
-		if (level.circuit_map[j][i][k].tree) {
-		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
-		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		    draw_effect(1, 1, &dst);
-		}
-		switch (level.static_map[j][i][k]) {
-		case GROUND ... SWITCH:
-		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
-		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		    draw_object(level.static_map[j][i][k] - 1, 0, &dst);
-		    break;
-
-		case TUBE:
-		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
-		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		    if (level.static_map[j + 1][i][k] != TUBE) {
-			draw_effect(1, 0, &dst);
-		    }
-		    draw_effect(0, 0, &dst);
-		    break;
-
-		case WARP:
-		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
-		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		    draw_particles(canvas, &dst);
-		    break;
-
-		default:
-		    if (j == Y(cursor)) {
-			dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
-			dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-			draw_effect(3, 1, &dst);
-		    }
-		}
-		if (cursor == OFF(i, j, k)) {
-		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
-		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		    draw_effect(0, 1, &dst);
-		}
-	    }
-	    for (j = 0; j < SIZE; ++j) {
-		if (level.static_map[j][i][k] == TUBE) {
-		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
-		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		    warp_surface(canvas, &dst);
-		}
-	    }
-	    for (j = 0; j < SIZE; ++j) {
-		if (level.circuit_map[j][i][k].tree) {
-		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
-		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		    draw_effect(2, 1, &dst);
-		}
-	    }
-	}
-
-    // Label all buttons and switches.
-
-    for (i = 0; i < SIZE; ++i)
-	for (j = 0; j < SIZE; ++j)
-	    for (k = 0; k < SIZE; ++k)
-		switch (level.static_map[i][j][k]) {
-		case BUTTON:
-		case SWITCH:
-		    sprintf(lil_buf, "%d%d%d", i, j, k);
-		    if ((surface =
-			 TTF_RenderUTF8_Blended(font_normal, lil_buf,
-						color_white))) {
-			dst.x =
-			    SCREENX(SPS * j, SPS * i,
-				    SPS * k) - surface->w / 2 + 30;
-			dst.y =
-			    SCREENY(SPS * j, SPS * i,
-				    SPS * k) - surface->h / 2 + 10;
-			SDL_BlitSurface(surface, NULL, canvas, &dst);
-			SDL_FreeSurface(surface);
-		    }
-
-		default:
-		    break;
-		}
-
-    // Draw the cursor
-    /*
-       dst.x = SCREENX (SPS * X (cursor), SPS * Y (cursor), SPS * Z (cursor));
-       dst.y = SCREENY (SPS * X (cursor), SPS * Y (cursor), SPS * Z (cursor));
-       draw_object (0, 1, &dst);
-     */
-    return 0;
-}
 
 /*
  * Load level.

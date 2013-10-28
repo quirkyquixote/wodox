@@ -57,6 +57,8 @@ struct tree {
 struct level {
     uint8_t static_map[SIZE][SIZE][SIZE];
     struct circuit circuit_map[SIZE][SIZE][SIZE];
+
+    uint16_t cursor;
 };
 
 extern struct level level;
