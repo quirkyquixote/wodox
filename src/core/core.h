@@ -56,8 +56,8 @@ static inline uint16_t idx_rt (uint16_t idx) { return idx + SIZE; }
 static inline uint16_t idx_dn (uint16_t idx) { return idx - SIZE_2; }
 static inline uint16_t idx_up (uint16_t idx) { return idx + SIZE_2; }
 
-static inline uint8_t idx_x(uint16_t idx) { return idx / SIZE_2; }
-static inline uint8_t idx_y(uint16_t idx) { return (idx % SIZE_2) / SIZE; }
+static inline uint8_t idx_x(uint16_t idx) { return (idx % SIZE_2) / SIZE; }
+static inline uint8_t idx_y(uint16_t idx) { return idx / SIZE_2; }
 static inline uint8_t idx_z(uint16_t idx) { return (idx % SIZE_2) % SIZE; }
 
 /*----------------------------------------------------------------------------
@@ -84,8 +84,7 @@ coord_to_idx(struct coord w)
 static inline struct coord
 idx_to_coord(uint16_t idx)
 {
-    uint16_t tmp = idx % SIZE_2;
-    return coord(idx / SIZE_2, tmp / SIZE, tmp % SIZE);
+    return coord(idx_x(idx), idx_y(idx), idx_z(idx));
 }
 
 static inline int
