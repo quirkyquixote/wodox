@@ -1,6 +1,6 @@
 /*
  * Wodox reimplemented again.
- * This code copyright (c) Luis Javier Sanz 2009 
+ * This code copyright (c) Luis Javier Sanz 2009-2013
  */
 
 #include "media.h"
@@ -18,9 +18,9 @@ SDL_Color color_red = { 255, 0, 0 };
 SDL_Color color_marker = { 40, 40, 24 };
 
 
-/*
+/*----------------------------------------------------------------------------
  * Source rects for all objects and effects.
- */
+ *----------------------------------------------------------------------------*/
 static SDL_Rect rects_55_63[][4] = {
     {{0, 0, 55, 63}, {0, 63, 55, 63}, {0, 126, 55, 63}, {0, 189, 55, 63}},
     {{55, 0, 55, 63}, {55, 63, 55, 63}, {55, 126, 55, 63},
@@ -57,23 +57,21 @@ static SDL_Rect rects_55_63[][4] = {
      {880, 189, 55, 63}},
 };
 
-/*
+/*----------------------------------------------------------------------------
  * Source rects for all particles.
- */
+ *----------------------------------------------------------------------------*/
 static SDL_Rect rects_particles[] = {
     {165, 0, 32, 32},		// particle (big, white)
     {165, 32, 16, 16},		// particle (medium, blue)
     {165, 48, 8, 8},		// particle (small, red)
 };
 
-/*
- * Initialize SDL.
- */
+/*----------------------------------------------------------------------------
+ * Initialize
+ *----------------------------------------------------------------------------*/
 int
 media_init(void)
 {
-    // Initialize SDL itself. Exit on failure.
-
     if (SDL_Init(SDL_INIT_VIDEO)) {
 	fprintf(stderr, "%s\n", SDL_GetError());
 	exit(0);
@@ -123,13 +121,7 @@ media_init(void)
 	fprintf(stderr, "%s\n", TTF_GetError());
 	exit(0);
     }
-/*
-  media.font_small = load_font ("acoustic_bass.ttf", 12);
-  media.font_normal = load_font ("acoustic_bass.ttf", 16);
-  media.font_large = load_font ("acoustic_bass.ttf", 24);
-  media.font_input = load_font ("acoustic_bass.ttf", 20);
-  media.font_equation = load_font ("acoustic_bass.ttf", 20);
-*/
+
     media.font_small = load_font("underwood_champion.ttf", 16);
     media.font_normal = load_font("underwood_champion.ttf", 18);
     media.font_large = load_font("underwood_champion.ttf", 30);
@@ -177,9 +169,9 @@ media_init(void)
     return 0;
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Terminate
- */
+ *----------------------------------------------------------------------------*/
 void
 media_end(void)
 {
@@ -190,9 +182,9 @@ media_end(void)
     SDL_Quit();
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Call at the end of each iteration.
- */
+ *----------------------------------------------------------------------------*/
 void
 media_sync(void)
 {
@@ -200,9 +192,9 @@ media_sync(void)
     SDL_Flip(media.canvas);
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Pause
- */
+ *----------------------------------------------------------------------------*/
 void
 media_freeze(void)
 {
@@ -227,9 +219,9 @@ media_freeze(void)
     return;
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Display help.
- */
+ *----------------------------------------------------------------------------*/
 int
 help(char **text, char **opts, char *shortcuts)
 {
@@ -388,9 +380,9 @@ help(char **text, char **opts, char *shortcuts)
 
 #define PATH_LEN 1024
 
-/*
+/*----------------------------------------------------------------------------
  * Edit level properties.
- */
+ *----------------------------------------------------------------------------*/
 int
 properties(char *path)
 {
@@ -519,11 +511,11 @@ properties(char *path)
     return ret;
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Start drawing.
- */
+ *----------------------------------------------------------------------------*/
 void
-render_background()
+render_background(void)
 {
     int bpp = media.canvas->format->BytesPerPixel;
     int pitch = media.canvas->pitch;
@@ -611,9 +603,9 @@ render_foreground(void)
     SDL_BlitSurface(media.surface_frame, NULL, media.canvas, NULL);
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Blit object.
- */
+ *----------------------------------------------------------------------------*/
 void
 render_object(Uint32 sprite, Uint32 frame, SDL_Rect * dst)
 {
@@ -621,9 +613,9 @@ render_object(Uint32 sprite, Uint32 frame, SDL_Rect * dst)
 		    dst);
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Blit effect.
- */
+ *----------------------------------------------------------------------------*/
 void
 render_effect(Uint32 sprite, Uint32 frame, SDL_Rect * dst)
 {
@@ -631,9 +623,9 @@ render_effect(Uint32 sprite, Uint32 frame, SDL_Rect * dst)
 		    dst);
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Blit text.
- */
+ *----------------------------------------------------------------------------*/
 void
 render_text(TTF_Font * font, const char *text, Sint16 x, Sint16 y)
 {
@@ -648,9 +640,9 @@ render_text(TTF_Font * font, const char *text, Sint16 x, Sint16 y)
     }
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Warp effect for levitators.
- */
+ *----------------------------------------------------------------------------*/
 void
 warp_surface(SDL_Surface * s, SDL_Rect * rect)
 {
@@ -703,9 +695,9 @@ warp_surface(SDL_Surface * s, SDL_Rect * rect)
     SDL_UnlockSurface(s);
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Wave effect for menus.
- */
+ *----------------------------------------------------------------------------*/
 void
 render_spark(SDL_Surface * s, SDL_Rect * rect)
 {
@@ -760,9 +752,9 @@ render_spark(SDL_Surface * s, SDL_Rect * rect)
     SDL_UnlockSurface(s);
 }
 
-/*
+/*----------------------------------------------------------------------------
  * The exit particle system
- */
+ *----------------------------------------------------------------------------*/
 void
 render_particles(SDL_Surface * s, SDL_Rect * dst)
 {
@@ -817,6 +809,9 @@ render_particles(SDL_Surface * s, SDL_Rect * dst)
     }
 }
 
+/*----------------------------------------------------------------------------
+ * Post-process a surface to make it sepia
+ *----------------------------------------------------------------------------*/
 void
 sepia_surface(SDL_Surface * s)
 {
@@ -872,9 +867,9 @@ sepia_surface(SDL_Surface * s)
     SDL_UnlockSurface(s);
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Play music.
- */
+ *----------------------------------------------------------------------------*/
 void
 play_music(int track)
 {
@@ -918,9 +913,9 @@ play_music(int track)
 
 
 
-/*
+/*----------------------------------------------------------------------------
  * Load an image; on error exit the program with the appropiate error message.
- */
+ *----------------------------------------------------------------------------*/
 SDL_Surface *
 load_texture(const char *filename)
 {
@@ -938,9 +933,9 @@ load_texture(const char *filename)
     return texture;
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Load a true type font; on error exit the program with the appropiate error message.
- */
+ *----------------------------------------------------------------------------*/
 TTF_Font *
 load_font(const char *filename, int size)
 {
@@ -958,9 +953,9 @@ load_font(const char *filename, int size)
     return font;
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Load a sample; on error output a message.
- */
+ *----------------------------------------------------------------------------*/
 Mix_Chunk *
 load_sample(const char *filename)
 {

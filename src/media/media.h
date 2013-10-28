@@ -1,6 +1,6 @@
 /*
  * Wodox reimplemented again.
- * This code copyright (c) Luis Javier Sanz 2009-2012
+ * This code copyright (c) Luis Javier Sanz 2009-2013
  */
 
 #pragma once
@@ -14,6 +14,9 @@
 
 #include "../core/core.h"
 
+/*----------------------------------------------------------------------------
+ * All data needed for media
+ *----------------------------------------------------------------------------*/
 struct media {
     int enable_audio;
     int enable_music;
@@ -53,41 +56,44 @@ struct media {
 
 extern struct media media;
 
+/*----------------------------------------------------------------------------
+ * Some constants
+ *----------------------------------------------------------------------------*/
 extern SDL_Color color_white;	// Some used and reused values.
 extern SDL_Color color_black;	// Some used and reused values.
 extern SDL_Color color_red;
 extern SDL_Color color_marker;
 
-/*
- * Initialize and terminate SDL.
- */
+/*----------------------------------------------------------------------------
+ * Setup and setdown
+ *----------------------------------------------------------------------------*/
 int media_init(void);
 void media_end(void);
 
-/*
+/*----------------------------------------------------------------------------
  * Call at the end of every iteration to draw to screen and handle framerate.
- */
+ *----------------------------------------------------------------------------*/
 void media_sync(void);
 
-/*
+/*----------------------------------------------------------------------------
  * Pause the application
- */
+ *----------------------------------------------------------------------------*/
 void media_freeze(void);
 
-/*
+/*----------------------------------------------------------------------------
  * Pause while showing a help text.
- */
+ *----------------------------------------------------------------------------*/
 int help(char **text, char **opts, char *shortcuts);
 
-/*
+/*----------------------------------------------------------------------------
  * Edit level properties
- */
+ *----------------------------------------------------------------------------*/
 int properties(char *path);
 
-/*
- * To draw things.
- */
-void render_background();
+/*----------------------------------------------------------------------------
+ * Specific rendering and post-rendering routines
+ *----------------------------------------------------------------------------*/
+void render_background(void);
 void render_foreground(void);
 void render_object(Uint32 sprite, Uint32 frame, SDL_Rect * dst);
 void render_effect(Uint32 sprite, Uint32 frame, SDL_Rect * dst);
@@ -99,14 +105,14 @@ void render_particles(SDL_Surface *, SDL_Rect * dst);
 
 void sepia_surface(SDL_Surface * s);
 
-/*
+/*----------------------------------------------------------------------------
  * Play music.
- */
+ *----------------------------------------------------------------------------*/
 void play_music(int track);
 
-/*
+/*----------------------------------------------------------------------------
  * Load resources.
- */
+ *----------------------------------------------------------------------------*/
 SDL_Surface *load_texture(const char *filename);
 TTF_Font *load_font(const char *filename, int size);
 Mix_Chunk *load_sample(const char *filename);
