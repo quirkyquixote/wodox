@@ -82,11 +82,11 @@
  * the 3d version, all of this will change.
  */
 
-#define SCREENX(x,y,z) (canvas->w / 2 + 100 + 4 * (x) - 10 * (z))
-#define SCREENY(x,y,z) (canvas->h / 2 - 8 * (y) + 6 * (x) + 2 * (z))
+#define SCREENX(x,y,z) (media.canvas->w / 2 + 100 + 4 * (x) - 10 * (z))
+#define SCREENY(x,y,z) (media.canvas->h / 2 - 8 * (y) + 6 * (x) + 2 * (z))
 
-#define WORLDX(i,j,y) (((i) + 5 * (j) - canvas->w / 2 - 5 * canvas->h / 2 + 40 * (y) - 100) / 34)
-#define WORLDZ(i,j,y) ((2 * (j) - 3 * (i) + 3 * canvas->w / 2 - canvas->h + 300 + 16 * (y)) / 34)
+#define WORLDX(i,j,y) (((i) + 5 * (j) - media.canvas->w / 2 - 5 * media.canvas->h / 2 + 40 * (y) - 100) / 34)
+#define WORLDZ(i,j,y) ((2 * (j) - 3 * (i) + 3 * media.canvas->w / 2 - media.canvas->h + 300 + 16 * (y)) / 34)
 
 /*
  * To hell with strcpy, strcat and all their relatives...

@@ -113,7 +113,7 @@ handle_player_input(void)
 		break;
 
 	    case SDLK_p:
-		freeze();
+		media_freeze();
 		break;
 	    case SDLK_r:
 		game.keep_going = 0;
@@ -131,7 +131,7 @@ handle_player_input(void)
 		break;
 	    }
 
-	    if (enable_audio &&
+	    if (media.enable_audio &&
 		(game.keyup || game.keydn || game.keylf || game.keyrt)) {
 		Mix_Resume(CHANNEL_WODOX);
 	    }
@@ -160,7 +160,7 @@ handle_player_input(void)
 		break;
 	    }
 
-	    if (enable_audio &&
+	    if (media.enable_audio &&
 		(game.keyup | game.keydn | game.keylf | game.keyrt) == 0) {
 		Mix_Pause(CHANNEL_WODOX);
 	    }

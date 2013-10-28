@@ -128,8 +128,8 @@ update_dynamic_circuit(struct dynamic_circuit *d)
 	    if (object_try_move(d->obj, DIR_DN)) {
 		MAP[idx_dn(d->obj->idx)] = MOVING_1;
 		d->obj->type = MOVING_1;
-		if (enable_audio)
-		    Mix_PlayChannel(CHANNEL_OPEN, chunk_open, 0);
+		if (media.enable_audio)
+		    Mix_PlayChannel(CHANNEL_OPEN, media.chunk_open, 0);
 	    }
 	    break;
 	}
@@ -139,8 +139,8 @@ update_dynamic_circuit(struct dynamic_circuit *d)
 	    if (levitate(d->obj)) {
 		MAP[idx_up(d->obj->idx)] = MOVING_0;
 		d->obj->type = MOVING_0;
-		if (enable_audio)
-		    Mix_PlayChannel(CHANNEL_OPEN, chunk_open, 0);
+		if (media.enable_audio)
+		    Mix_PlayChannel(CHANNEL_OPEN, media.chunk_open, 0);
 	    }
 	    break;
 	}

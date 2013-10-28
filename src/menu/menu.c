@@ -102,10 +102,10 @@ select_user()
 	blit_menu();
 
 	if ((tmp =
-	     TTF_RenderUTF8_Blended(font_large, str_entername, white))) {
+	     TTF_RenderUTF8_Blended(media.font_large, str_entername, white))) {
 	    rect.x = 300 - tmp->w / 2;
 	    rect.y = 200 - tmp->h / 2;
-	    SDL_BlitSurface(tmp, NULL, canvas, &rect);
+	    SDL_BlitSurface(tmp, NULL, media.canvas, &rect);
 	    SDL_FreeSurface(tmp);
 	}
 
@@ -118,7 +118,7 @@ select_user()
 
 		case SDLK_RETURN:
 		    if (user_name_end != user.name) {
-			Mix_PlayChannel(2, chunk_keystroke, 0);
+			Mix_PlayChannel(2, media.chunk_keystroke, 0);
 			load_profile(user.name);
 			keep_going = 0;
 		    }
@@ -126,7 +126,7 @@ select_user()
 
 		case SDLK_BACKSPACE:
 		    if (user_name_end != user.name) {
-			Mix_PlayChannel(2, chunk_keystroke, 0);
+			Mix_PlayChannel(2, media.chunk_keystroke, 0);
 			--user_name_end;
 			*user_name_end = 0;
 		    }
@@ -135,7 +135,7 @@ select_user()
 		default:
 		    if (user_name_end != user.name + USER_NAME_LEN &&
 			isprint(event.key.keysym.unicode)) {
-			Mix_PlayChannel(2, chunk_keystroke, 0);
+			Mix_PlayChannel(2, media.chunk_keystroke, 0);
 			*user_name_end = event.key.keysym.unicode;
 			++user_name_end;
 		    }
@@ -151,7 +151,7 @@ select_user()
 	    }
 	}
 
-	sync();
+	media_sync();
     }
 
     SDL_EnableUNICODE(0);
@@ -177,7 +177,7 @@ draw_main_menu()
 
     for (i = 0; i < 3; ++i)
 	if ((tmp =
-	     TTF_RenderUTF8_Blended(font_large, str_menumain[i], white))) {
+	     TTF_RenderUTF8_Blended(media.font_large, str_menumain[i], white))) {
 	    rect.x = left_relative;
 	    rect.y = top_main + 200 + 80 * i;
 	    SDL_BlitSurface(tmp, NULL, ctx.surface_menu, &rect);
@@ -187,7 +187,7 @@ draw_main_menu()
     if (user.max_level > 0) {
 	for (i = 0; i <= user.max_level; ++i)
 	    if ((tmp =
-		 TTF_RenderUTF8_Blended(font_normal, str_levelnames[i],
+		 TTF_RenderUTF8_Blended(media.font_normal, str_levelnames[i],
 					white))) {
 		rect.x = left_relative;
 		rect.y = top_main + 450 + 24 * i;
@@ -235,7 +235,7 @@ run_main_menu()
 	    switch (option) {
 	    case 0:
 		ctx.offset = 0;
-		TTF_SizeText(font_input, user.name, &w, &h);
+		TTF_SizeText(media.font_input, user.name, &w, &h);
 		rect.x = left_absolute - 20;
 		rect.y = top_main + 130;
 		rect.w = 200;
@@ -243,7 +243,7 @@ run_main_menu()
 		break;
 
 	    case 1 ... 3:
-		TTF_SizeText(font_large, str_menumain[option - 1], &w, &h);
+		TTF_SizeText(media.font_large, str_menumain[option - 1], &w, &h);
 		rect.x = left_absolute - 20;
 		rect.y = top_main + 130 + 80 * option - ctx.offset;
 		rect.w = 200;
@@ -259,12 +259,12 @@ run_main_menu()
 	    }
 	    if (rect.y - rect.h < 0) {
 		ctx.offset -= 24;
-	    } else if (rect.y + rect.h > canvas->h) {
+	    } else if (rect.y + rect.h > media.canvas->h) {
 		ctx.offset += 24;
 	    } else
 		break;
 	}
-	draw_spark(canvas, &rect);
+	draw_spark(media.canvas, &rect);
 
 	// Handle player input.
 
@@ -337,7 +337,7 @@ run_main_menu()
 	    }
 	}
 
-	sync();
+	media_sync();
     }
 
     shift_menu(-400);
@@ -358,7 +358,7 @@ draw_sandbox_menu()
 
     for (i = 0; i < 1; ++i)
 	if ((tmp =
-	     TTF_RenderUTF8_Blended(font_large, str_menusandbox[i],
+	     TTF_RenderUTF8_Blended(media.font_large, str_menusandbox[i],
 				    white))) {
 	    rect.x = left_relative;
 	    rect.y = top_sandbox + 50 + 80 * i;
@@ -368,7 +368,7 @@ draw_sandbox_menu()
 
     for (i = 0; i < ctx.sandbox_count; ++i)
 	if ((tmp =
-	     TTF_RenderUTF8_Blended(font_normal, ctx.sandbox_list[i],
+	     TTF_RenderUTF8_Blended(media.font_normal, ctx.sandbox_list[i],
 				    white))) {
 	    rect.x = left_relative;
 	    rect.y = top_sandbox + 130 + 24 * i;
@@ -403,7 +403,7 @@ run_sandbox_menu()
 	for (;;) {
 	    switch (option) {
 	    case 0:
-		TTF_SizeText(font_large, str_menusandbox[option], &w, &h);
+		TTF_SizeText(media.font_large, str_menusandbox[option], &w, &h);
 		rect.x = left_absolute - 20;
 		rect.y = top_sandbox + 60 + 80 * option - ctx.offset;
 		rect.w = 200;
@@ -411,7 +411,7 @@ run_sandbox_menu()
 		break;
 
 	    default:
-		TTF_SizeText(font_normal, ctx.sandbox_list[option - 1], &w,
+		TTF_SizeText(media.font_normal, ctx.sandbox_list[option - 1], &w,
 			     &h);
 		rect.x = left_absolute - 20;
 		rect.y = top_sandbox + 138 + 24 * (option - 1) - ctx.offset;
@@ -421,12 +421,12 @@ run_sandbox_menu()
 	    }
 	    if (rect.y - rect.h < 0) {
 		ctx.offset -= 24;
-	    } else if (rect.y + rect.h > canvas->h) {
+	    } else if (rect.y + rect.h > media.canvas->h) {
 		ctx.offset += 24;
 	    } else
 		break;
 	}
-	draw_spark(canvas, &rect);
+	draw_spark(media.canvas, &rect);
 
 	while (SDL_PollEvent(&event) != 0) {
 	    switch (event.type) {
@@ -493,7 +493,7 @@ run_sandbox_menu()
 	    }
 	}
 
-	sync();
+	media_sync();
     }
 
     free(dir);
@@ -515,7 +515,7 @@ shift_menu(int new_offset)
 	ctx.offset = new_offset + k;
 	draw_background();
 	blit_menu();
-	sync();
+	media_sync();
     }
 }
 
@@ -525,16 +525,16 @@ blit_menu()
     SDL_Rect rect;
     SDL_Surface *tmp;
 
-    SDL_BlitSurface(surface_title, NULL, canvas, NULL);
+    SDL_BlitSurface(media.surface_title, NULL, media.canvas, NULL);
 
     rect.x = 150;
     rect.y = -ctx.offset;
-    SDL_BlitSurface(ctx.surface_menu, NULL, canvas, &rect);
+    SDL_BlitSurface(ctx.surface_menu, NULL, media.canvas, &rect);
 
-    if ((tmp = TTF_RenderUTF8_Blended(font_input, user.name, black))) {
+    if ((tmp = TTF_RenderUTF8_Blended(media.font_input, user.name, black))) {
 	rect.x = 300 - tmp->w / 2;
 	rect.y = 120 - ctx.offset;
-	SDL_BlitSurface(tmp, NULL, canvas, &rect);
+	SDL_BlitSurface(tmp, NULL, media.canvas, &rect);
 	SDL_FreeSurface(tmp);
     }
 }
@@ -574,7 +574,7 @@ void
 load_background()
 {
     SDL_Surface *tmp = load_texture("menu.png");
-    ctx.surface_menu = SDL_ConvertSurface(tmp, canvas->format, 0);
+    ctx.surface_menu = SDL_ConvertSurface(tmp, media.canvas->format, 0);
     SDL_SetColorKey(ctx.surface_menu, SDL_SRCCOLORKEY,
 		    *(Uint16 *) ctx.surface_menu->pixels);
     SDL_FreeSurface(tmp);
@@ -588,12 +588,12 @@ run_transition(int i)
     SDL_Event event;
     int k;
 
-    SDL_FillRect(canvas, NULL, 0);
+    SDL_FillRect(media.canvas, NULL, 0);
 
-    if ((tmp = TTF_RenderUTF8_Blended(font_large, str_actnames[i], white))) {
-	rect.x = (canvas->w - tmp->w) / 2;
-	rect.y = (canvas->h - tmp->h) / 2;
-	SDL_BlitSurface(tmp, NULL, canvas, &rect);
+    if ((tmp = TTF_RenderUTF8_Blended(media.font_large, str_actnames[i], white))) {
+	rect.x = (media.canvas->w - tmp->w) / 2;
+	rect.y = (media.canvas->h - tmp->h) / 2;
+	SDL_BlitSurface(tmp, NULL, media.canvas, &rect);
 	SDL_FreeSurface(tmp);
     }
 
@@ -606,6 +606,6 @@ run_transition(int i)
 		exit(0);
 	    }
 	}
-	sync();
+	media_sync();
     }
 }

@@ -24,8 +24,8 @@ int
 play(const char *path, const char *name)
 {
     SDL_EnableKeyRepeat(0, SDL_DEFAULT_REPEAT_INTERVAL);
-    surface_levelname =
-	TTF_RenderUTF8_Blended(font_large, name, color_white);
+    media.surface_levelname =
+	TTF_RenderUTF8_Blended(media.font_large, name, color_white);
 
     game.state_stack_top = game.state_stack;
     game.state_stack_bottom = game.state_stack;
@@ -37,7 +37,7 @@ play(const char *path, const char *name)
 	free_level();
     }
 
-    SDL_FreeSurface(surface_levelname);
+    SDL_FreeSurface(media.surface_levelname);
     SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,
 			SDL_DEFAULT_REPEAT_INTERVAL);
 
@@ -82,8 +82,8 @@ run_level()
     game.must_save = 0;
     game.warped = 0;
 
-    if (enable_audio) {
-	Mix_PlayChannel(CHANNEL_WODOX, chunk_wodox, -1);
+    if (media.enable_audio) {
+	Mix_PlayChannel(CHANNEL_WODOX, media.chunk_wodox, -1);
 	Mix_Pause(CHANNEL_WODOX);
     }
 
@@ -93,11 +93,11 @@ run_level()
 	render_objects();	
 	handle_player_input();
 	render_foreground();
-	sync();	
+	media_sync();	
 	++game.cs.ticks;	
     }
 
-    if (enable_audio) 
+    if (media.enable_audio) 
 	Mix_HaltChannel(CHANNEL_WODOX);
 
     // Before terminating we perform a screen transition to close the level but
@@ -116,8 +116,8 @@ run_level()
 	j = SCREENY(SPS * X(game.po->idx), SPS * Y(game.po->idx),
 		    SPS * Z(game.po->idx)) + 32;
     } else {
-	i = canvas->w / 2;
-	j = canvas->h / 2;
+	i = media.canvas->w / 2;
+	j = media.canvas->h / 2;
     }
 
     transition_func *transition = TRANSITION_FUNC[(int) (3 * (rand() / (RAND_MAX + 1.)))]; 
@@ -145,7 +145,7 @@ run_level()
 	}
 
 	transition(i, j, k);
-	sync();
+	media_sync();
     }
 
     return;

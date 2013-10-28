@@ -32,8 +32,8 @@ static const char *str_help =
     "\n";
 
 static struct option long_options[] = {
-    { "no-audio", no_argument, &enable_audio, 0 },
-    { "no-music", no_argument, &enable_music, 0 },
+    { "no-audio", no_argument, &media.enable_audio, 0 },
+    { "no-music", no_argument, &media.enable_music, 0 },
     { "help", no_argument, 0, 'h' },
     { "edit", no_argument, 0, 'e' },
     { "lang", required_argument, 0, 'l' },
@@ -81,7 +81,7 @@ main (int argc, char * argv[])
     }
 
     init_lang (lang);
-    init_graphics ();
+    media_init ();
 
     if (optind < argc) {
 	for (c = optind; c < argc; ++c) {
@@ -96,7 +96,7 @@ main (int argc, char * argv[])
 	menu ();
     }
 
-    end_graphics ();
+    media_end ();
     end_lang ();
     return 0;
 }

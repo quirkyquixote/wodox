@@ -49,7 +49,7 @@ render_level(void)
 		case WARP:
 		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		    draw_particles(canvas, &dst);
+		    draw_particles(media.canvas, &dst);
 		    break;
 
 		default:
@@ -69,7 +69,7 @@ render_level(void)
 		if (level.static_map[j][i][k] == TUBE) {
 		    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 		    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-		    warp_surface(canvas, &dst);
+		    warp_surface(media.canvas, &dst);
 		}
 	    }
 	    for (j = 0; j < SIZE; ++j) {
@@ -92,7 +92,7 @@ render_level(void)
 		case SWITCH:
 		    sprintf(lil_buf, "%d%d%d", i, j, k);
 		    if ((surface =
-			 TTF_RenderUTF8_Blended(font_normal, lil_buf,
+			 TTF_RenderUTF8_Blended(media.font_normal, lil_buf,
 						color_white))) {
 			dst.x =
 			    SCREENX(SPS * j, SPS * i,
@@ -100,7 +100,7 @@ render_level(void)
 			dst.y =
 			    SCREENY(SPS * j, SPS * i,
 				    SPS * k) - surface->h / 2 + 10;
-			SDL_BlitSurface(surface, NULL, canvas, &dst);
+			SDL_BlitSurface(surface, NULL, media.canvas, &dst);
 			SDL_FreeSurface(surface);
 		    }
 
@@ -137,11 +137,11 @@ render_circuit(void)
 	    circuit_to_text(buf, C_MAP + level.cursor, 0, 0);
 
 	    if ((surface =
-		 TTF_RenderUTF8_Blended(font_equation, buf,
+		 TTF_RenderUTF8_Blended(media.font_equation, buf,
 					color_white))) {
-		dst.x = (canvas->w - surface->w) / 2;
+		dst.x = (media.canvas->w - surface->w) / 2;
 		dst.y = 0;
-		SDL_BlitSurface(surface, NULL, canvas, &dst);
+		SDL_BlitSurface(surface, NULL, media.canvas, &dst);
 		SDL_FreeSurface(surface);
 	    }
 	}

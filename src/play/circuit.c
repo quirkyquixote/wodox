@@ -16,8 +16,8 @@ release_buttons(struct object *o)
     switch (MAP[idx]) {
     case BUTTON_1:
 	MAP[idx] = BUTTON_0;
-	if (enable_audio) 
-	    Mix_PlayChannel(CHANNEL_RELEASE, chunk_release, 0);
+	if (media.enable_audio) 
+	    Mix_PlayChannel(CHANNEL_RELEASE, media.chunk_release, 0);
 	break;
     }
 }
@@ -33,18 +33,18 @@ press_buttons(struct object *o)
     switch (MAP[idx]) {
     case BUTTON_0:
 	MAP[idx] = BUTTON_1;
-	if (enable_audio) 
-	    Mix_PlayChannel(CHANNEL_PRESS, chunk_press, 0);
+	if (media.enable_audio) 
+	    Mix_PlayChannel(CHANNEL_PRESS, media.chunk_press, 0);
 	break;
     case SWITCH_0:
 	MAP[idx] = SWITCH_1;
-	if (enable_audio) 
-	    Mix_PlayChannel(CHANNEL_PRESS, chunk_press, 0);
+	if (media.enable_audio) 
+	    Mix_PlayChannel(CHANNEL_PRESS, media.chunk_press, 0);
 	break;
     case SWITCH_1:
 	MAP[idx] = SWITCH_0;
-	if (enable_audio) 
-	    Mix_PlayChannel(CHANNEL_PRESS, chunk_press, 0);
+	if (media.enable_audio) 
+	    Mix_PlayChannel(CHANNEL_PRESS, media.chunk_press, 0);
 	break;
     }
 }

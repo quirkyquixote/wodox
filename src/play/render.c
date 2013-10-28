@@ -68,7 +68,7 @@ render_column(size_t i, size_t k)
 	if (game.cs.forces_map[j][i][k] == WARP) {
 	    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 	    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-	    draw_particles(canvas, &dst);
+	    draw_particles(media.canvas, &dst);
 	}
 
 	if (((o = game.cs.object_map[j][i][k]) &&
@@ -142,7 +142,7 @@ render_column(size_t i, size_t k)
 	if (game.cs.forces_map[j][i][k] == DIR_UP) {
 	    dst.x = SCREENX(SPS * i, SPS * j, SPS * k);
 	    dst.y = SCREENY(SPS * i, SPS * j, SPS * k);
-	    warp_surface(canvas, &dst);
+	    warp_surface(media.canvas, &dst);
 	}
     }
 }
@@ -158,15 +158,15 @@ transition0(int32_t x, int32_t y, int k)
     int state;
     int i;
 
-    for (i = 0; i < canvas->w + 32; i += 32) {
-	state = 2 * k + (i - canvas->w) / 32;
+    for (i = 0; i < media.canvas->w + 32; i += 32) {
+	state = 2 * k + (i - media.canvas->w) / 32;
 
 	if (state > 0) {
 	    rect.x = i - state / 2;
 	    rect.y = 0;
 	    rect.w = state;
-	    rect.h = canvas->h;
-	    SDL_FillRect(canvas, &rect, 0);
+	    rect.h = media.canvas->h;
+	    SDL_FillRect(media.canvas, &rect, 0);
 	}
     }
 }
@@ -181,15 +181,15 @@ transition1(int32_t x, int32_t y, int k)
     int state;
     int j;
 
-    for (j = 0; j < canvas->h + 32; j += 32) {
-	state = 2 * k + (j - canvas->h) / 32;
+    for (j = 0; j < media.canvas->h + 32; j += 32) {
+	state = 2 * k + (j - media.canvas->h) / 32;
 
 	if (state > 0) {
 	    rect.x = 0;
 	    rect.y = j - state / 2;
-	    rect.w = canvas->w;
+	    rect.w = media.canvas->w;
 	    rect.h = state;
-	    SDL_FillRect(canvas, &rect, 0);
+	    SDL_FillRect(media.canvas, &rect, 0);
 	}
     }
 }
@@ -205,8 +205,8 @@ transition2(int32_t x, int32_t y, int k)
     int16_t vx[4];
     int16_t vy[4];
 
-    for (i = 0; i < canvas->w + 32; i += 32) {
-	for (j = 0; j < canvas->h + 32; j += 32) {
+    for (i = 0; i < media.canvas->w + 32; i += 32) {
+	for (j = 0; j < media.canvas->h + 32; j += 32) {
 	    state = k - 16 + hypot(i - x, j - y) / 32;
 
 	    if (state > 0) {
@@ -218,7 +218,7 @@ transition2(int32_t x, int32_t y, int k)
 		vy[1] = j;
 		vy[2] = j - 2 * state;
 		vy[3] = j;
-		filledPolygonRGBA(canvas, vx, vy, 4, 0, 0, 0, 255);
+		filledPolygonRGBA(media.canvas, vx, vy, 4, 0, 0, 0, 255);
 	    }
 	}
     }

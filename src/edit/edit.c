@@ -34,7 +34,7 @@ edit(char *path)
     uint16_t offset = 0;
     SDL_Rect dst;
 
-    surface_levelname = NULL;
+    media.surface_levelname = NULL;
 
     level.keep_going = 1;
     level.cursor = OFF(0, 0, 0);
@@ -51,7 +51,7 @@ edit(char *path)
 	render_circuit();
 	handle_player_input();
 	render_foreground();
-	sync();
+	media_sync();
     }
 
     edit_free();
@@ -373,11 +373,11 @@ edit_circuit(uint16_t offset)
     case BELTBK:
     case BELTFT:
     case MOVING:
-	Mix_PlayChannel(-1, chunk_press, 0);
+	Mix_PlayChannel(-1, media.chunk_press, 0);
 	break;
 
     default:
-	Mix_PlayChannel(-1, chunk_release, 0);
+	Mix_PlayChannel(-1, media.chunk_release, 0);
 	return -1;
     }
 
@@ -408,36 +408,36 @@ edit_circuit(uint16_t offset)
 
     draw_background();
     render_level();
-    sepia_surface(canvas);
-    bkgr = SDL_ConvertSurface(canvas, canvas->format, canvas->flags);
+    sepia_surface(media.canvas);
+    bkgr = SDL_ConvertSurface(media.canvas, media.canvas->format, media.canvas->flags);
 
     // Main loop.
 
     while (keep_going) {
-	SDL_BlitSurface(bkgr, NULL, canvas, NULL);
+	SDL_BlitSurface(bkgr, NULL, media.canvas, NULL);
 
 	// Draw the circuit being edited.
 
 	if ((surface =
-	     TTF_RenderUTF8_Blended(font_equation, buf, color_white))) {
-	    dst.x = (canvas->w - surface->w) / 2;
+	     TTF_RenderUTF8_Blended(media.font_equation, buf, color_white))) {
+	    dst.x = (media.canvas->w - surface->w) / 2;
 	    dst.y = 0;
-	    SDL_BlitSurface(surface, NULL, canvas, &dst);
+	    SDL_BlitSurface(surface, NULL, media.canvas, &dst);
 
 	    if ((++blink / 4) % 2) {
 		dst.x += surface->w;
 		dst.w = 20;
 		dst.h = surface->h - 5;
-		SDL_FillRect(canvas, &dst, 0xffffffff);
+		SDL_FillRect(media.canvas, &dst, 0xffffffff);
 	    }
 
 	    SDL_FreeSurface(surface);
 	} else if ((++blink / 4) % 2) {
-	    dst.x = canvas->w / 2;
+	    dst.x = media.canvas->w / 2;
 	    dst.y = 0;
 	    dst.w = 20;
 	    dst.h = 20;
-	    SDL_FillRect(canvas, &dst, 0xffffffff);
+	    SDL_FillRect(media.canvas, &dst, 0xffffffff);
 	}
 	// Handle player input.
 
@@ -462,13 +462,13 @@ edit_circuit(uint16_t offset)
 			keep_going = 0;
 		    }
 
-		    Mix_PlayChannel(2, chunk_keystroke, 0);
+		    Mix_PlayChannel(2, media.chunk_keystroke, 0);
 		    break;
 
 		case SDLK_RETURN:
 		    text_to_circuit(buf, C_MAP + offset, 0);
 		    keep_going = 0;
-		    Mix_PlayChannel(2, chunk_keystroke, 0);
+		    Mix_PlayChannel(2, media.chunk_keystroke, 0);
 		    break;
 
 		case SDLK_F1:
@@ -504,7 +504,7 @@ edit_circuit(uint16_t offset)
 			buf_ptr != buf + sizeof(buf)) {
 			*buf_ptr = event.key.keysym.unicode;
 			++buf_ptr;
-			Mix_PlayChannel(2, chunk_keystroke, 0);
+			Mix_PlayChannel(2, media.chunk_keystroke, 0);
 		    }
 
 		    break;
@@ -521,15 +521,15 @@ edit_circuit(uint16_t offset)
 
 	// Some decorations.
 
-	dst.x = (canvas->w - surface_hforhelp->w) / 2;
-	dst.y = canvas->h - surface_hforhelp->h;
-	SDL_BlitSurface(surface_hforhelp, NULL, canvas, &dst);
+	dst.x = (media.canvas->w - media.surface_hforhelp->w) / 2;
+	dst.y = media.canvas->h - media.surface_hforhelp->h;
+	SDL_BlitSurface(media.surface_hforhelp, NULL, media.canvas, &dst);
 
-	SDL_BlitSurface(surface_frame, NULL, canvas, NULL);
+	SDL_BlitSurface(media.surface_frame, NULL, media.canvas, NULL);
 
 	// Update screen.
 
-	sync();
+	media_sync();
     }
 
     SDL_FreeSurface(bkgr);
