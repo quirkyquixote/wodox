@@ -36,7 +36,7 @@ edit(char *path)
     media.surface_levelname = NULL;
 
     level.keep_going = 1;
-    level.cursor = 0;
+    level.cursor = coord(0, 0, 0);
     level.object = -1;
 
     edit_load(path);
@@ -169,28 +169,28 @@ handle_event(SDL_Event * event)
 	}
 	switch (event->key.keysym.sym) {
 	case SDLK_PAGEDOWN:
-	    if (idx_y(level.cursor) > MIN)
-		level.cursor -= SIZE_2;
+	    if (level.cursor.y > MIN)
+		level.cursor.y--; 
 	    break;
 	case SDLK_PAGEUP:
-	    if (idx_y(level.cursor) < MAX)
-		level.cursor += SIZE_2;
+	    if (level.cursor.y < MAX)
+		level.cursor.y++;
 	    break;
 	case SDLK_UP:
-	    if (idx_x(level.cursor) > MIN)
-		level.cursor -= SIZE;
+	    if (level.cursor.x > MIN)
+		level.cursor.x--;
 	    break;
 	case SDLK_DOWN:
-	    if (idx_x(level.cursor) < MAX)
-		level.cursor += SIZE;
+	    if (level.cursor.x < MAX)
+		level.cursor.x++;
 	    break;
 	case SDLK_RIGHT:
-	    if (idx_z(level.cursor) > MIN)
-		level.cursor -= 1;
+	    if (level.cursor.z > MIN)
+		level.cursor.z--;
 	    break;
 	case SDLK_LEFT:
-	    if (idx_z(level.cursor) < MAX)
-		level.cursor += 1;
+	    if (level.cursor.z < MAX)
+		level.cursor.z++;
 	    break;
 	case SDLK_g:
 	    level.object = GROUND;
@@ -268,7 +268,7 @@ handle_event(SDL_Event * event)
 	    }
 	    break;
 	case SDLK_RETURN:
-	    edit_circuit(level.cursor);
+	    edit_circuit(coord_to_idx(level.cursor));
 	default:
 	    break;
 	}
@@ -304,7 +304,7 @@ check_singletons(void)
 	    }
 	}
 
-	S_MAP[level.cursor] = level.object;
+	S_MAP[coord_to_idx(level.cursor)] = level.object;
     }
 }
 

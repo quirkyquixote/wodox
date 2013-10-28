@@ -13,13 +13,10 @@
 void
 render_level(void)
 {
-    struct coord cursor;
     struct coord c;
     SDL_Rect dst;
     SDL_Surface *surface;
     char lil_buf[4];
-
-    cursor = idx_to_coord(level.cursor);
 
     // Draw all objects. Most objects have only a simple sprite with no 
     // alpha channel, but levitators have alpha transparency and a "warp"
@@ -49,19 +46,19 @@ render_level(void)
 		    break;
 
 		case WARP:
-		    dst = world_to_screen(SPS * c.x, SPS * c.y, SPS * c.z);
+		    dst = world_to_screen(SPS * c.x, SPS * (c.y - 2), SPS * c.z);
 		    render_particles(media.canvas, &dst);
 		    break;
 
 		default:
-		    if (c.y == cursor.y) {
+		    if (c.y == level.cursor.y) {
 			dst = world_to_screen(SPS * c.x, SPS * c.y,
 					    SPS * c.z);
 			render_effect(3, 1, &dst);
 		    }
 		}
 
-		if (coordcmp(cursor, c) == 0) {
+		if (coordcmp(level.cursor, c) == 0) {
 		    dst = world_to_screen(SPS * c.x, SPS * c.y, SPS * c.z);
 		    render_effect(0, 1, &dst);
 		}
@@ -125,7 +122,7 @@ render_circuit(void)
     SDL_Surface *surface;
     SDL_Rect dst;
 
-    switch (S_MAP[level.cursor]) {
+    switch (S_MAP[coord_to_idx(level.cursor)]) {
     case TUBE:
     case BELTLF:
     case BELTRT:
@@ -133,7 +130,7 @@ render_circuit(void)
     case BELTFT:
     case MOVING:
 	memset(buf, 0, sizeof(buf));
-	circuit_to_text(buf, C_MAP + level.cursor, 0, 0);
+	circuit_to_text(buf, &C_MAP[coord_to_idx(level.cursor)], 0, 0);
 
 	if ((surface =
 	     TTF_RenderUTF8_Blended(media.font_equation, buf,

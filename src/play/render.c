@@ -65,7 +65,7 @@ render_column(size_t i, size_t k)
 	}
 
 	if (game.cs.forces_map[j][i][k] == WARP) {
-	    dst = world_to_screen (SPS * i, SPS * j, SPS * k);
+	    dst = world_to_screen (SPS * i, SPS * (j - 2), SPS * k);
 	    render_particles(media.canvas, &dst);
 	}
 
