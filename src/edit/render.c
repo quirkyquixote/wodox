@@ -3,14 +3,15 @@
  * This code copyright (c) Luis Javier Sanz 2009-2013
  */
 
-#include "types.h"
 #include "../media/draw.h"
+#include "types.h"
+#include "circuit.h"
 
 /*
  * Draw objects.
  */
 void
-render(void)
+render_level(void)
 {
     size_t i, j, k;
     SDL_Rect dst;
@@ -21,7 +22,7 @@ render(void)
     // alpha channel, but levitators have alpha transparency and a "warp"
     // effect, and the exit is a particle system.
 
-    for (i = 0; i < SIZE; ++i)
+    for (i = 0; i < SIZE; ++i) {
 	for (k = 0; k < SIZE; ++k) {
 	    for (j = 0; j < SIZE; ++j) {
 		if (level.circuit_map[j][i][k].tree) {
@@ -79,12 +80,13 @@ render(void)
 		}
 	    }
 	}
+    }
 
     // Label all buttons and switches.
 
-    for (i = 0; i < SIZE; ++i)
-	for (j = 0; j < SIZE; ++j)
-	    for (k = 0; k < SIZE; ++k)
+    for (i = 0; i < SIZE; ++i) {
+	for (j = 0; j < SIZE; ++j) {
+	    for (k = 0; k < SIZE; ++k) {
 		switch (level.static_map[i][j][k]) {
 		case BUTTON:
 		case SWITCH:
@@ -105,6 +107,9 @@ render(void)
 		default:
 		    break;
 		}
+	    }
+	}
+    }
 
     // Draw the cursor
     /*
@@ -114,3 +119,30 @@ render(void)
      */
 }
 
+void
+render_circuit(void)
+{
+    char buf[256];
+    SDL_Surface *surface;
+    SDL_Rect dst;
+
+	switch (S_MAP[level.cursor]) {
+	case TUBE:
+	case BELTLF:
+	case BELTRT:
+	case BELTBK:
+	case BELTFT:
+	case MOVING:
+	    memset(buf, 0, sizeof(buf));
+	    circuit_to_text(buf, C_MAP + level.cursor, 0, 0);
+
+	    if ((surface =
+		 TTF_RenderUTF8_Blended(font_equation, buf,
+					color_white))) {
+		dst.x = (canvas->w - surface->w) / 2;
+		dst.y = 0;
+		SDL_BlitSurface(surface, NULL, canvas, &dst);
+		SDL_FreeSurface(surface);
+	    }
+	}
+}

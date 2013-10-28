@@ -5,5 +5,6 @@
 
 #pragma once
 
-void render(void);
+void render_level(void);
+void render_circuit(void);
 

@@ -41,9 +41,6 @@ edit(char *path)
 
     // Circuits.
 
-    char buf[256];
-    SDL_Surface *surface;
-
     // Loop control
 
     int keep_going = 1;
@@ -80,35 +77,11 @@ edit(char *path)
 
 	    S_MAP[level.cursor] = object;
 	}
-	// Start drawing.
 
 	draw_background();
+	render_level();
+	render_circuit();
 
-	// Draw level.
-
-	render();
-
-	// Draw circuit under cursor.
-
-	switch (S_MAP[level.cursor]) {
-	case TUBE:
-	case BELTLF:
-	case BELTRT:
-	case BELTBK:
-	case BELTFT:
-	case MOVING:
-	    memset(buf, 0, sizeof(buf));
-	    circuit_to_text(buf, C_MAP + level.cursor, 0, 0);
-
-	    if ((surface =
-		 TTF_RenderUTF8_Blended(font_equation, buf,
-					color_white))) {
-		dst.x = (canvas->w - surface->w) / 2;
-		dst.y = 0;
-		SDL_BlitSurface(surface, NULL, canvas, &dst);
-		SDL_FreeSurface(surface);
-	    }
-	}
 
 	// Handle player input.
 
@@ -455,7 +428,7 @@ edit_circuit(uint16_t offset)
     // Freeze the background.
 
     draw_background();
-    render();
+    render_level();
     sepia_surface(canvas);
     bkgr = SDL_ConvertSurface(canvas, canvas->format, canvas->flags);
 
