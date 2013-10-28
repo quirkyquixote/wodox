@@ -9,7 +9,7 @@
 #include "../play/play.h"
 
 #include "types.h"
-#include "circuit.h"
+#include "parse.h"
 #include "shift.h"
 #include "rotate.h"
 #include "render.h"
@@ -18,7 +18,8 @@
 struct level level;
 
 
-static void handle_player_input(void);
+static void check_singletons(void);
+static void handle_event(SDL_Event * event);
 /*
  * Edit links.
  */
@@ -33,6 +34,7 @@ edit(char *path)
     uint16_t i;
     uint16_t offset = 0;
     SDL_Rect dst;
+    SDL_Event event;
 
     media.surface_levelname = NULL;
 
@@ -42,14 +44,18 @@ edit(char *path)
 
     edit_load(path);
 
-    if (path == NULL) 
+    if (path == NULL)
 	path = strjoin(PATH_SEPARATOR, USER_DIR, "sandbox", NULL);
 
     while (level.keep_going) {
+	check_singletons();
 	render_background();
 	render_level();
 	render_circuit();
-	handle_player_input();
+
+	while (SDL_PollEvent(&event) != 0)
+	    handle_event(&event);
+
 	render_foreground();
 	media_sync();
     }
@@ -59,283 +65,284 @@ edit(char *path)
 }
 
 void
-handle_player_input(void)
+handle_event(SDL_Event * event)
 {
-    SDL_Event event;
-    int i;
+    switch (event->type) {
+    case SDL_MOUSEMOTION:
+	do {
+	    int y = Y(level.cursor);
+	    int x =
+		(WORLDX(event->motion.x, event->motion.y, SPS * y) -
+		 SPS / 2) / SPS;
+	    int z =
+		(WORLDZ(event->motion.x, event->motion.y, SPS * y) +
+		 SPS / 2) / SPS;
 
-    while (SDL_PollEvent(&event) != 0) {
-	switch (event.type) {
-	case SDL_MOUSEMOTION:
-	    do {
-		int y = Y(level.cursor);
-		int x =
-		    (WORLDX(event.motion.x, event.motion.y, SPS * y) -
-		     SPS / 2) / SPS;
-		int z =
-		    (WORLDZ(event.motion.x, event.motion.y, SPS * y) +
-		     SPS / 2) / SPS;
-
-		if (x < 0) {
-		    x = 0;
-		} else if (x >= SIZE) {
-		    x = SIZE - 1;
-		}
-		if (z < 0) {
-		    z = 0;
-		} else if (z >= SIZE) {
-		    z = SIZE - 1;
-		}
-
-		level.cursor = OFF(x, y, z);
+	    if (x < 0) {
+		x = 0;
+	    } else if (x >= SIZE) {
+		x = SIZE - 1;
 	    }
-	    while (0);
-	    break;
-
-	case SDL_MOUSEBUTTONDOWN:
-	    switch (event.button.button) {
-	    case SDL_BUTTON_LEFT:
-		level.object = GROUND;
-		break;
-	    case SDL_BUTTON_WHEELDOWN:
-		if (Y(level.cursor) > MIN)
-		    level.cursor -= SIZE_2;
-		break;
-	    case SDL_BUTTON_WHEELUP:
-		if (Y(level.cursor) < MAX)
-		    level.cursor += SIZE_2;
-		break;
-	    default:
-		break;
+	    if (z < 0) {
+		z = 0;
+	    } else if (z >= SIZE) {
+		z = SIZE - 1;
 	    }
-	    break;
 
-	case SDL_MOUSEBUTTONUP:
-	    switch (event.button.button) {
-	    case SDL_BUTTON_LEFT:
+	    level.cursor = OFF(x, y, z);
+	}
+	while (0);
+	break;
+
+    case SDL_MOUSEBUTTONDOWN:
+	switch (event->button.button) {
+	case SDL_BUTTON_LEFT:
+	    level.object = GROUND;
+	    break;
+	case SDL_BUTTON_WHEELDOWN:
+	    if (Y(level.cursor) > MIN)
+		level.cursor -= SIZE_2;
+	    break;
+	case SDL_BUTTON_WHEELUP:
+	    if (Y(level.cursor) < MAX)
+		level.cursor += SIZE_2;
+	    break;
+	default:
+	    break;
+	}
+	break;
+
+    case SDL_MOUSEBUTTONUP:
+	switch (event->button.button) {
+	case SDL_BUTTON_LEFT:
+	    level.object = -1;
+	    break;
+	default:
+	    break;
+	}
+	break;
+
+    case SDL_KEYUP:
+	switch (event->key.keysym.sym) {
+	case SDLK_g:
+	    if (level.object == GROUND)
 		level.object = -1;
-		break;
-	    default:
-		break;
-	    }
 	    break;
-
-	case SDL_KEYUP:
-	    switch (event.key.keysym.sym) {
-	    case SDLK_g:
-		if (level.object == GROUND)
-		    level.object = -1;
-		break;
-	    case SDLK_c:
-		if (level.object == CRATE)
-		    level.object = -1;
-		break;
-	    case SDLK_p:
-		if (level.object == WODOX)
-		    level.object = -1;
-		break;
-	    case SDLK_j:
-		if (level.object == SMALL)
-		    level.object = -1;
-		break;
-	    case SDLK_l:
-		if (level.object == TUBE)
-		    level.object = -1;
-		break;
-	    case SDLK_u:
-		if (level.object == BELTLF)
-		    level.object = -1;
-		break;
-	    case SDLK_o:
-		if (level.object == BELTBK)
-		    level.object = -1;
-		break;
-	    case SDLK_i:
-		if (level.object == BELTRT)
-		    level.object = -1;
-		break;
-	    case SDLK_y:
-		if (level.object == BELTFT)
-		    level.object = -1;
-		break;
-	    case SDLK_m:
-		if (level.object == MOVING)
-		    level.object = -1;
-		break;
-	    case SDLK_b:
-		if (level.object == BUTTON)
-		    level.object = -1;
-		break;
-	    case SDLK_s:
-		if (level.object == SWITCH)
-		    level.object = -1;
-		break;
-	    case SDLK_e:
-		if (level.object == WARP)
-		    level.object = -1;
-		break;
-	    case SDLK_x:
-		if (level.object == EMPTY)
-		    level.object = -1;
-		break;
-	    default:
-		break;
-	    }
+	case SDLK_c:
+	    if (level.object == CRATE)
+		level.object = -1;
 	    break;
+	case SDLK_p:
+	    if (level.object == WODOX)
+		level.object = -1;
+	    break;
+	case SDLK_j:
+	    if (level.object == SMALL)
+		level.object = -1;
+	    break;
+	case SDLK_l:
+	    if (level.object == TUBE)
+		level.object = -1;
+	    break;
+	case SDLK_u:
+	    if (level.object == BELTLF)
+		level.object = -1;
+	    break;
+	case SDLK_o:
+	    if (level.object == BELTBK)
+		level.object = -1;
+	    break;
+	case SDLK_i:
+	    if (level.object == BELTRT)
+		level.object = -1;
+	    break;
+	case SDLK_y:
+	    if (level.object == BELTFT)
+		level.object = -1;
+	    break;
+	case SDLK_m:
+	    if (level.object == MOVING)
+		level.object = -1;
+	    break;
+	case SDLK_b:
+	    if (level.object == BUTTON)
+		level.object = -1;
+	    break;
+	case SDLK_s:
+	    if (level.object == SWITCH)
+		level.object = -1;
+	    break;
+	case SDLK_e:
+	    if (level.object == WARP)
+		level.object = -1;
+	    break;
+	case SDLK_x:
+	    if (level.object == EMPTY)
+		level.object = -1;
+	    break;
+	default:
+	    break;
+	}
+	break;
 
-	case SDL_KEYDOWN:
-	    if (event.key.keysym.mod & KMOD_SHIFT) {
-		switch (event.key.keysym.sym) {
-		case SDLK_UP:
-		    shift_lf();
-		    break;
-		case SDLK_DOWN:
-		    shift_rt();
-		    break;
-		case SDLK_RIGHT:
-		    shift_bk();
-		    break;
-		case SDLK_LEFT:
-		    shift_ft();
-		    break;
-		case SDLK_PAGEDOWN:
-		    shift_dn();
-		    break;
-		case SDLK_PAGEUP:
-		    shift_up();
-		    break;
-		default:
-		    break;
-		}
-		break;
-	    }
-	    if (event.key.keysym.mod & KMOD_CTRL) {
-		switch (event.key.keysym.sym) {
-		case SDLK_RIGHT:
-		    rotate_rt();
-		    break;
-		case SDLK_LEFT:
-		    rotate_lf();
-		    break;
-		default:
-		    break;
-		}
-		break;
-	    }
-	    switch (event.key.keysym.sym) {
-	    case SDLK_PAGEDOWN:
-		if (Y(level.cursor) > MIN)
-		    level.cursor -= SIZE_2;
-		break;
-	    case SDLK_PAGEUP:
-		if (Y(level.cursor) < MAX)
-		    level.cursor += SIZE_2;
-		break;
+    case SDL_KEYDOWN:
+	if (event->key.keysym.mod & KMOD_SHIFT) {
+	    switch (event->key.keysym.sym) {
 	    case SDLK_UP:
-		if (X(level.cursor) > MIN)
-		    level.cursor -= SIZE;
+		shift_lf();
 		break;
 	    case SDLK_DOWN:
-		if (X(level.cursor) < MAX)
-		    level.cursor += SIZE;
+		shift_rt();
 		break;
 	    case SDLK_RIGHT:
-		if (Z(level.cursor) > MIN)
-		    level.cursor -= 1;
+		shift_bk();
 		break;
 	    case SDLK_LEFT:
-		if (Z(level.cursor) < MAX)
-		    level.cursor += 1;
+		shift_ft();
 		break;
-	    case SDLK_g:
-		level.object = GROUND;
+	    case SDLK_PAGEDOWN:
+		shift_dn();
 		break;
-	    case SDLK_c:
-		level.object = CRATE;
+	    case SDLK_PAGEUP:
+		shift_up();
 		break;
-	    case SDLK_p:
-		level.object = WODOX;
+	    default:
 		break;
-	    case SDLK_j:
-		level.object = SMALL;
+	    }
+	    break;
+	}
+	if (event->key.keysym.mod & KMOD_CTRL) {
+	    switch (event->key.keysym.sym) {
+	    case SDLK_RIGHT:
+		rotate_rt();
 		break;
-	    case SDLK_l:
-		level.object = TUBE;
+	    case SDLK_LEFT:
+		rotate_lf();
 		break;
-	    case SDLK_u:
-		level.object = BELTLF;
+	    default:
 		break;
-	    case SDLK_o:
-		level.object = BELTBK;
+	    }
+	    break;
+	}
+	switch (event->key.keysym.sym) {
+	case SDLK_PAGEDOWN:
+	    if (Y(level.cursor) > MIN)
+		level.cursor -= SIZE_2;
+	    break;
+	case SDLK_PAGEUP:
+	    if (Y(level.cursor) < MAX)
+		level.cursor += SIZE_2;
+	    break;
+	case SDLK_UP:
+	    if (X(level.cursor) > MIN)
+		level.cursor -= SIZE;
+	    break;
+	case SDLK_DOWN:
+	    if (X(level.cursor) < MAX)
+		level.cursor += SIZE;
+	    break;
+	case SDLK_RIGHT:
+	    if (Z(level.cursor) > MIN)
+		level.cursor -= 1;
+	    break;
+	case SDLK_LEFT:
+	    if (Z(level.cursor) < MAX)
+		level.cursor += 1;
+	    break;
+	case SDLK_g:
+	    level.object = GROUND;
+	    break;
+	case SDLK_c:
+	    level.object = CRATE;
+	    break;
+	case SDLK_p:
+	    level.object = WODOX;
+	    break;
+	case SDLK_j:
+	    level.object = SMALL;
+	    break;
+	case SDLK_l:
+	    level.object = TUBE;
+	    break;
+	case SDLK_u:
+	    level.object = BELTLF;
+	    break;
+	case SDLK_o:
+	    level.object = BELTBK;
+	    break;
+	case SDLK_i:
+	    level.object = BELTRT;
+	    break;
+	case SDLK_y:
+	    level.object = BELTFT;
+	    break;
+	case SDLK_m:
+	    level.object = MOVING;
+	    break;
+	case SDLK_b:
+	    level.object = BUTTON;
+	    break;
+	case SDLK_s:
+	    level.object = SWITCH;
+	    break;
+	case SDLK_e:
+	    level.object = WARP;
+	    break;
+	case SDLK_x:
+	    level.object = EMPTY;
+	    break;
+	case SDLK_w:
+	    if (properties(1 + strrchr(level.path, '/'))) {
+		edit_save(level.path);
+	    }
+	    break;
+	case SDLK_r:
+	    edit_load(level.path);
+	    break;
+	case SDLK_t:
+	    edit_save("level.tmp");
+	    play("level.tmp", "Unnamed level");
+	    break;
+	case SDLK_ESCAPE:
+	    level.keep_going = 0;
+	    break;
+	case SDLK_F1:
+	    switch (help(str_howtoedit, str_menuedit, "\0twrq")) {
+	    case 1:
+		edit_save("level.tmp");
+		play("level.tmp", "Unnamed level");
 		break;
-	    case SDLK_i:
-		level.object = BELTRT;
-		break;
-	    case SDLK_y:
-		level.object = BELTFT;
-		break;
-	    case SDLK_m:
-		level.object = MOVING;
-		break;
-	    case SDLK_b:
-		level.object = BUTTON;
-		break;
-	    case SDLK_s:
-		level.object = SWITCH;
-		break;
-	    case SDLK_e:
-		level.object = WARP;
-		break;
-	    case SDLK_x:
-		level.object = EMPTY;
-		break;
-	    case SDLK_w:
+	    case 2:
 		if (properties(1 + strrchr(level.path, '/'))) {
 		    edit_save(level.path);
 		}
 		break;
-	    case SDLK_r:
+	    case 3:
 		edit_load(level.path);
 		break;
-	    case SDLK_t:
-		edit_save("level.tmp");
-		play("level.tmp", "Unnamed level");
-		break;
-	    case SDLK_ESCAPE:
+	    case 4:
 		level.keep_going = 0;
-		break;
-	    case SDLK_F1:
-		switch (help(str_howtoedit, str_menuedit, "\0twrq")) {
-		case 1:
-		    edit_save("level.tmp");
-		    play("level.tmp", "Unnamed level");
-		    break;
-		case 2:
-		    if (properties(1 + strrchr(level.path, '/'))) {
-			edit_save(level.path);
-		    }
-		    break;
-		case 3:
-		    edit_load(level.path);
-		    break;
-		case 4:
-		    level.keep_going = 0;
-		}
-		break;
-	    case SDLK_RETURN:
-		edit_circuit(level.cursor);
-	    default:
-		break;
 	    }
 	    break;
-
-	case SDL_QUIT:
-	    exit(0);
-
+	case SDLK_RETURN:
+	    edit_circuit(level.cursor);
 	default:
 	    break;
 	}
+	break;
+
+    case SDL_QUIT:
+	exit(0);
+
+    default:
+	break;
     }
+}
+
+void
+check_singletons(void)
+{
+    int i;
 
     if (level.object >= 0) {
 	if (level.object == WODOX) {
@@ -409,7 +416,9 @@ edit_circuit(uint16_t offset)
     render_background();
     render_level();
     sepia_surface(media.canvas);
-    bkgr = SDL_ConvertSurface(media.canvas, media.canvas->format, media.canvas->flags);
+    bkgr =
+	SDL_ConvertSurface(media.canvas, media.canvas->format,
+			   media.canvas->flags);
 
     // Main loop.
 
@@ -419,7 +428,8 @@ edit_circuit(uint16_t offset)
 	// Draw the circuit being edited.
 
 	if ((surface =
-	     TTF_RenderUTF8_Blended(media.font_equation, buf, color_white))) {
+	     TTF_RenderUTF8_Blended(media.font_equation, buf,
+				    color_white))) {
 	    dst.x = (media.canvas->w - surface->w) / 2;
 	    dst.y = 0;
 	    SDL_BlitSurface(surface, NULL, media.canvas, &dst);

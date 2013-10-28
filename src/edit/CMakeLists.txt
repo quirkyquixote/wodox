@@ -1,1 +1,1 @@
-add_library(edit edit.c shift.c rotate.c circuit.c render.c file.c)
+add_library(edit edit.c shift.c rotate.c parse.c render.c file.c)

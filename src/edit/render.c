@@ -5,7 +5,7 @@
 
 #include "../media/media.h"
 #include "types.h"
-#include "circuit.h"
+#include "parse.h"
 
 /*
  * Draw objects.

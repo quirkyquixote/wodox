@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "circuit.h"
+#include "parse.h"
 
 static int token;
 
