@@ -7,21 +7,6 @@
 
 #include "types.h"
 
-/*
- * Shift a circuit in some direction.
- */
-struct circuit shift_circuit_bk(struct circuit c);
-struct circuit shift_circuit_ft(struct circuit c);
-struct circuit shift_circuit_lf(struct circuit c);
-struct circuit shift_circuit_rt(struct circuit c);
-struct circuit shift_circuit_up(struct circuit c);
-struct circuit shift_circuit_dn(struct circuit c);
-
-/*
- * Rotate a circuit in some direction.
- */
-struct circuit rotate_circuit_lf(struct circuit c);
-struct circuit rotate_circuit_rt(struct circuit c);
 
 /*
  * To parse a circuit from text and format text from a circuit.
