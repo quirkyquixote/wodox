@@ -6,9 +6,9 @@
 #include "types.h"
 
 
-/*
+/*----------------------------------------------------------------------------
  * Grab an object from the unused list and initialize it.
- */
+ *----------------------------------------------------------------------------*/
 struct object *
 object_new(uint8_t type, uint16_t off)
 {
@@ -28,9 +28,9 @@ object_new(uint8_t type, uint16_t off)
     return o;
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Drop an object in the unused list.
- */
+ *----------------------------------------------------------------------------*/
 void
 object_free (struct object * o)
 {
@@ -38,9 +38,9 @@ object_free (struct object * o)
     MAP[o->idx] = EMPTY;
 } 
 
-/*
- * Macros to move objects.
- */
+/*----------------------------------------------------------------------------
+ * Move object
+ *----------------------------------------------------------------------------*/
 void
 object_move(struct object *o, int dir)
 {
@@ -51,6 +51,9 @@ object_move(struct object *o, int dir)
   OBJ[o->idx] = NULL;
 }
 
+/*----------------------------------------------------------------------------
+ * Move object, if possible
+ *----------------------------------------------------------------------------*/
 int
 object_try_move(struct object *o, int dir)
 {

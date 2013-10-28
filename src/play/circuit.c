@@ -5,9 +5,9 @@
 
 #include "types.h"
 
-/*
+/*----------------------------------------------------------------------------
  * Release buttons under the chosen object.
- */
+ *----------------------------------------------------------------------------*/
 void
 release_buttons(struct object *o)
 {
@@ -22,9 +22,9 @@ release_buttons(struct object *o)
     }
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Press buttons under the chosen object.
- */
+ *----------------------------------------------------------------------------*/
 void
 press_buttons(struct object *o)
 {
@@ -49,9 +49,9 @@ press_buttons(struct object *o)
     }
 }
 
-/*
+/*----------------------------------------------------------------------------
  * Calculate the output of a circuit.
- */
+ *----------------------------------------------------------------------------*/
 int
 calculate(uint16_t * tree, size_t off)
 {
