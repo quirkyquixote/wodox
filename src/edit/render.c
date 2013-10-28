@@ -3,7 +3,7 @@
  * This code copyright (c) Luis Javier Sanz 2009-2013
  */
 
-#include "../media/draw.h"
+#include "../media/media.h"
 #include "types.h"
 #include "circuit.h"
 

@@ -1,1 +1,1 @@
-add_library(media draw.c)
+add_library(media media.c)

@@ -9,6 +9,7 @@
 #include "../play/play.h"	// Game engine.
 #include "../edit/edit.h"	// Level editor.
 #include "../menu/menu.h"
+#include "../media/media.h"
 
 #include "types.h"
 
@@ -37,7 +38,7 @@ static void run_transition(int i);
  * Menus.
  */
 int
-menu()
+menu(void)
 {
     FILE *f;
     char *path;

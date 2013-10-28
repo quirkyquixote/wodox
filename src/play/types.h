@@ -6,7 +6,7 @@
 #pragma once
 
 #include "../core/list.h"
-#include "../media/draw.h"
+#include "../media/media.h"
 
 
 #include <unistd.h>		// For rand

@@ -6,6 +6,7 @@
 #include "../menu/menu.h"		// Menus.
 #include "../play/play.h"		// Game engine.
 #include "../edit/edit.h"		// Level editor.
+#include "../media/media.h"		// Graphics and audio
 
 #include <getopt.h>		// For getopt
 

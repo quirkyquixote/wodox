@@ -72,7 +72,7 @@ void media_sync(void);
 /*
  * Pause the application
  */
-void freeze();
+void media_freeze(void);
 
 /*
  * Pause while showing a help text.

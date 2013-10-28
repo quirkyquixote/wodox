@@ -3,7 +3,7 @@
  * This code copyright (c) Luis Javier Sanz 2009 
  */
 
-#include "draw.h"
+#include "media.h"
 
 
 struct media media = { 

@@ -5,6 +5,4 @@
 
 #pragma once
 
-#include "../media/draw.h"	// Basic stuff.
-
 int edit(char *path);

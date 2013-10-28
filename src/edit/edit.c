@@ -5,7 +5,7 @@
 
 #include <errno.h>
 
-#include "../media/draw.h"
+#include "../media/media.h"
 #include "../play/play.h"
 
 #include "types.h"
