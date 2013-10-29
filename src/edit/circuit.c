@@ -124,16 +124,16 @@ handle_event(SDL_Event * event)
 	    while (page)
 		switch (page) {
 		case 1:
-		    page = help(str_howtolink, str_menulink, "\01234");
+		    page = help(lang.howtolink, lang.menulink, "\01234");
 		    break;
 		case 2:
-		    page = help(str_howtolink2, str_menulink, "\01234");
+		    page = help(lang.howtolink2, lang.menulink, "\01234");
 		    break;
 		case 3:
-		    page = help(str_howtolink3, str_menulink, "\01234");
+		    page = help(lang.howtolink3, lang.menulink, "\01234");
 		    break;
 		case 4:
-		    page = help(str_howtolink4, str_menulink, "\01234");
+		    page = help(lang.howtolink4, lang.menulink, "\01234");
 		    break;
 		}
 	    break;

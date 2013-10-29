@@ -103,7 +103,7 @@ select_user()
 	blit_menu();
 
 	if ((tmp =
-	     TTF_RenderUTF8_Blended(media.font_large, str_entername, white))) {
+	     TTF_RenderUTF8_Blended(media.font_large, lang.entername, white))) {
 	    rect.x = 300 - tmp->w / 2;
 	    rect.y = 200 - tmp->h / 2;
 	    SDL_BlitSurface(tmp, NULL, media.canvas, &rect);
@@ -178,7 +178,7 @@ render_main_menu()
 
     for (i = 0; i < 3; ++i)
 	if ((tmp =
-	     TTF_RenderUTF8_Blended(media.font_large, str_menumain[i], white))) {
+	     TTF_RenderUTF8_Blended(media.font_large, lang.menumain[i], white))) {
 	    rect.x = left_relative;
 	    rect.y = top_main + 200 + 80 * i;
 	    SDL_BlitSurface(tmp, NULL, ctx.surface_menu, &rect);
@@ -188,7 +188,7 @@ render_main_menu()
     if (user.max_level > 0) {
 	for (i = 0; i <= user.max_level; ++i)
 	    if ((tmp =
-		 TTF_RenderUTF8_Blended(media.font_normal, str_levelnames[i],
+		 TTF_RenderUTF8_Blended(media.font_normal, lang.levelnames[i],
 					white))) {
 		rect.x = left_relative;
 		rect.y = top_main + 450 + 24 * i;
@@ -244,7 +244,7 @@ run_main_menu()
 		break;
 
 	    case 1 ... 3:
-		TTF_SizeText(media.font_large, str_menumain[option - 1], &w, &h);
+		TTF_SizeText(media.font_large, lang.menumain[option - 1], &w, &h);
 		rect.x = left_absolute - 20;
 		rect.y = top_main + 130 + 80 * option - ctx.offset;
 		rect.w = 200;
@@ -359,7 +359,7 @@ render_sandbox_menu()
 
     for (i = 0; i < 1; ++i)
 	if ((tmp =
-	     TTF_RenderUTF8_Blended(media.font_large, str_menusandbox[i],
+	     TTF_RenderUTF8_Blended(media.font_large, lang.menusandbox[i],
 				    white))) {
 	    rect.x = left_relative;
 	    rect.y = top_sandbox + 50 + 80 * i;
@@ -404,7 +404,7 @@ run_sandbox_menu()
 	for (;;) {
 	    switch (option) {
 	    case 0:
-		TTF_SizeText(media.font_large, str_menusandbox[option], &w, &h);
+		TTF_SizeText(media.font_large, lang.menusandbox[option], &w, &h);
 		rect.x = left_absolute - 20;
 		rect.y = top_sandbox + 60 + 80 * option - ctx.offset;
 		rect.w = 200;
@@ -560,7 +560,7 @@ play_from(int i)
 	    strjoin(PATH_SEPARATOR, DATA_DIR, "levels", ctx.level_list[i].file,
 		    NULL);
 	play_music(ctx.level_list[i].track);
-	ret = play(path, str_levelnames[i]);
+	ret = play(path, lang.levelnames[i]);
 	free(path);
 
 	if (ret == 0) {
@@ -591,7 +591,7 @@ run_transition(int i)
 
     SDL_FillRect(media.canvas, NULL, 0);
 
-    if ((tmp = TTF_RenderUTF8_Blended(media.font_large, str_actnames[i], white))) {
+    if ((tmp = TTF_RenderUTF8_Blended(media.font_large, lang.actnames[i], white))) {
 	rect.x = (media.canvas->w - tmp->w) / 2;
 	rect.y = (media.canvas->h - tmp->h) / 2;
 	SDL_BlitSurface(tmp, NULL, media.canvas, &rect);

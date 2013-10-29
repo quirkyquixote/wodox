@@ -51,10 +51,8 @@ main (int argc, char * argv[])
 {
     int c;
     int mode = 0;
-    char * lang = "en";
+    char * language = "en";
     int i;
-
-    init_lang (lang);
 
     while ((c = getopt_long (argc, argv, "hvepl:", long_options, NULL)) != -1) {
 	switch (c) {
@@ -67,21 +65,25 @@ main (int argc, char * argv[])
 	    exit(EXIT_SUCCESS);
     
         case 'e':
+	    lang_init (language);
 	    media_init();
 	    for (i = optind; i < argc; i++)
 		edit(argv[i]);
 	    media_end();
+	    lang_end();
 	    exit(EXIT_SUCCESS);
     
         case 'p':
+	    lang_init (language);
 	    media_init();
 	    for (i = optind; i < argc; i++)
 		play(argv[i], argv[i]);
 	    media_end();
+	    lang_end();
 	    exit(EXIT_SUCCESS);
     
         case 'l':
-            lang = optarg;
+            language = optarg;
 	    break;
     
         case 'v':
@@ -99,11 +101,11 @@ main (int argc, char * argv[])
 	exit(EXIT_FAILURE);
     }
 
+    lang_init (language);
     media_init();
     menu();
     media_end();
-
-    end_lang ();
+    lang_end();
     exit(EXIT_SUCCESS);
 }
 

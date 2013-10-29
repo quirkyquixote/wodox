@@ -250,7 +250,7 @@ handle_event(SDL_Event * event)
 	    level.keep_going = 0;
 	    break;
 	case SDLK_F1:
-	    switch (help(str_howtoedit, str_menuedit, "\0twrq")) {
+	    switch (help(lang.howtoedit, lang.menuedit, "\0twrq")) {
 	    case 1:
 		edit_save("level.tmp");
 		play("level.tmp", "Unnamed level");

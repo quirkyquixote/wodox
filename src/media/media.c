@@ -130,7 +130,7 @@ media_init(void)
     media.font_button = load_font("j_d_handcrafted.ttf", 22);
 
     media.surface_hforhelp =
-	TTF_RenderUTF8_Blended(media.font_normal, str_hforhelp, color_white);
+	TTF_RenderUTF8_Blended(media.font_normal, lang.hforhelp, color_white);
 
     // Initialize audio if wanted and load all samples. Disable audio on failure
     // (audio is not indispensable)
@@ -244,7 +244,7 @@ help(char **text, char **opts, char *shortcuts)
     SDL_BlitSurface(media.surface_manual, NULL, media.canvas, NULL);
 
     if ((tmp =
-	 TTF_RenderUTF8_Blended(media.font_small, str_usermanual, color_red))) {
+	 TTF_RenderUTF8_Blended(media.font_small, lang.usermanual, color_red))) {
 	dst.x = 740 - tmp->w;
 	dst.y = 60;
 	SDL_BlitSurface(tmp, NULL, media.canvas, &dst);
@@ -411,7 +411,7 @@ properties(char *path)
 	}
 
 	if ((tmp =
-	     TTF_RenderUTF8_Blended(media.font_button, str_menusave[0],
+	     TTF_RenderUTF8_Blended(media.font_button, lang.menusave[0],
 				    color_marker))) {
 	    rect.x = 220 - tmp->w / 2;
 	    rect.y = 540 - tmp->h / 2;
@@ -420,7 +420,7 @@ properties(char *path)
 	}
 
 	if ((tmp =
-	     TTF_RenderUTF8_Blended(media.font_button, str_menusave[1],
+	     TTF_RenderUTF8_Blended(media.font_button, lang.menusave[1],
 				    color_marker))) {
 	    rect.x = 580 - tmp->w / 2;
 	    rect.y = 540 - tmp->h / 2;

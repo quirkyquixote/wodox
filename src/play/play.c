@@ -247,7 +247,7 @@ handle_event(SDL_Event * event)
 	    break;
 
 	case SDLK_F1:
-	    switch (help(str_howtoplay, str_menuplay, "\0rscq")) {
+	    switch (help(lang.howtoplay, lang.menuplay, "\0rscq")) {
 	    case 1:
 		game.keep_going = 0;
 		break;

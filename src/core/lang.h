@@ -5,31 +5,34 @@
 
 #pragma once
 
-extern char * str_entername;
-extern char * str_enterlink;
-extern char * str_hforhelp;
-extern char * str_usermanual;
+struct lang {
+    char *entername;
+    char *enterlink;
+    char *hforhelp;
+    char *usermanual;
 
-extern char ** str_messages;
+    char **messages;
 
-extern char ** str_menus;
-extern char ** str_menumain;
-extern char ** str_menusandbox;
-extern char ** str_menuplay;
-extern char ** str_menuedit;
-extern char ** str_menulink;
-extern char ** str_menusave;
+    char **menus;
+    char **menumain;
+    char **menusandbox;
+    char **menuplay;
+    char **menuedit;
+    char **menulink;
+    char **menusave;
 
-extern char ** str_howtoplay;
-extern char ** str_howtoedit;
-extern char ** str_howtolink;
-extern char ** str_howtolink2;
-extern char ** str_howtolink3;
-extern char ** str_howtolink4;
-extern char ** str_credits;
-extern char ** str_levelnames;
-extern char ** str_actnames;
+    char **howtoplay;
+    char **howtoedit;
+    char **howtolink;
+    char **howtolink2;
+    char **howtolink3;
+    char **howtolink4;
+    char **credits;
+    char **levelnames;
+    char **actnames;
+};
 
-int init_lang (const char * lang);
-void end_lang ();
+extern struct lang lang;
 
+int lang_init(const char *lang);
+void lang_end(void);
