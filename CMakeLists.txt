@@ -7,7 +7,7 @@ project (LLR)
 set (CMAKE_C_FLAGS "-g -std=gnu99")
 add_definitions(-DDATADIR=\"${CMAKE_INSTALL_PREFIX}/share\")
 add_definitions(-DPACKAGE=\"wodox\")
-add_definitions(-DVERSION=\"1.0\")
+add_definitions(-DVERSION=\"1.1.0\")
 
 set (LLR_SOURCE_DIR "${LLR_SOURCE_DIR}/src")
 

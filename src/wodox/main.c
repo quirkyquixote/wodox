@@ -12,30 +12,32 @@
 
 
 static const char *str_version = 
-    PACKAGE " " VERSION "\n"
-    "compiled at " __DATE__ "\n"
-    "datadir: " DATA_DIR "\n";
+    PACKAGE " " VERSION " compiled " __DATE__ "\n";
 
 static const char *str_usage = 
     "Usage: wodox --help\n"
     "       wodox --version\n"
-    "       wodox [<options>] --edit <file>\n"
-    "       wodox [<options>] --play <file>\n"
+    "       wodox [<options>] --edit <file> ...\n"
+    "       wodox [<options>] --play <file> ...\n"
     "       wodox [<options>]\n";
 
 static const char *str_options = 
     "Options:\n"
-    "  -l, --lang <lang>        Specify language\n"
-    "      --no-audio           Disable all audio\n"
-    "      --no-music           Disable all music\n"
+    "  -e, --edit         skip the menu and edit files\n"
+    "  -h, --help         display this help and exit\n"
+    "  -l, --lang <lang>  specify language\n"
+    "      --no-audio     disable all audio\n"
+    "      --no-music     disable all music\n"
+    "  -p, --play         skip the menu and play files\n"
+    "  -v, --version      output version information and exit\n"
     "\n";
 
 static struct option long_options[] = {
     { "no-audio", no_argument, &media.enable_audio, 0 },
     { "no-music", no_argument, &media.enable_music, 0 },
     { "help", no_argument, 0, 'h' },
-    { "edit", required_argument, 0, 'e' },
-    { "play", required_argument, 0, 'p' },
+    { "edit", no_argument, 0, 'e' },
+    { "play", no_argument, 0, 'p' },
     { "lang", required_argument, 0, 'l' },
     { "version", no_argument, 0, 'v' },
     { 0, 0, 0, 0 }
@@ -49,12 +51,12 @@ main (int argc, char * argv[])
 {
     int c;
     int mode = 0;
-    int option_index = 0;
     char * lang = "en";
+    int i;
 
     init_lang (lang);
 
-    while ((c = getopt_long (argc, argv, "hve:p:l:", long_options, &option_index)) != -1) {
+    while ((c = getopt_long (argc, argv, "hvepl:", long_options, NULL)) != -1) {
 	switch (c) {
 	case 0: // If this option set a flag do nothing.
             break;
@@ -66,13 +68,15 @@ main (int argc, char * argv[])
     
         case 'e':
 	    media_init();
-	    edit(optarg);
+	    for (i = optind; i < argc; i++)
+		edit(argv[i]);
 	    media_end();
 	    exit(EXIT_SUCCESS);
     
         case 'p':
 	    media_init();
-	    play(optarg, optarg);
+	    for (i = optind; i < argc; i++)
+		play(argv[i], argv[i]);
 	    media_end();
 	    exit(EXIT_SUCCESS);
     
