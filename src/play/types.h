@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "../core/list.h"
 #include "../media/media.h"
 
 

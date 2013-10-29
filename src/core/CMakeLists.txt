@@ -1,1 +1,1 @@
-add_library(core core.c lang.c list.c user.c)
+add_library(core core.c lang.c user.c)
