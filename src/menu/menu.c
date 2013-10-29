@@ -95,7 +95,7 @@ select_user()
 
     SDL_EnableUNICODE(1);
 
-    memset(&user, 0, sizeof(user_profile));
+    memset(&user, 0, sizeof(user));
 
     while (keep_going) {
 	render_background();

@@ -11,19 +11,15 @@
  */
 #define USER_NAME_LEN 13
 
-typedef struct user_profile_t user_profile;
-
-struct user_profile_t
-{
-  char name[USER_NAME_LEN];
-  int max_level;
+struct user_profile {
+    char name[USER_NAME_LEN];
+    int max_level;
 };
 
-extern user_profile user;
+extern struct user_profile user;
 
 /*
  * User profile management.
  */
-void load_profile (const char * username);
-void save_profile ();
-
+void load_profile(const char *username);
+void save_profile();
