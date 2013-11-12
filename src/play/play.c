@@ -3,21 +3,25 @@
  * This code copyright (c) Luis Javier Sanz 2009-2013 
  */
 
-#include "types.h"
-#include "load.h"
-#include "update.h"
-#include "render.h"
-#include "state.h"
+#include "play_private.h"
 
+/* Singleton to hold all internal state */
 struct game game;
 
-/*
- * All static functions declared here.
- */
-static void run_level();
+/* Main loop of the game */
+static void game_main_loop();
+
+/* Handles replaying */
 static void replay(void);
+
+/* Handles user input */
 static void handle_event(SDL_Event * event);
+
+/* In the correct circunstances, save state */
 static void test_for_save_state(void);
+
+/* To record a key pressing */
+static void record(int k);
 
 /*----------------------------------------------------------------------------
  * Play a level.
@@ -34,9 +38,9 @@ play(const char *path, const char *name)
 
     game.keep_playing = 1;
 
-    while (game.keep_playing && load_level(path)) {
-	run_level();
-	free_level();
+    while (game.keep_playing && game_load(path)) {
+	game_main_loop();
+	game_destroy();
     }
 
     SDL_FreeSurface(media.surface_levelname);
@@ -54,7 +58,7 @@ play(const char *path, const char *name)
  * the normal flow is broken by a GOTO.
  *----------------------------------------------------------------------------*/
 void
-run_level()
+game_main_loop()
 {
     SDL_Event event;
 
@@ -66,7 +70,7 @@ run_level()
     game.cs.record_ptr = game.record_list;
 
     if (game.state_stack_top == game.state_stack_bottom) {
-	save_state();
+	game_push_state();
     }
     // And here's the aberration. It is said that Djikstra headbangs his coffin
     // once per each one of those. I guess that he will do mine around year 2500
@@ -89,9 +93,9 @@ run_level()
     }
 
     while (game.keep_going) {
-	update();
+	game_update();
 	render_background();
-	render_objects();
+	game_render();
 
 	if (game.replay)
 	    replay();
@@ -140,7 +144,7 @@ run_level()
 	    case SDL_KEYDOWN:
 		switch (event.key.keysym.sym) {
 		case SDLK_BACKSPACE:
-		    load_state();
+		    game_pop_state();
 		    goto game_loop_begin;
 		case SDLK_ESCAPE:
 		    game.keep_playing = 0;
@@ -161,6 +165,19 @@ run_level()
     return;
 }
 
+/*----------------------------------------------------------------------------
+ * Record player input
+ *----------------------------------------------------------------------------*/
+void
+record(int k)
+{ 
+    if (game.cs.record_ptr - game.record_list < RECORD_LIST_SIZE) {
+        game.cs.record_ptr->time = game.cs.ticks; 
+        game.cs.record_ptr->key = k; 
+        ++game.cs.record_ptr; 
+    } 
+    game.replay = 0; 
+} 
 
 /*----------------------------------------------------------------------------
  * When replaying, the wodox moves automatically
@@ -218,31 +235,31 @@ handle_event(SDL_Event * event)
 	switch (event->key.keysym.sym) {
 	case SDLK_UP:
 	    game.keyup = 1;
-	    RECORD_MOVE(1);
+	    record(1);
 	    game.must_save = 1;
 	    break;
 	case SDLK_DOWN:
 	    game.keydn = 1;
-	    RECORD_MOVE(2);
+	    record(2);
 	    game.must_save = 1;
 	    break;
 	case SDLK_LEFT:
 	    game.keylf = 1;
-	    RECORD_MOVE(3);
+	    record(3);
 	    game.must_save = 1;
 	    break;
 	case SDLK_RIGHT:
 	    game.keyrt = 1;
-	    RECORD_MOVE(4);
+	    record(4);
 	    game.must_save = 1;
 	    break;
 
 	case SDLK_BACKSPACE:
-	    load_state();
-	    RECORD_MOVE(game.keyup ? 1 : -1);
-	    RECORD_MOVE(game.keydn ? 2 : -2);
-	    RECORD_MOVE(game.keylf ? 3 : -3);
-	    RECORD_MOVE(game.keyrt ? 4 : -4);
+	    game_pop_state();
+	    record(game.keyup ? 1 : -1);
+	    record(game.keydn ? 2 : -2);
+	    record(game.keylf ? 3 : -3);
+	    record(game.keyrt ? 4 : -4);
 	    game.po->dir = STILL;
 	    break;
 
@@ -295,19 +312,19 @@ handle_event(SDL_Event * event)
 	switch (event->key.keysym.sym) {
 	case SDLK_UP:
 	    game.keyup = 0;
-	    RECORD_MOVE(-1);
+	    record(-1);
 	    break;
 	case SDLK_DOWN:
 	    game.keydn = 0;
-	    RECORD_MOVE(-2);
+	    record(-2);
 	    break;
 	case SDLK_LEFT:
 	    game.keylf = 0;
-	    RECORD_MOVE(-3);
+	    record(-3);
 	    break;
 	case SDLK_RIGHT:
 	    game.keyrt = 0;
-	    RECORD_MOVE(-4);
+	    record(-4);
 	    break;
 	default:
 	    break;
@@ -348,7 +365,7 @@ test_for_save_state(void)
 	case BUTTON_1:
 	case SWITCH_0:
 	case SWITCH_1:
-	    save_state();
+	    game_push_state();
 	    game.must_save = 0;
 	    break;
 	}

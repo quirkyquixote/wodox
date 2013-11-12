@@ -3,15 +3,13 @@
  * This code copyright (c) Luis Javier Sanz 2009-2013 
  */
 
-#include "types.h"
-#include "object.h"
-#include "circuit.h"
+#include "play_private.h"
 
 /*----------------------------------------------------------------------------
  * Load a level.
  *----------------------------------------------------------------------------*/
 int
-load_level(const char *path)
+game_load(const char *path)
 {
     FILE *f;
     uint16_t i;
@@ -153,7 +151,7 @@ load_level(const char *path)
  * Setdown level.
  *----------------------------------------------------------------------------*/
 void
-free_level()
+game_destroy()
 {
     struct static_circuit *s;
     struct dynamic_circuit *d;

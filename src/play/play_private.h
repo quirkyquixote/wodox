@@ -13,6 +13,12 @@
 #include <errno.h>
 #include <stdint.h>
 
+/* Each sound plays through a channel */
+#define CHANNEL_WODOX	1
+#define CHANNEL_OPEN	2
+#define CHANNEL_PRESS	3
+#define CHANNEL_RELEASE	4
+
 /*----------------------------------------------------------------------------
  * These define object flags.
  *----------------------------------------------------------------------------*/
@@ -95,8 +101,7 @@ static const uint16_t bounds[] = {
 #define PUSH_DELAY 1		// Number of frames before the wodox can push another object.
 #define OBJECT_POOL_SIZE 1000	// Number of allocated objects.
 #define STATE_STACK_LEN 10	// Size of the "undo" stack.
-#define RECORD_MOVE_LIST_SIZE 10000
-				// Number of moves that may be remembered to replay a level (unimplemented). 
+#define RECORD_LIST_SIZE 10000	// Number of moves that may be remembered to replay a level (unimplemented). 
 
 
 /*----------------------------------------------------------------------------
@@ -111,25 +116,46 @@ struct object {
     uint8_t dsp;			// How many steps has the object moved between spaces.
 };
 
+/* Create */
+struct object *object_new(uint8_t type, uint16_t off);
+
+/* Destroy */
+void object_free (struct object * o);
+
+/* Move in direction dir */
+void object_move(struct object *o, int dir);
+
+/* Move in direction dir if the next cell is empty */
+int object_try_move(struct object *o, int dir);
+
+/* Release buttons under object */
+void release_buttons(struct object *o);
+
+/* Press buttons under object */
+void press_buttons(struct object *o);
+
 /*----------------------------------------------------------------------------
- * Static circuits connect buttons to positions on the map.
+ * Circuits are connections between elements of the map
  *----------------------------------------------------------------------------*/
+
+/* Static circuits connect buttons to positions on the map */
 struct static_circuit {
-    struct static_circuit *next;// Next in list
-    uint16_t size;		// Size of the tree.
-    uint16_t *tree;		// Boolean operation.
+    struct static_circuit *next;	// Next in list
+    uint16_t size;			// Size of the tree.
+    uint16_t *tree;			// Boolean operation.
     uint16_t idx;			// Position.
 };
 
-/*----------------------------------------------------------------------------
- * Dynamic circuits connect buttons to objects.
- *----------------------------------------------------------------------------*/
+/* Dynamic circuits connect buttons to objects */
 struct dynamic_circuit {
-    struct dynamic_circuit *next;// Next in list
-    uint16_t size;		// Size of the tree.
-    uint16_t *tree;		// Boolean operation.
-    struct object *obj;		// Object.
+    struct dynamic_circuit *next;	// Next in list
+    uint16_t size;			// Size of the tree.
+    uint16_t *tree;			// Boolean operation.
+    struct object *obj;			// Object.
 };
+
+/* Current value of the part of the circuit  whose root node is tree[off] */
+int calculate(uint16_t * tree, size_t off);
 
 /*----------------------------------------------------------------------------
  * The level records are basically pairs <time,key>.
@@ -223,43 +249,41 @@ struct game {
     struct state *state_stack_top;	// In a circular stack.
     struct state *state_stack_bottom;	// That may not be full.
 
-    struct record record_list[RECORD_MOVE_LIST_SIZE];	// What the player has been doing.
+    struct record record_list[RECORD_LIST_SIZE];// What the player has been doing.
 };
 
-/*
- * There can be only one!
- */
+/* There can be only one! */
 extern struct game game;
 
-/*
- * Aliases for quick iteration on all elements and low level manipulation.
- */
+/* Aliases for quick iteration on all elements and low level manipulation */
 #define MAP ((uint8_t *)game.cs.static_map)
 #define FRC ((uint8_t *)game.cs.forces_map)
 #define OBJ ((struct object **)game.cs.object_map)
 
-/*
- * To record a key pressing.
- */
-#define RECORD_MOVE(k) \
-do \
-  { \
-    if (game.cs.record_ptr - game.record_list < RECORD_MOVE_LIST_SIZE) \
-      { \
-        game.cs.record_ptr->time = game.cs.ticks; \
-        game.cs.record_ptr->key = k; \
-        ++game.cs.record_ptr; \
-      } \
-    game.replay = 0; \
-  } \
-while (0)
+/*----------------------------------------------------------------------------
+ * All together
+ *----------------------------------------------------------------------------*/
 
-/*
- * Each sound plays through a channel.
- */
-#define CHANNEL_WODOX	1
-#define CHANNEL_OPEN	2
-#define CHANNEL_PRESS	3
-#define CHANNEL_RELEASE	4
+/* Load a level */
+int game_load(const char *path);
 
-extern SDL_Surface *surface_levelname;
+/* Free a level */
+void game_destroy(void);
+
+/* Update */
+void game_update(void);
+
+/* Render all objects */
+void game_render(void);
+
+/* Push current state in the stack */
+void game_push_state(void);
+
+/* Pop state from the stack top */
+void game_pop_state(void);
+
+/* Transition functions are used for special effects */
+typedef void transition_func (SDL_Rect *, int);
+
+extern transition_func * TRANSITION_FUNC[];
+

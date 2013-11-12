@@ -3,7 +3,7 @@
  * This code copyright (c) Luis Javier Sanz 2009-2013 
  */
 
-#include "types.h"
+#include "play_private.h"
 
 /*----------------------------------------------------------------------------
  * Release buttons under the chosen object.

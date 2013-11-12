@@ -3,8 +3,7 @@
  * This code copyright (c) Luis Javier Sanz 2009-2013 
  */
 
-#include "types.h"
-#include "render.h"
+#include "play_private.h"
 
 
 static void render_column(size_t i, size_t k);
@@ -26,7 +25,7 @@ transition_func *TRANSITION_FUNC[] = {
  * exit is a particle system.
  *----------------------------------------------------------------------------*/
 void
-render_objects(void)
+game_render(void)
 {
     size_t i, k;
 

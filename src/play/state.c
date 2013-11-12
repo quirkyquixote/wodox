@@ -1,13 +1,12 @@
 
 #include <string.h>
-#include "types.h"
-#include "state.h"
+#include "play_private.h"
 
 /*----------------------------------------------------------------------------
  * Save the state of the level in the state stack.
  *----------------------------------------------------------------------------*/
 void
-save_state(void)
+game_push_state(void)
 {
     memcpy(game.state_stack_top, &game.cs, sizeof(struct state));
 
@@ -25,7 +24,7 @@ save_state(void)
  * Load the state of the level from the state stack.
  *----------------------------------------------------------------------------*/
 void
-load_state(void)
+game_pop_state(void)
 {
     if (game.state_stack_top != game.state_stack_bottom) {
 	if (game.state_stack_top == game.state_stack) {

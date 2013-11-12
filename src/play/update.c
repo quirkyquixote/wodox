@@ -3,9 +3,7 @@
  * This code copyright (c) Luis Javier Sanz 2009-2013 
  */
 
-#include "types.h"
-#include "object.h"
-#include "circuit.h"
+#include "play_private.h"
 
 static void update_static_circuit(struct static_circuit *s);
 static void update_dynamic_circuit(struct dynamic_circuit *d);
@@ -20,7 +18,7 @@ static int levitate(struct object *o);
  * Update all
  *----------------------------------------------------------------------------*/
 void
-update(void)
+game_update(void)
 {
     struct static_circuit *s;
     struct dynamic_circuit *d;
