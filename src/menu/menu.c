@@ -8,10 +8,9 @@
 
 #include "play/play.h"	// Game engine.
 #include "edit/edit.h"	// Level editor.
-#include "menu/menu.h"
 #include "media/media.h"
 
-#include "types.h"
+#include "menu_private.h"
 
 const SDL_Color black = { 0, 0, 0 };
 const SDL_Color white = { 255, 255, 255 };

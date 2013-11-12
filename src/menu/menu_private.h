@@ -6,6 +6,7 @@
 #pragma once
 
 #include <SDL/SDL.h>
+#include "menu.h"
 
 struct level {
     char file[32];
