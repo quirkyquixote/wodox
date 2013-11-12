@@ -1,15 +1,15 @@
-# The name of our project is "LLR". CMakeLists files in this project can 
-# refer to the root source directory of the project as ${LLR_SOURCE_DIR} and 
-# to the root binary directory of the project as ${LLR_BINARY_DIR}. 
+# The name of our project is "WODOX". CMakeLists files in this project can 
+# refer to the root source directory of the project as ${WODOX_SOURCE_DIR} and 
+# to the root binary directory of the project as ${WODOX_BINARY_DIR}. 
 cmake_minimum_required (VERSION 2.6) 
-project (LLR) 
+project (WODOX) 
 
 set (CMAKE_C_FLAGS "-g -std=gnu99")
 add_definitions(-DDATADIR=\"${CMAKE_INSTALL_PREFIX}/share\")
 add_definitions(-DPACKAGE=\"wodox\")
 add_definitions(-DVERSION=\"1.1.0\")
 
-set (LLR_SOURCE_DIR "${LLR_SOURCE_DIR}/src")
+set (WODOX_SOURCE_DIR "${WODOX_SOURCE_DIR}/src")
 
 # Needed for SDL_gfx and Chipmunk
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
@@ -23,7 +23,7 @@ find_package(SDL_gfx)
 find_library(M_LIB m)
 
 include_directories (
-  ${LLR_SOURCE_DIR}
+  ${WODOX_SOURCE_DIR}
   ${SDL_INCLUDE_DIR}
   ${SDLIMAGE_INCLUDE_DIR}
   ${SDLMIXER_INCLUDE_DIR}

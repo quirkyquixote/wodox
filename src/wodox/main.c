@@ -3,10 +3,10 @@
  * This code copyright (c) Luis Javier Sanz 2009-2013 
  */
 
-#include "../menu/menu.h"		// Menus.
-#include "../play/play.h"		// Game engine.
-#include "../edit/edit.h"		// Level editor.
-#include "../media/media.h"		// Graphics and audio
+#include "menu/menu.h"		// Menus.
+#include "play/play.h"		// Game engine.
+#include "edit/edit.h"		// Level editor.
+#include "media/media.h"		// Graphics and audio
 
 #include <getopt.h>		// For getopt
 

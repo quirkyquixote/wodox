@@ -3,15 +3,14 @@
  * This code copyright (c) Luis Javier Sanz 2009-2013
  */
 
-#include "../media/media.h"
-#include "types.h"
-#include "parse.h"
+#include "media/media.h"
+#include "edit_private.h"
 
 /*
  * Draw objects.
  */
 void
-render_level(void)
+editor_render_level(void)
 {
     struct coord c;
     SDL_Rect dst;
@@ -116,7 +115,7 @@ render_level(void)
 }
 
 void
-render_circuit(void)
+editor_render_circuit(void)
 {
     char buf[256];
     SDL_Surface *surface;

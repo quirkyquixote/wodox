@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "../core/core.h"
+#include "core/core.h"
 #include <stdint.h>
 
 /*----------------------------------------------------------------------------
@@ -36,14 +36,11 @@ struct circuit {
     uint16_t *tree;
 };
 
-/*----------------------------------------------------------------------------
- * A tree
- *----------------------------------------------------------------------------*/
-struct tree {
-    int token;
-    struct tree *l;
-    struct tree *r;
-};
+/* Format a valid equation from a circuit */
+int circuit_to_text(char *buf, struct circuit *c, uint16_t node, int is_right);
+
+/* Create a valid circuit from an equation */
+int text_to_circuit(char *buf, struct circuit *c, uint16_t node);
 
 /*----------------------------------------------------------------------------
  * The scene is represented by two different maps:
@@ -71,3 +68,34 @@ extern struct level level;
  *----------------------------------------------------------------------------*/
 #define S_MAP ((uint8_t *)level.static_map)
 #define C_MAP ((struct circuit *)level.circuit_map)
+
+/* Load a level */
+int editor_load(const char *path);
+
+/* Save a level */
+int editor_save(const char *path);
+
+/* Destroy a level */
+void editor_destroy(void);
+
+/* Edit a circuit */
+int editor_edit_circuit(uint16_t idx);
+
+/* Render entire level */
+void editor_render_level(void);
+
+/* Render circuit currently being edited */
+void editor_render_circuit(void);
+
+/* Shift the entire level in one direction */
+void editor_shift_bk(void);
+void editor_shift_ft(void);
+void editor_shift_lf(void);
+void editor_shift_rt(void);
+void editor_shift_up(void);
+void editor_shift_dn(void);
+
+/* Rotate the entire level on the vertical axis */
+void editor_rotate_lf(void);
+void editor_rotate_rt(void);
+

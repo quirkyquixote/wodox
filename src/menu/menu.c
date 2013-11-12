@@ -6,10 +6,10 @@
 #include <string.h>		// For memset, strerror
 #include <errno.h>		// for errno
 
-#include "../play/play.h"	// Game engine.
-#include "../edit/edit.h"	// Level editor.
-#include "../menu/menu.h"
-#include "../media/media.h"
+#include "play/play.h"	// Game engine.
+#include "edit/edit.h"	// Level editor.
+#include "menu/menu.h"
+#include "media/media.h"
 
 #include "types.h"
 

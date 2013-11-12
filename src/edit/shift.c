@@ -3,23 +3,23 @@
  * This code copyright (c) Luis Javier Sanz 2009-2013
  */
 
-#include "types.h"
+#include "edit_private.h"
 
 /*
  * Shift a circuit in some direction.
  */
-static struct circuit shift_circuit_bk(struct circuit c);
-static struct circuit shift_circuit_ft(struct circuit c);
-static struct circuit shift_circuit_lf(struct circuit c);
-static struct circuit shift_circuit_rt(struct circuit c);
-static struct circuit shift_circuit_up(struct circuit c);
-static struct circuit shift_circuit_dn(struct circuit c);
+static struct circuit editor_shift_circuit_bk(struct circuit c);
+static struct circuit editor_shift_circuit_ft(struct circuit c);
+static struct circuit editor_shift_circuit_lf(struct circuit c);
+static struct circuit editor_shift_circuit_rt(struct circuit c);
+static struct circuit editor_shift_circuit_up(struct circuit c);
+static struct circuit editor_shift_circuit_dn(struct circuit c);
 
 /*
  * The following methods 'shift' the level in one direction.
  */
 void
-shift_bk(void)
+editor_shift_bk(void)
 {
     uint8_t i, j, k, tmp;
     struct circuit tmp2;
@@ -29,15 +29,15 @@ shift_bk(void)
 	    tmp2 = level.circuit_map[j][i][MIN];
 	    for (k = MIN; k < MAX; ++k) {
 		level.static_map[j][i][k] = level.static_map[j][i][k + 1];
-		level.circuit_map[j][i][k] = shift_circuit_bk(level.circuit_map[j][i][k + 1]);
+		level.circuit_map[j][i][k] = editor_shift_circuit_bk(level.circuit_map[j][i][k + 1]);
 	    }
 	    level.static_map[j][i][MAX] = tmp;
-	    level.circuit_map[j][i][MAX] = shift_circuit_bk(tmp2);
+	    level.circuit_map[j][i][MAX] = editor_shift_circuit_bk(tmp2);
 	}
 }
 
 void
-shift_ft(void)
+editor_shift_ft(void)
 {
     uint8_t i, j, k, tmp;
     struct circuit tmp2;
@@ -47,15 +47,15 @@ shift_ft(void)
 	    tmp2 = level.circuit_map[j][i][MAX];
 	    for (k = MAX; k > MIN; --k) {
 		level.static_map[j][i][k] = level.static_map[j][i][k - 1];
-		level.circuit_map[j][i][k] = shift_circuit_ft(level.circuit_map[j][i][k - 1]);
+		level.circuit_map[j][i][k] = editor_shift_circuit_ft(level.circuit_map[j][i][k - 1]);
 	    }
 	    level.static_map[j][i][MIN] = tmp;
-	    level.circuit_map[j][i][MIN] = shift_circuit_ft(tmp2);
+	    level.circuit_map[j][i][MIN] = editor_shift_circuit_ft(tmp2);
 	}
 }
 
 void
-shift_lf(void)
+editor_shift_lf(void)
 {
     uint8_t i, j, k, tmp;
     struct circuit tmp2;
@@ -65,15 +65,15 @@ shift_lf(void)
 	    tmp2 = level.circuit_map[j][MIN][k];
 	    for (i = MIN; i < MAX; ++i) {
 		level.static_map[j][i][k] = level.static_map[j][i + 1][k];
-		level.circuit_map[j][i][k] = shift_circuit_lf(level.circuit_map[j][i + 1][k]);
+		level.circuit_map[j][i][k] = editor_shift_circuit_lf(level.circuit_map[j][i + 1][k]);
 	    }
 	    level.static_map[j][MAX][k] = tmp;
-	    level.circuit_map[j][MAX][k] = shift_circuit_lf(tmp2);
+	    level.circuit_map[j][MAX][k] = editor_shift_circuit_lf(tmp2);
 	}
 }
 
 void
-shift_rt(void)
+editor_shift_rt(void)
 {
     uint8_t i, j, k, tmp;
     struct circuit tmp2;
@@ -83,15 +83,15 @@ shift_rt(void)
 	    tmp2 = level.circuit_map[j][MAX][k];
 	    for (i = MAX; i > MIN; --i) {
 		level.static_map[j][i][k] = level.static_map[j][i - 1][k];
-		level.circuit_map[j][i][k] = shift_circuit_rt(level.circuit_map[j][i - 1][k]);
+		level.circuit_map[j][i][k] = editor_shift_circuit_rt(level.circuit_map[j][i - 1][k]);
 	    }
 	    level.static_map[j][MIN][k] = tmp;
-	    level.circuit_map[j][MIN][k] = shift_circuit_rt(tmp2);
+	    level.circuit_map[j][MIN][k] = editor_shift_circuit_rt(tmp2);
 	}
 }
 
 void
-shift_dn(void)
+editor_shift_dn(void)
 {
     uint8_t i, j, k, tmp;
     struct circuit tmp2;
@@ -101,15 +101,15 @@ shift_dn(void)
 	    tmp2 = level.circuit_map[MIN][i][k];
 	    for (j = MIN; j < MAX; ++j) {
 		level.static_map[j][i][k] = level.static_map[j + 1][i][k];
-		level.circuit_map[j][i][k] = shift_circuit_dn(level.circuit_map[j + 1][i][k]);
+		level.circuit_map[j][i][k] = editor_shift_circuit_dn(level.circuit_map[j + 1][i][k]);
 	    }
 	    level.static_map[MAX][i][k] = tmp;
-	    level.circuit_map[MAX][i][k] = shift_circuit_dn(tmp2);
+	    level.circuit_map[MAX][i][k] = editor_shift_circuit_dn(tmp2);
 	}
 }
 
 void
-shift_up(void)
+editor_shift_up(void)
 {
     uint8_t i, j, k, tmp;
     struct circuit tmp2;
@@ -119,10 +119,10 @@ shift_up(void)
 	    tmp2 = level.circuit_map[MAX][i][k];
 	    for (j = MAX; j > MIN; --j) {
 		level.static_map[j][i][k] = level.static_map[j - 1][i][k];
-		level.circuit_map[j][i][k] = shift_circuit_up(level.circuit_map[j - 1][i][k]);
+		level.circuit_map[j][i][k] = editor_shift_circuit_up(level.circuit_map[j - 1][i][k]);
 	    }
 	    level.static_map[MIN][i][k] = tmp;
-	    level.circuit_map[MIN][i][k] = shift_circuit_up(tmp2);
+	    level.circuit_map[MIN][i][k] = editor_shift_circuit_up(tmp2);
 	}
 }
 
@@ -130,7 +130,7 @@ shift_up(void)
  * The following methods 'shift' a circuit in one direction.
  */
 struct circuit
-shift_circuit_ft(struct circuit n)
+editor_shift_circuit_ft(struct circuit n)
 {
     uint16_t *it;
     if (n.tree)
@@ -142,7 +142,7 @@ shift_circuit_ft(struct circuit n)
 }
 
 struct circuit
-shift_circuit_bk(struct circuit n)
+editor_shift_circuit_bk(struct circuit n)
 {
     uint16_t *it;
     if (n.tree)
@@ -156,7 +156,7 @@ shift_circuit_bk(struct circuit n)
 }
 
 struct circuit
-shift_circuit_up(struct circuit n)
+editor_shift_circuit_up(struct circuit n)
 {
     uint16_t *it;
     if (n.tree)
@@ -168,7 +168,7 @@ shift_circuit_up(struct circuit n)
 }
 
 struct circuit
-shift_circuit_dn(struct circuit n)
+editor_shift_circuit_dn(struct circuit n)
 {
     uint16_t *it;
     if (n.tree)
@@ -180,7 +180,7 @@ shift_circuit_dn(struct circuit n)
 }
 
 struct circuit
-shift_circuit_rt(struct circuit n)
+editor_shift_circuit_rt(struct circuit n)
 {
     uint16_t *it;
     if (n.tree)
@@ -194,7 +194,7 @@ shift_circuit_rt(struct circuit n)
 }
 
 struct circuit
-shift_circuit_lf(struct circuit n)
+editor_shift_circuit_lf(struct circuit n)
 {
     uint16_t *it;
     if (n.tree)

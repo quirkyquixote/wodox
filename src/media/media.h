@@ -12,7 +12,7 @@
 #include <SDL/SDL_gfxPrimitives.h>	// For lineColor
 #include <SDL/SDL_ttf.h>	// For text
 
-#include "../core/core.h"
+#include "core/core.h"
 
 /*----------------------------------------------------------------------------
  * All data needed for media

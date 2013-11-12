@@ -5,16 +5,10 @@
 
 #include <errno.h>
 
-#include "../media/media.h"
-#include "../play/play.h"
+#include "media/media.h"
+#include "play/play.h"
 
-#include "types.h"
-#include "parse.h"
-#include "shift.h"
-#include "rotate.h"
-#include "render.h"
-#include "file.h"
-#include "circuit.h"
+#include "edit_private.h"
 
 struct level level;
 
@@ -39,7 +33,7 @@ edit(char *path)
     level.cursor = coord(0, 0, 0);
     level.object = -1;
 
-    edit_load(path);
+    editor_load(path);
 
     if (path == NULL)
 	path = strjoin(PATH_SEPARATOR, USER_DIR, "sandbox", NULL);
@@ -47,8 +41,8 @@ edit(char *path)
     while (level.keep_going) {
 	check_singletons();
 	render_background();
-	render_level();
-	render_circuit();
+	editor_render_level();
+	editor_render_circuit();
 
 	while (SDL_PollEvent(&event) != 0)
 	    handle_event(&event);
@@ -57,7 +51,7 @@ edit(char *path)
 	media_sync();
     }
 
-    edit_free();
+    editor_destroy();
     return 0;
 }
 
@@ -132,22 +126,22 @@ handle_event(SDL_Event * event)
 	if (event->key.keysym.mod & KMOD_SHIFT) {
 	    switch (event->key.keysym.sym) {
 	    case SDLK_UP:
-		shift_lf();
+		editor_shift_lf();
 		break;
 	    case SDLK_DOWN:
-		shift_rt();
+		editor_shift_rt();
 		break;
 	    case SDLK_RIGHT:
-		shift_bk();
+		editor_shift_bk();
 		break;
 	    case SDLK_LEFT:
-		shift_ft();
+		editor_shift_ft();
 		break;
 	    case SDLK_PAGEDOWN:
-		shift_dn();
+		editor_shift_dn();
 		break;
 	    case SDLK_PAGEUP:
-		shift_up();
+		editor_shift_up();
 		break;
 	    default:
 		break;
@@ -157,10 +151,10 @@ handle_event(SDL_Event * event)
 	if (event->key.keysym.mod & KMOD_CTRL) {
 	    switch (event->key.keysym.sym) {
 	    case SDLK_RIGHT:
-		rotate_rt();
+		editor_rotate_rt();
 		break;
 	    case SDLK_LEFT:
-		rotate_lf();
+		editor_rotate_lf();
 		break;
 	    default:
 		break;
@@ -236,14 +230,14 @@ handle_event(SDL_Event * event)
 	    break;
 	case SDLK_w:
 	    if (properties(1 + strrchr(level.path, '/'))) {
-		edit_save(level.path);
+		editor_save(level.path);
 	    }
 	    break;
 	case SDLK_r:
-	    edit_load(level.path);
+	    editor_load(level.path);
 	    break;
 	case SDLK_t:
-	    edit_save("level.tmp");
+	    editor_save("level.tmp");
 	    play("level.tmp", "Unnamed level");
 	    break;
 	case SDLK_ESCAPE:
@@ -252,23 +246,23 @@ handle_event(SDL_Event * event)
 	case SDLK_F1:
 	    switch (help(lang.howtoedit, lang.menuedit, "\0twrq")) {
 	    case 1:
-		edit_save("level.tmp");
+		editor_save("level.tmp");
 		play("level.tmp", "Unnamed level");
 		break;
 	    case 2:
 		if (properties(1 + strrchr(level.path, '/'))) {
-		    edit_save(level.path);
+		    editor_save(level.path);
 		}
 		break;
 	    case 3:
-		edit_load(level.path);
+		editor_load(level.path);
 		break;
 	    case 4:
 		level.keep_going = 0;
 	    }
 	    break;
 	case SDLK_RETURN:
-	    edit_circuit(coord_to_idx(level.cursor));
+	    editor_edit_circuit(coord_to_idx(level.cursor));
 	default:
 	    break;
 	}

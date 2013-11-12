@@ -5,15 +5,10 @@
 
 #include <errno.h>
 
-#include "../media/media.h"
-#include "../play/play.h"
+#include "media/media.h"
+#include "play/play.h"
 
-#include "types.h"
-#include "parse.h"
-#include "shift.h"
-#include "rotate.h"
-#include "render.h"
-#include "file.h"
+#include "edit_private.h"
 
 struct context {
     uint16_t idx;
@@ -34,7 +29,7 @@ static void render(void);
  * Edit circuit.
  */
 int
-edit_circuit(uint16_t idx)
+editor_edit_circuit(uint16_t idx)
 {
     // Only edit if what we want to link is a machine.
 
@@ -162,7 +157,7 @@ void
 capture_background(void)
 {
     render_background();
-    render_level();
+    editor_render_level();
     sepia_surface(media.canvas);
     ctx.bkgr =
 	SDL_ConvertSurface(media.canvas, media.canvas->format,

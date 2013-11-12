@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "../media/media.h"
+#include "media/media.h"
 
 
 #include <unistd.h>		// For rand

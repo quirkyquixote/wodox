@@ -7,13 +7,13 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "types.h"
+#include "edit_private.h"
 
 /*
  * Load level.
  */
 int
-edit_load(const char *path)
+editor_load(const char *path)
 {
     FILE *f;
     uint16_t n;
@@ -43,7 +43,7 @@ edit_load(const char *path)
  * Save level.
  */
 int
-edit_save(const char *path)
+editor_save(const char *path)
 {
     FILE *f;
     uint16_t n;
@@ -68,7 +68,7 @@ edit_save(const char *path)
 }
 
 void
-edit_free(void)
+editor_destroy(void)
 {
     int i;
 
