@@ -26,19 +26,19 @@ game_update(void)
     int i;
 
     for (s = game.static_circuits; s; s = s->next)
-	update_static_circuit(s);
+        update_static_circuit(s);
 
     for (d = game.dynamic_circuits; d; d = d->next)
-	update_dynamic_circuit(d);
+        update_dynamic_circuit(d);
 
     for (i = SIZE_3 - 1; i >= 0; --i)
-	if ((o = OBJ[i]) && (o->type & HEAVY))
-	    update_heavy_object(o);
+        if ((o = OBJ[i]) && (o->type & HEAVY))
+            update_heavy_object(o);
 
     update_player_object();
 
     for (i = 0; i < game.object_count; ++i)
-	update_object(&game.cs.objects[i]);
+        update_object(&game.cs.objects[i]);
 }
 
 /*----------------------------------------------------------------------------
@@ -54,62 +54,62 @@ void
 update_static_circuit(struct static_circuit *s)
 {
     if (calculate(s->tree, 0)) {
-	switch (MAP[s->idx]) {
-	case BELT_LF_0:
-	    MAP[s->idx] = BELT_LF_1;
-	    break;
-	case BELT_RT_0:
-	    MAP[s->idx] = BELT_RT_1;
-	    break;
-	case BELT_BK_0:
-	    MAP[s->idx] = BELT_BK_1;
-	    break;
-	case BELT_FT_0:
-	    MAP[s->idx] = BELT_FT_1;
-	    break;
+        switch (MAP[s->idx]) {
+        case BELT_LF_0:
+            MAP[s->idx] = BELT_LF_1;
+            break;
+        case BELT_RT_0:
+            MAP[s->idx] = BELT_RT_1;
+            break;
+        case BELT_BK_0:
+            MAP[s->idx] = BELT_BK_1;
+            break;
+        case BELT_FT_0:
+            MAP[s->idx] = BELT_FT_1;
+            break;
 
-	case BELT_LF_1:
-	case BELT_RT_1:
-	case BELT_BK_1:
-	case BELT_FT_1:
-	    break;
+        case BELT_LF_1:
+        case BELT_RT_1:
+        case BELT_BK_1:
+        case BELT_FT_1:
+            break;
 
-	default:
-	    FRC[s->idx] = DIR_UP;
-	    if (FRC[idx_up(s->idx)] == DIR_DN)
-		FRC[idx_up(s->idx)] = STILL;
-	    break;
-	}
+        default:
+            FRC[s->idx] = DIR_UP;
+            if (FRC[idx_up(s->idx)] == DIR_DN)
+                FRC[idx_up(s->idx)] = STILL;
+            break;
+        }
     } else {
-	switch (MAP[s->idx]) {
-	case BELT_LF_1:
-	    MAP[s->idx] = BELT_LF_0;
-	    break;
-	case BELT_RT_1:
-	    MAP[s->idx] = BELT_RT_0;
-	    break;
-	case BELT_BK_1:
-	    MAP[s->idx] = BELT_BK_0;
-	    break;
-	case BELT_FT_1:
-	    MAP[s->idx] = BELT_FT_0;
-	    break;
+        switch (MAP[s->idx]) {
+        case BELT_LF_1:
+            MAP[s->idx] = BELT_LF_0;
+            break;
+        case BELT_RT_1:
+            MAP[s->idx] = BELT_RT_0;
+            break;
+        case BELT_BK_1:
+            MAP[s->idx] = BELT_BK_0;
+            break;
+        case BELT_FT_1:
+            MAP[s->idx] = BELT_FT_0;
+            break;
 
-	case BELT_LF_0:
-	case BELT_RT_0:
-	case BELT_BK_0:
-	case BELT_FT_0:
-	    break;
+        case BELT_LF_0:
+        case BELT_RT_0:
+        case BELT_BK_0:
+        case BELT_FT_0:
+            break;
 
-	default:
-	    if (FRC[idx_dn(s->idx)] == DIR_UP)
-		FRC[s->idx] = STILL;
-	    else
-		FRC[s->idx] = DIR_DN;
-	    if (FRC[idx_up(s->idx)] == STILL)
-		FRC[idx_up(s->idx)] = DIR_DN;
-	    break;
-	}
+        default:
+            if (FRC[idx_dn(s->idx)] == DIR_UP)
+                FRC[s->idx] = STILL;
+            else
+                FRC[s->idx] = DIR_DN;
+            if (FRC[idx_up(s->idx)] == STILL)
+                FRC[idx_up(s->idx)] = DIR_DN;
+            break;
+        }
     }
 }
 
@@ -121,27 +121,27 @@ void
 update_dynamic_circuit(struct dynamic_circuit *d)
 {
     if (calculate(d->tree, 0)) {
-	switch (d->obj->type) {
-	case MOVING_0:
-	    if (object_try_move(d->obj, DIR_DN)) {
-		MAP[idx_dn(d->obj->idx)] = MOVING_1;
-		d->obj->type = MOVING_1;
-		if (media.enable_audio)
-		    Mix_PlayChannel(CHANNEL_OPEN, media.chunk_open, 0);
-	    }
-	    break;
-	}
+        switch (d->obj->type) {
+        case MOVING_0:
+            if (object_try_move(d->obj, DIR_DN)) {
+                MAP[idx_dn(d->obj->idx)] = MOVING_1;
+                d->obj->type = MOVING_1;
+                if (media.enable_audio)
+                    Mix_PlayChannel(CHANNEL_OPEN, media.chunk_open, 0);
+            }
+            break;
+        }
     } else {
-	switch (d->obj->type) {
-	case MOVING_1:
-	    if (levitate(d->obj)) {
-		MAP[idx_up(d->obj->idx)] = MOVING_0;
-		d->obj->type = MOVING_0;
-		if (media.enable_audio)
-		    Mix_PlayChannel(CHANNEL_OPEN, media.chunk_open, 0);
-	    }
-	    break;
-	}
+        switch (d->obj->type) {
+        case MOVING_1:
+            if (levitate(d->obj)) {
+                MAP[idx_up(d->obj->idx)] = MOVING_0;
+                d->obj->type = MOVING_0;
+                if (media.enable_audio)
+                    Mix_PlayChannel(CHANNEL_OPEN, media.chunk_open, 0);
+            }
+            break;
+        }
     }
 }
 
@@ -156,36 +156,36 @@ void
 update_heavy_object(struct object *o)
 {
     if (o->dir != STILL)
-	return;
+        return;
 
     switch (FRC[o->idx]) {
     case DIR_DN:
-	if (idx_y(o->idx) > MIN && object_try_move(o, DIR_DN))
-	    return;
-	break;
+        if (idx_y(o->idx) > MIN && object_try_move(o, DIR_DN))
+            return;
+        break;
     case DIR_UP:
-	if (levitate(o))
-	    return;
-	break;
+        if (levitate(o))
+            return;
+        break;
     }
 
     switch (MAP[idx_dn(o->idx)]) {
     case BELT_LF_1:
-	if (idx_x(o->idx) > MIN)
-	    object_try_move(o, DIR_LF);
-	break;
+        if (idx_x(o->idx) > MIN)
+            object_try_move(o, DIR_LF);
+        break;
     case BELT_RT_1:
-	if (idx_x(o->idx) < MAX)
-	    object_try_move(o, DIR_RT);
-	break;
+        if (idx_x(o->idx) < MAX)
+            object_try_move(o, DIR_RT);
+        break;
     case BELT_BK_1:
-	if (idx_z(o->idx) > MIN)
-	    object_try_move(o, DIR_BK);
-	break;
+        if (idx_z(o->idx) > MIN)
+            object_try_move(o, DIR_BK);
+        break;
     case BELT_FT_1:
-	if (idx_z(o->idx) < MAX)
-	    object_try_move(o, DIR_FT);
-	break;
+        if (idx_z(o->idx) < MAX)
+            object_try_move(o, DIR_FT);
+        break;
     }
 }
 
@@ -204,61 +204,61 @@ update_player_object(void)
 {
     switch (game.cs.cur_ang - game.cs.dst_ang) {
     case -8 ... -5:
-	if (--game.cs.cur_ang < 0)
-	    game.cs.cur_ang = 7;
-	break;
+        if (--game.cs.cur_ang < 0)
+            game.cs.cur_ang = 7;
+        break;
     case -4 ... -1:
-	++game.cs.cur_ang;
-	break;
+        ++game.cs.cur_ang;
+        break;
     case 1 ... 4:
-	--game.cs.cur_ang;
-	break;
+        --game.cs.cur_ang;
+        break;
     case 5 ... 8:
-	if (++game.cs.cur_ang > 7)
-	    game.cs.cur_ang = 0;
-	break;
+        if (++game.cs.cur_ang > 7)
+            game.cs.cur_ang = 0;
+        break;
     default:
-	game.cs.cur_ang = game.cs.dst_ang;
-	break;
+        game.cs.cur_ang = game.cs.dst_ang;
+        break;
     }
 
     if (game.po == NULL || game.po->dir != STILL)
-	return;
+        return;
 
     if (idx_y(game.po->idx) == 0)
-	game.keep_going = 0;
+        game.keep_going = 0;
 
     if (FRC[game.po->idx] == WARP) {
-	game.keep_going = 0;
-	game.keep_playing = 0;
-	game.warped = 1;
+        game.keep_going = 0;
+        game.keep_playing = 0;
+        game.warped = 1;
     }
 
     switch (game.keydn - game.keyup) {
     case -1:
-	game.cs.dst_ang = 0;
-	if (idx_x(game.po->idx) > MIN)
-	    try_move_player(DIR_LF);
-	return;
+        game.cs.dst_ang = 0;
+        if (idx_x(game.po->idx) > MIN)
+            try_move_player(DIR_LF);
+        return;
 
     case 1:
-	game.cs.dst_ang = 4;
-	if (idx_x(game.po->idx) < MAX)
-	    try_move_player(DIR_RT);
-	return;
+        game.cs.dst_ang = 4;
+        if (idx_x(game.po->idx) < MAX)
+            try_move_player(DIR_RT);
+        return;
     }
 
     switch (game.keylf - game.keyrt) {
     case -1:
-	game.cs.dst_ang = 2;
-	if (idx_z(game.po->idx) > MIN)
-	    try_move_player(DIR_BK);
-	return;
+        game.cs.dst_ang = 2;
+        if (idx_z(game.po->idx) > MIN)
+            try_move_player(DIR_BK);
+        return;
     case 1:
-	game.cs.dst_ang = 6;
-	if (idx_z(game.po->idx) < MAX)
-	    try_move_player(DIR_FT);
-	return;
+        game.cs.dst_ang = 6;
+        if (idx_z(game.po->idx) < MAX)
+            try_move_player(DIR_FT);
+        return;
     }
 
     game.cs.pushing = 0;
@@ -273,15 +273,15 @@ try_move_player(uint8_t dir)
     struct object *o;
 
     if ((o = OBJ[game.po->idx + offset[dir]]) && o->dir == STILL) {
-	if ((o->type & HEAVY) &&
-	    (o->idx / bounds[dir] ==
-	     (o->idx + offset[dir]) / bounds[dir])) {
-	    if (game.cs.pushing++ > PUSH_DELAY && object_try_move(o, dir)) {
-		object_move(game.po, dir);
-		game.cs.pushing = 0;
-	    }
-	    return;
-	}
+        if ((o->type & HEAVY) &&
+            (o->idx / bounds[dir] ==
+             (o->idx + offset[dir]) / bounds[dir])) {
+            if (game.cs.pushing++ > PUSH_DELAY && object_try_move(o, dir)) {
+                object_move(game.po, dir);
+                game.cs.pushing = 0;
+            }
+            return;
+        }
     }
 
     object_try_move(game.po, dir);
@@ -296,18 +296,18 @@ void
 update_object(struct object *o)
 {
     if (o->dir == STILL || ++o->dsp < SPS)
-	return;
+        return;
 
     if (MAP[o->idx] == GHOST)
-	MAP[o->idx] = EMPTY;
+        MAP[o->idx] = EMPTY;
 
     if (o != game.po)
-	release_buttons(o);
+        release_buttons(o);
 
     o->idx += offset[o->dir];
 
     if (o != game.po)
-	press_buttons(o);
+        press_buttons(o);
 
     o->dir = STILL;
     o->dsp = 0;
@@ -323,15 +323,15 @@ levitate(struct object *o)
     struct object *tmp;
 
     if (idx_y(o->idx) == MAX)
-	return 0;
+        return 0;
 
     if ((tmp = OBJ[idx_up(o->idx)]) && tmp->dir == STILL) {
-	if (levitate(tmp)) {
-	    object_move(o, DIR_UP);
-	    return DIR_UP;
-	}
+        if (levitate(tmp)) {
+            object_move(o, DIR_UP);
+            return DIR_UP;
+        }
 
-	return STILL;
+        return STILL;
     }
 
     return object_try_move(o, DIR_UP);

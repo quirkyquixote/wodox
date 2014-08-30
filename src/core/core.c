@@ -34,17 +34,17 @@ list_folder (char * path, char *** files)
     {
       while ((ep = readdir (dp)))
         {
-	  if (ep->d_name[0] != '.')
-	    {
-	      if (file_count == max_files)
-	        {
-	          max_files += 8;
-	          *files = (char **)realloc (*files, sizeof (char *) * max_files);
-	        }
+          if (ep->d_name[0] != '.')
+            {
+              if (file_count == max_files)
+                {
+                  max_files += 8;
+                  *files = (char **)realloc (*files, sizeof (char *) * max_files);
+                }
 
-	      (*files)[file_count++] = strdup (ep->d_name);
-	    }
-	}
+              (*files)[file_count++] = strdup (ep->d_name);
+            }
+        }
 
       closedir (dp);
       qsort (*files, file_count, sizeof (const char *), cstring_cmp);
@@ -85,20 +85,20 @@ strjoin (char *separator, ...)
       size = len + 1;
 
       while ((src = va_arg (ap, char *)))
-	{
-	  if (separator)
-	    {
-	      size += strlen (separator);
-	      dst = realloc (dst, size);
-	      strcpy (dst + len, separator);
-	      len = size - 1;
-	    }
+        {
+          if (separator)
+            {
+              size += strlen (separator);
+              dst = realloc (dst, size);
+              strcpy (dst + len, separator);
+              len = size - 1;
+            }
 
-	  size += strlen (src);
-	  dst = realloc (dst, size);
-	  strcpy (dst + len, src);
-	  len = size - 1;
-	}
+          size += strlen (src);
+          dst = realloc (dst, size);
+          strcpy (dst + len, src);
+          len = size - 1;
+        }
     }
   else
     {

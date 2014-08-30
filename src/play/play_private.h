@@ -8,66 +8,66 @@
 #include "media/media.h"
 
 
-#include <unistd.h>		// For rand
-#include <math.h>		// For hypot
+#include <unistd.h>                // For rand
+#include <math.h>                // For hypot
 #include <errno.h>
 #include <stdint.h>
 
 /* Each sound plays through a channel */
-#define CHANNEL_WODOX	1
-#define CHANNEL_OPEN	2
-#define CHANNEL_PRESS	3
-#define CHANNEL_RELEASE	4
+#define CHANNEL_WODOX        1
+#define CHANNEL_OPEN        2
+#define CHANNEL_PRESS        3
+#define CHANNEL_RELEASE        4
 
 /*----------------------------------------------------------------------------
  * These define object flags.
  *----------------------------------------------------------------------------*/
 enum {
-    SPRITE		= 0x0f,	// Mask for the sprite.
-    VISIBLE		= 0x10,	// If visible, there must be a sprite.
-    SOLID		= 0x20,	// Prevents objects from entering its space.
-    HEAVY		= 0x40,	// Affected by forces.
-    ACTIVE		= 0x80,	// Generates a signal.
+    SPRITE                = 0x0f,        // Mask for the sprite.
+    VISIBLE                = 0x10,        // If visible, there must be a sprite.
+    SOLID                = 0x20,        // Prevents objects from entering its space.
+    HEAVY                = 0x40,        // Affected by forces.
+    ACTIVE                = 0x80,        // Generates a signal.
 };
 
 /*----------------------------------------------------------------------------
  * These define object types.
  *----------------------------------------------------------------------------*/
 enum {
-    EMPTY	=  (0x0),
-    GHOST	=  (0x0 | SOLID),
-    GROUND	=  (0x0 | VISIBLE | SOLID),
-    CRATE	=  (0x1 | SOLID | HEAVY),
-    PLAYER	=  (0x2 | SOLID | HEAVY),
-    SMALL	=  (0x3 | HEAVY),
-    BELT_LF_0	=  (0x4 | VISIBLE | SOLID),
-    BELT_LF_1	=  (0x4 | VISIBLE | SOLID | ACTIVE),
-    BELT_BK_0	=  (0x5 | VISIBLE | SOLID),
-    BELT_BK_1	=  (0x5 | VISIBLE | SOLID | ACTIVE),
-    BELT_RT_0	=  (0x6 | VISIBLE | SOLID),
-    BELT_RT_1	=  (0x6 | VISIBLE | SOLID | ACTIVE),
-    BELT_FT_0	=  (0x7 | VISIBLE | SOLID),
-    BELT_FT_1	=  (0x7 | VISIBLE | SOLID | ACTIVE),
-    MOVING_0	=  (0x8 | SOLID),
-    MOVING_1	=  (0x8 | SOLID | ACTIVE),
-    BUTTON_0	=  (0x9 | VISIBLE | SOLID),
-    BUTTON_1	=  (0x9 | VISIBLE | SOLID | ACTIVE),
-    SWITCH_0	=  (0xa | VISIBLE | SOLID),
-    SWITCH_1	=  (0xb | VISIBLE | SOLID | ACTIVE),
+    EMPTY        =  (0x0),
+    GHOST        =  (0x0 | SOLID),
+    GROUND        =  (0x0 | VISIBLE | SOLID),
+    CRATE        =  (0x1 | SOLID | HEAVY),
+    PLAYER        =  (0x2 | SOLID | HEAVY),
+    SMALL        =  (0x3 | HEAVY),
+    BELT_LF_0        =  (0x4 | VISIBLE | SOLID),
+    BELT_LF_1        =  (0x4 | VISIBLE | SOLID | ACTIVE),
+    BELT_BK_0        =  (0x5 | VISIBLE | SOLID),
+    BELT_BK_1        =  (0x5 | VISIBLE | SOLID | ACTIVE),
+    BELT_RT_0        =  (0x6 | VISIBLE | SOLID),
+    BELT_RT_1        =  (0x6 | VISIBLE | SOLID | ACTIVE),
+    BELT_FT_0        =  (0x7 | VISIBLE | SOLID),
+    BELT_FT_1        =  (0x7 | VISIBLE | SOLID | ACTIVE),
+    MOVING_0        =  (0x8 | SOLID),
+    MOVING_1        =  (0x8 | SOLID | ACTIVE),
+    BUTTON_0        =  (0x9 | VISIBLE | SOLID),
+    BUTTON_1        =  (0x9 | VISIBLE | SOLID | ACTIVE),
+    SWITCH_0        =  (0xa | VISIBLE | SOLID),
+    SWITCH_1        =  (0xb | VISIBLE | SOLID | ACTIVE),
 };
 
 /*----------------------------------------------------------------------------
  * These define object movement.
  *----------------------------------------------------------------------------*/
 enum {
-    STILL		= 0,	// Not moving.
-    DIR_DN		= 1,	// Moving down.
-    DIR_UP		= 2,	// Moving up.
-    DIR_LF		= 3,	// Moving left.
-    DIR_RT		= 4,	// Moving right.
-    DIR_BK		= 5,	// Moving back.
-    DIR_FT		= 6,	// Moving front.
-    WARP		= 7,	// Warping outside the level.
+    STILL                = 0,        // Not moving.
+    DIR_DN                = 1,        // Moving down.
+    DIR_UP                = 2,        // Moving up.
+    DIR_LF                = 3,        // Moving left.
+    DIR_RT                = 4,        // Moving right.
+    DIR_BK                = 5,        // Moving back.
+    DIR_FT                = 6,        // Moving front.
+    WARP                = 7,        // Warping outside the level.
 };
 
 /*----------------------------------------------------------------------------
@@ -98,10 +98,10 @@ static const uint16_t bounds[] = {
 /*----------------------------------------------------------------------------
  * Some more things...
  *----------------------------------------------------------------------------*/
-#define PUSH_DELAY 1		// Number of frames before the wodox can push another object.
-#define OBJECT_POOL_SIZE 1000	// Number of allocated objects.
-#define STATE_STACK_LEN 10	// Size of the "undo" stack.
-#define RECORD_LIST_SIZE 10000	// Number of moves that may be remembered to replay a level (unimplemented). 
+#define PUSH_DELAY 1                // Number of frames before the wodox can push another object.
+#define OBJECT_POOL_SIZE 1000        // Number of allocated objects.
+#define STATE_STACK_LEN 10        // Size of the "undo" stack.
+#define RECORD_LIST_SIZE 10000        // Number of moves that may be remembered to replay a level (unimplemented). 
 
 
 /*----------------------------------------------------------------------------
@@ -110,10 +110,10 @@ static const uint16_t bounds[] = {
  * scene and as a double linked list to easily iterate over them.
  *----------------------------------------------------------------------------*/
 struct object {
-    uint8_t type;			// Type of object.
-    uint16_t idx;			// Position.
-    uint8_t dir;			// Direction of movement.
-    uint8_t dsp;			// How many steps has the object moved between spaces.
+    uint8_t type;                        // Type of object.
+    uint16_t idx;                        // Position.
+    uint8_t dir;                        // Direction of movement.
+    uint8_t dsp;                        // How many steps has the object moved between spaces.
 };
 
 /* Create */
@@ -140,18 +140,18 @@ void press_buttons(struct object *o);
 
 /* Static circuits connect buttons to positions on the map */
 struct static_circuit {
-    struct static_circuit *next;	// Next in list
-    uint16_t size;			// Size of the tree.
-    uint16_t *tree;			// Boolean operation.
-    uint16_t idx;			// Position.
+    struct static_circuit *next;        // Next in list
+    uint16_t size;                        // Size of the tree.
+    uint16_t *tree;                        // Boolean operation.
+    uint16_t idx;                        // Position.
 };
 
 /* Dynamic circuits connect buttons to objects */
 struct dynamic_circuit {
-    struct dynamic_circuit *next;	// Next in list
-    uint16_t size;			// Size of the tree.
-    uint16_t *tree;			// Boolean operation.
-    struct object *obj;			// Object.
+    struct dynamic_circuit *next;        // Next in list
+    uint16_t size;                        // Size of the tree.
+    uint16_t *tree;                        // Boolean operation.
+    struct object *obj;                        // Object.
 };
 
 /* Current value of the part of the circuit  whose root node is tree[off] */
@@ -161,8 +161,8 @@ int calculate(uint16_t * tree, size_t off);
  * The level records are basically pairs <time,key>.
  *----------------------------------------------------------------------------*/
 struct record {
-    uint32_t time;		// When the key was pushed.
-    int8_t key;			// Whick key.
+    uint32_t time;                // When the key was pushed.
+    int8_t key;                        // Whick key.
 };
 
 /*----------------------------------------------------------------------------
@@ -193,16 +193,16 @@ struct record {
  *----------------------------------------------------------------------------*/
 struct state {
     struct object objects[OBJECT_POOL_SIZE];
-    uint8_t static_map[SIZE][SIZE][SIZE];	// Static map.
-    uint8_t forces_map[SIZE][SIZE][SIZE];	// Forces map.
-    struct object *object_map[SIZE][SIZE][SIZE];	// Object map.
+    uint8_t static_map[SIZE][SIZE][SIZE];        // Static map.
+    uint8_t forces_map[SIZE][SIZE][SIZE];        // Forces map.
+    struct object *object_map[SIZE][SIZE][SIZE];        // Object map.
 
-    uint32_t ticks;		// Number of iterations since the level began.
-    struct record *record_ptr;	// The current record.
+    uint32_t ticks;                // Number of iterations since the level began.
+    struct record *record_ptr;        // The current record.
 
-    int8_t pushing;		// If the wodox is attempting to push something.
-    int8_t dst_ang;		// Target angle for the wodox.
-    int8_t cur_ang;		// Current angle for the wodox.
+    int8_t pushing;                // If the wodox is attempting to push something.
+    int8_t dst_ang;                // Target angle for the wodox.
+    int8_t cur_ang;                // Current angle for the wodox.
 };
 
 /*----------------------------------------------------------------------------
@@ -226,28 +226,28 @@ struct state {
  * only gave problems with specially dense people playing the 40th. 
  *----------------------------------------------------------------------------*/
 struct game {
-    int keyup;			// Key for movng up.
-    int keydn;			// Key for movng down.
-    int keylf;			// Key for movng left.
-    int keyrt;			// Key for movng right.
+    int keyup;                        // Key for movng up.
+    int keydn;                        // Key for movng down.
+    int keylf;                        // Key for movng left.
+    int keyrt;                        // Key for movng right.
 
-    int keep_going;		// While true, reload level.
-    int keep_playing;		// While true, play level.
-    int must_save;		// Important.
-    int warped;			// True if the player has warped.
-    int replay;			// True if we are automatically replaying the level.
+    int keep_going;                // While true, reload level.
+    int keep_playing;                // While true, play level.
+    int must_save;                // Important.
+    int warped;                        // True if the player has warped.
+    int replay;                        // True if we are automatically replaying the level.
 
-    struct object *po;		// Player controlled object.
+    struct object *po;                // Player controlled object.
 
-    int object_count;		// Number of objects.
-    struct static_circuit *static_circuits;	// Static circuits.
-    struct dynamic_circuit *dynamic_circuits;	// Dynamic circuits.
+    int object_count;                // Number of objects.
+    struct static_circuit *static_circuits;        // Static circuits.
+    struct dynamic_circuit *dynamic_circuits;        // Dynamic circuits.
 
-    struct state cs;		// Current state.
+    struct state cs;                // Current state.
 
-    struct state state_stack[STATE_STACK_LEN];	// Saved states.
-    struct state *state_stack_top;	// In a circular stack.
-    struct state *state_stack_bottom;	// That may not be full.
+    struct state state_stack[STATE_STACK_LEN];        // Saved states.
+    struct state *state_stack_top;        // In a circular stack.
+    struct state *state_stack_bottom;        // That may not be full.
 
     struct record record_list[RECORD_LIST_SIZE];// What the player has been doing.
 };

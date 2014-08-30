@@ -28,20 +28,20 @@ editor_rotate_lf(void)
     struct circuit tmp2;
 
     for (j = 0; j < SIZE; ++j) {
-	for (i = MIN, m = MAX; i < m; ++i, --m)
-	    for (k = MIN, n = MAX; k < n; ++k, --n) {
-		tmp = level.static_map[j][i][k];
-		level.static_map[j][i][k] = editor_rotate_object_lf(level.static_map[j][n][i]);
-		level.static_map[j][n][i] = editor_rotate_object_lf(level.static_map[j][m][n]);
-		level.static_map[j][m][n] = editor_rotate_object_lf(level.static_map[j][k][m]);
-		level.static_map[j][k][m] = editor_rotate_object_lf(tmp);
+        for (i = MIN, m = MAX; i < m; ++i, --m)
+            for (k = MIN, n = MAX; k < n; ++k, --n) {
+                tmp = level.static_map[j][i][k];
+                level.static_map[j][i][k] = editor_rotate_object_lf(level.static_map[j][n][i]);
+                level.static_map[j][n][i] = editor_rotate_object_lf(level.static_map[j][m][n]);
+                level.static_map[j][m][n] = editor_rotate_object_lf(level.static_map[j][k][m]);
+                level.static_map[j][k][m] = editor_rotate_object_lf(tmp);
 
-		tmp2 = level.circuit_map[j][i][k];
-		level.circuit_map[j][i][k] = editor_rotate_circuit_lf(level.circuit_map[j][n][i]);
-		level.circuit_map[j][n][i] = editor_rotate_circuit_lf(level.circuit_map[j][m][n]);
-		level.circuit_map[j][m][n] = editor_rotate_circuit_lf(level.circuit_map[j][k][m]);
-		level.circuit_map[j][k][m] = editor_rotate_circuit_lf(tmp2);
-	    }
+                tmp2 = level.circuit_map[j][i][k];
+                level.circuit_map[j][i][k] = editor_rotate_circuit_lf(level.circuit_map[j][n][i]);
+                level.circuit_map[j][n][i] = editor_rotate_circuit_lf(level.circuit_map[j][m][n]);
+                level.circuit_map[j][m][n] = editor_rotate_circuit_lf(level.circuit_map[j][k][m]);
+                level.circuit_map[j][k][m] = editor_rotate_circuit_lf(tmp2);
+            }
     }
 }
 
@@ -52,20 +52,20 @@ editor_rotate_rt(void)
     struct circuit tmp2;
 
     for (j = 0; j < SIZE; ++j) {
-	for (i = MIN, m = MAX; i < m; ++i, --m)
-	    for (k = MIN, n = MAX; k < n; ++k, --n) {
-		tmp = level.static_map[j][i][k];
-		level.static_map[j][i][k] = editor_rotate_object_rt(level.static_map[j][k][m]);
-		level.static_map[j][k][m] = editor_rotate_object_rt(level.static_map[j][m][n]);
-		level.static_map[j][m][n] = editor_rotate_object_rt(level.static_map[j][n][i]);
-		level.static_map[j][n][i] = editor_rotate_object_rt(tmp);
+        for (i = MIN, m = MAX; i < m; ++i, --m)
+            for (k = MIN, n = MAX; k < n; ++k, --n) {
+                tmp = level.static_map[j][i][k];
+                level.static_map[j][i][k] = editor_rotate_object_rt(level.static_map[j][k][m]);
+                level.static_map[j][k][m] = editor_rotate_object_rt(level.static_map[j][m][n]);
+                level.static_map[j][m][n] = editor_rotate_object_rt(level.static_map[j][n][i]);
+                level.static_map[j][n][i] = editor_rotate_object_rt(tmp);
 
-		tmp2 = level.circuit_map[j][i][k];
-		level.circuit_map[j][i][k] = editor_rotate_circuit_rt(level.circuit_map[j][k][m]);
-		level.circuit_map[j][k][m] = editor_rotate_circuit_rt(level.circuit_map[j][m][n]);
-		level.circuit_map[j][m][n] = editor_rotate_circuit_rt(level.circuit_map[j][n][i]);
-		level.circuit_map[j][n][i] = editor_rotate_circuit_rt(tmp2);
-	    }
+                tmp2 = level.circuit_map[j][i][k];
+                level.circuit_map[j][i][k] = editor_rotate_circuit_rt(level.circuit_map[j][k][m]);
+                level.circuit_map[j][k][m] = editor_rotate_circuit_rt(level.circuit_map[j][m][n]);
+                level.circuit_map[j][m][n] = editor_rotate_circuit_rt(level.circuit_map[j][n][i]);
+                level.circuit_map[j][n][i] = editor_rotate_circuit_rt(tmp2);
+            }
     }
 }
 
@@ -77,13 +77,13 @@ editor_rotate_object_lf(uint8_t p)
 {
     switch (p) {
     case BELTLF:
-	return BELTFT;
+        return BELTFT;
     case BELTBK:
-	return BELTLF;
+        return BELTLF;
     case BELTRT:
-	return BELTBK;
+        return BELTBK;
     case BELTFT:
-	return BELTRT;
+        return BELTRT;
     }
     return p;
 }
@@ -93,13 +93,13 @@ editor_rotate_object_rt(uint8_t p)
 {
     switch (p) {
     case BELTLF:
-	return BELTBK;
+        return BELTBK;
     case BELTBK:
-	return BELTRT;
+        return BELTRT;
     case BELTRT:
-	return BELTFT;
+        return BELTFT;
     case BELTFT:
-	return BELTLF;
+        return BELTLF;
     }
     return p;
 }
@@ -114,12 +114,12 @@ editor_rotate_circuit_lf(struct circuit n)
     struct coord c;
 
     if (n.tree) {
-	for (it = n.tree; it < n.tree + n.size; ++it) {
-	    if (*it < NONE) {
-		c = idx_to_coord(*it);
-		*it = coord_to_idx(coord(c.z, c.y, MAX - c.x));
-	    }
-	}
+        for (it = n.tree; it < n.tree + n.size; ++it) {
+            if (*it < NONE) {
+                c = idx_to_coord(*it);
+                *it = coord_to_idx(coord(c.z, c.y, MAX - c.x));
+            }
+        }
     }
 
     return n;
@@ -132,12 +132,12 @@ editor_rotate_circuit_rt(struct circuit n)
     struct coord c;
 
     if (n.tree) {
-	for (it = n.tree; it < n.tree + n.size; ++it) {
-	    if (*it < NONE) {
-		c = idx_to_coord(*it);
-		*it = coord_to_idx(coord(MAX - c.z, c.y, c.x));
-	    }
-	}
+        for (it = n.tree; it < n.tree + n.size; ++it) {
+            if (*it < NONE) {
+                c = idx_to_coord(*it);
+                *it = coord_to_idx(coord(MAX - c.z, c.y, c.x));
+            }
+        }
     }
 
     return n;

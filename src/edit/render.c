@@ -22,88 +22,88 @@ editor_render_level(void)
     // effect, and the exit is a particle system.
 
     for (c.x = 0; c.x < SIZE; ++c.x) {
-	for (c.z = 0; c.z < SIZE; ++c.z) {
-	    for (c.y = 0; c.y < SIZE; ++c.y) {
-		if (level.circuit_map[c.y][c.x][c.z].tree) {
-		    dst = world_to_screen(SPS * c.x, SPS * c.y, SPS * c.z);
-		    render_effect(1, 1, &dst);
-		}
+        for (c.z = 0; c.z < SIZE; ++c.z) {
+            for (c.y = 0; c.y < SIZE; ++c.y) {
+                if (level.circuit_map[c.y][c.x][c.z].tree) {
+                    dst = world_to_screen(SPS * c.x, SPS * c.y, SPS * c.z);
+                    render_effect(1, 1, &dst);
+                }
 
-		switch (level.static_map[c.y][c.x][c.z]) {
-		case GROUND ... SWITCH:
-		    dst = world_to_screen(SPS * c.x, SPS * c.y, SPS * c.z);
-		    render_object(level.static_map[c.y][c.x][c.z] - 1, 0,
-				  &dst);
-		    break;
+                switch (level.static_map[c.y][c.x][c.z]) {
+                case GROUND ... SWITCH:
+                    dst = world_to_screen(SPS * c.x, SPS * c.y, SPS * c.z);
+                    render_object(level.static_map[c.y][c.x][c.z] - 1, 0,
+                                  &dst);
+                    break;
 
-		case TUBE:
-		    dst = world_to_screen(SPS * c.x, SPS * c.y, SPS * c.z);
-		    if (level.static_map[c.y + 1][c.x][c.z] != TUBE) {
-			render_effect(1, 0, &dst);
-		    }
-		    render_effect(0, 0, &dst);
-		    break;
+                case TUBE:
+                    dst = world_to_screen(SPS * c.x, SPS * c.y, SPS * c.z);
+                    if (level.static_map[c.y + 1][c.x][c.z] != TUBE) {
+                        render_effect(1, 0, &dst);
+                    }
+                    render_effect(0, 0, &dst);
+                    break;
 
-		case WARP:
-		    dst = world_to_screen(SPS * c.x, SPS * (c.y - 2), SPS * c.z);
-		    render_particles(media.canvas, &dst);
-		    break;
+                case WARP:
+                    dst = world_to_screen(SPS * c.x, SPS * (c.y - 2), SPS * c.z);
+                    render_particles(media.canvas, &dst);
+                    break;
 
-		default:
-		    if (c.y == level.cursor.y) {
-			dst = world_to_screen(SPS * c.x, SPS * c.y,
-					    SPS * c.z);
-			render_effect(3, 1, &dst);
-		    }
-		}
+                default:
+                    if (c.y == level.cursor.y) {
+                        dst = world_to_screen(SPS * c.x, SPS * c.y,
+                                            SPS * c.z);
+                        render_effect(3, 1, &dst);
+                    }
+                }
 
-		if (coordcmp(level.cursor, c) == 0) {
-		    dst = world_to_screen(SPS * c.x, SPS * c.y, SPS * c.z);
-		    render_effect(0, 1, &dst);
-		}
-	    }
+                if (coordcmp(level.cursor, c) == 0) {
+                    dst = world_to_screen(SPS * c.x, SPS * c.y, SPS * c.z);
+                    render_effect(0, 1, &dst);
+                }
+            }
 
-	    for (c.y = 0; c.y < SIZE; ++c.y) {
-		if (level.static_map[c.y][c.x][c.z] == TUBE) {
-		    dst = world_to_screen(SPS * c.x, SPS * c.y, SPS * c.z);
-		    warp_surface(media.canvas, &dst);
-		}
-	    }
+            for (c.y = 0; c.y < SIZE; ++c.y) {
+                if (level.static_map[c.y][c.x][c.z] == TUBE) {
+                    dst = world_to_screen(SPS * c.x, SPS * c.y, SPS * c.z);
+                    warp_surface(media.canvas, &dst);
+                }
+            }
 
-	    for (c.y = 0; c.y < SIZE; ++c.y) {
-		if (level.circuit_map[c.y][c.x][c.z].tree) {
-		    dst = world_to_screen(SPS * c.x, SPS * c.y, SPS * c.z);
-		    render_effect(2, 1, &dst);
-		}
-	    }
-	}
+            for (c.y = 0; c.y < SIZE; ++c.y) {
+                if (level.circuit_map[c.y][c.x][c.z].tree) {
+                    dst = world_to_screen(SPS * c.x, SPS * c.y, SPS * c.z);
+                    render_effect(2, 1, &dst);
+                }
+            }
+        }
     }
 
     // Label all buttons and switches.
 
     for (c.x = 0; c.x < SIZE; ++c.x) {
-	for (c.y = 0; c.y < SIZE; ++c.y) {
-	    for (c.z = 0; c.z < SIZE; ++c.z) {
-		switch (level.static_map[c.x][c.y][c.z]) {
-		case BUTTON:
-		case SWITCH:
-		    sprintf(lil_buf, "%d%d%d", c.x, c.y, c.z);
-		    if ((surface =
-			 TTF_RenderUTF8_Blended(media.font_normal, lil_buf,
-						color_white))) {
-			dst = world_to_screen(SPS * c.x, SPS * c.y,
-					    SPS * c.z);
-			dst.x += 30 - surface->w / 2;
-			dst.y += 10 - surface->h / 2;
-			SDL_BlitSurface(surface, NULL, media.canvas, &dst);
-			SDL_FreeSurface(surface);
-		    }
+        for (c.y = 0; c.y < SIZE; ++c.y) {
+            for (c.z = 0; c.z < SIZE; ++c.z) {
+                switch (level.static_map[c.x][c.y][c.z]) {
+                case BUTTON:
+                case SWITCH:
+                    sprintf(lil_buf, "%d%d%d", c.x, c.y, c.z);
+                    if ((surface =
+                         TTF_RenderUTF8_Blended(media.font_normal, lil_buf,
+                                                color_white))) {
+                        dst = world_to_screen(SPS * c.x, SPS * c.y,
+                                            SPS * c.z);
+                        dst.x += 30 - surface->w / 2;
+                        dst.y += 10 - surface->h / 2;
+                        SDL_BlitSurface(surface, NULL, media.canvas, &dst);
+                        SDL_FreeSurface(surface);
+                    }
 
-		default:
-		    break;
-		}
-	    }
-	}
+                default:
+                    break;
+                }
+            }
+        }
     }
 
     // Draw the cursor
@@ -128,16 +128,16 @@ editor_render_circuit(void)
     case BELTBK:
     case BELTFT:
     case MOVING:
-	memset(buf, 0, sizeof(buf));
-	circuit_to_text(buf, &C_MAP[coord_to_idx(level.cursor)], 0, 0);
+        memset(buf, 0, sizeof(buf));
+        circuit_to_text(buf, &C_MAP[coord_to_idx(level.cursor)], 0, 0);
 
-	if ((surface =
-	     TTF_RenderUTF8_Blended(media.font_equation, buf,
-				    color_white))) {
-	    dst.x = (media.canvas->w - surface->w) / 2;
-	    dst.y = 0;
-	    SDL_BlitSurface(surface, NULL, media.canvas, &dst);
-	    SDL_FreeSurface(surface);
-	}
+        if ((surface =
+             TTF_RenderUTF8_Blended(media.font_equation, buf,
+                                    color_white))) {
+            dst.x = (media.canvas->w - surface->w) / 2;
+            dst.y = 0;
+            SDL_BlitSurface(surface, NULL, media.canvas, &dst);
+            SDL_FreeSurface(surface);
+        }
     }
 }

@@ -94,18 +94,18 @@ read_messages(const char *dir, const char *filename)
     path = strjoin(PATH_SEPARATOR, dir, filename, NULL);
 
     if ((f = fopen(path, "rt"))) {
-	for (i = 0; fgets(buffer, sizeof(buffer), f); ++i) {
-	    if (i % 8 == 0) {
-		str = (char **) realloc(str, sizeof(char *) * (i + 8));
-		memset(str + i, 0, sizeof(char *) * 8);
-	    }
+        for (i = 0; fgets(buffer, sizeof(buffer), f); ++i) {
+            if (i % 8 == 0) {
+                str = (char **) realloc(str, sizeof(char *) * (i + 8));
+                memset(str + i, 0, sizeof(char *) * 8);
+            }
 
-	    str[i] = strdup(buffer);
-	    str[i][strlen(str[i]) - 1] = 0;
+            str[i] = strdup(buffer);
+            str[i][strlen(str[i]) - 1] = 0;
 
-	}
+        }
 
-	fclose(f);
+        fclose(f);
     }
 
     free(path);

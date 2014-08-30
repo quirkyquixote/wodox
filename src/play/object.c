@@ -13,7 +13,7 @@ struct object *
 object_new(uint8_t type, uint16_t off)
 {
     if (game.object_count > OBJECT_POOL_SIZE)
-	return NULL;
+        return NULL;
 
     struct object *o = &game.cs.objects[game.object_count++];
 
@@ -58,7 +58,7 @@ int
 object_try_move(struct object *o, int dir)
 {
     if (MAP[o->idx + offset[dir]] & SOLID)
-	return STILL;
+        return STILL;
     object_move(o, dir);
     return dir;
 }

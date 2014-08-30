@@ -5,12 +5,12 @@
 
 #pragma once
 
-#include <SDL/SDL.h>		// For SDL
-#include <SDL/SDL_image.h>	// For IMG_Load
-#include <SDL/SDL_mixer.h>	// For Sound
-#include <SDL/SDL_framerate.h>	// For FPSmanager
-#include <SDL/SDL_gfxPrimitives.h>	// For lineColor
-#include <SDL/SDL_ttf.h>	// For text
+#include <SDL/SDL.h>                // For SDL
+#include <SDL/SDL_image.h>        // For IMG_Load
+#include <SDL/SDL_mixer.h>        // For Sound
+#include <SDL/SDL_framerate.h>        // For FPSmanager
+#include <SDL/SDL_gfxPrimitives.h>        // For lineColor
+#include <SDL/SDL_ttf.h>        // For text
 
 #include "core/core.h"
 
@@ -21,10 +21,10 @@ struct media {
     int enable_audio;
     int enable_music;
 
-    SDL_Surface *canvas;	// The window.
-    SDL_Surface *surface_frame;	// The frame.
-    SDL_Surface *surface_title;	// The menu.
-    SDL_Surface *surface_hforhelp;	// Press H for help.
+    SDL_Surface *canvas;        // The window.
+    SDL_Surface *surface_frame;        // The frame.
+    SDL_Surface *surface_title;        // The menu.
+    SDL_Surface *surface_hforhelp;        // Press H for help.
     SDL_Surface *surface_levelname;
 
     SDL_Surface *surface_background;
@@ -34,24 +34,24 @@ struct media {
     SDL_Surface *surface_properties;
     SDL_Surface *surface_circle;
 
-    TTF_Font *font_small;	// Small sized font.
-    TTF_Font *font_normal;	// Normal sized font.
-    TTF_Font *font_large;	// Large sized font.
-    TTF_Font *font_input;	// Font for input boxes.
-    TTF_Font *font_equation;	// Font for equation.
-    TTF_Font *font_button;	// Font for equation.
+    TTF_Font *font_small;        // Small sized font.
+    TTF_Font *font_normal;        // Normal sized font.
+    TTF_Font *font_large;        // Large sized font.
+    TTF_Font *font_input;        // Font for input boxes.
+    TTF_Font *font_equation;        // Font for equation.
+    TTF_Font *font_button;        // Font for equation.
 
-    Mix_Chunk *chunk_press;	// The waveform of a button being pressed.
-    Mix_Chunk *chunk_release;	// The waveform of a button being released.
-    Mix_Chunk *chunk_open;	// The waveform of a gate being openend.
-    Mix_Chunk *chunk_fail;	// The waveform of a failure.
-    Mix_Chunk *chunk_wodox;	// The waveform of a wodox moving.
-    Mix_Chunk *chunk_keystroke;	// The waveform of a keystroke.
-    Mix_Chunk *chunk_marker;	// The waveform of a marker.
+    Mix_Chunk *chunk_press;        // The waveform of a button being pressed.
+    Mix_Chunk *chunk_release;        // The waveform of a button being released.
+    Mix_Chunk *chunk_open;        // The waveform of a gate being openend.
+    Mix_Chunk *chunk_fail;        // The waveform of a failure.
+    Mix_Chunk *chunk_wodox;        // The waveform of a wodox moving.
+    Mix_Chunk *chunk_keystroke;        // The waveform of a keystroke.
+    Mix_Chunk *chunk_marker;        // The waveform of a marker.
 
-    FPSmanager fpsmanager;	// To ensure a steady frame rate.
+    FPSmanager fpsmanager;        // To ensure a steady frame rate.
 
-    int current_frame;		// Controls The 'wave' effect applied to some surfaces
+    int current_frame;                // Controls The 'wave' effect applied to some surfaces
 };
 
 extern struct media media;
@@ -63,15 +63,15 @@ static inline struct SDL_Rect
 world_to_screen(int x, int y, int z)
 {
     return (SDL_Rect) { media.canvas->w / 2 + 100 + 4 * x - 10 * z,
-			media.canvas->h / 2 - 8 * y + 6 * x + 2 * z,
-			0, 0 };
+                        media.canvas->h / 2 - 8 * y + 6 * x + 2 * z,
+                        0, 0 };
 }
 
 /*----------------------------------------------------------------------------
  * Some constants
  *----------------------------------------------------------------------------*/
-extern SDL_Color color_white;	// Some used and reused values.
-extern SDL_Color color_black;	// Some used and reused values.
+extern SDL_Color color_white;        // Some used and reused values.
+extern SDL_Color color_black;        // Some used and reused values.
 extern SDL_Color color_red;
 extern SDL_Color color_marker;
 

@@ -23,16 +23,16 @@ editor_load(const char *path)
     memset(level.circuit_map, 0, sizeof(struct circuit) * SIZE_3);
 
     if ((f = fopen(path, "rb")) == NULL) {
-	perror(path);
-	return 0;
+        perror(path);
+        return 0;
     }
 
     fread(level.static_map, sizeof(uint8_t), SIZE_3, f);
 
     while (fread(&n, sizeof(uint16_t), 1, f) == 1 && n < SIZE_3) {
-	fread(&C_MAP[n].size, sizeof(uint16_t), 1, f);
-	C_MAP[n].tree = malloc(sizeof(uint16_t) * C_MAP[n].size);
-	fread(C_MAP[n].tree, sizeof(uint16_t), C_MAP[n].size, f);
+        fread(&C_MAP[n].size, sizeof(uint16_t), 1, f);
+        C_MAP[n].tree = malloc(sizeof(uint16_t) * C_MAP[n].size);
+        fread(C_MAP[n].tree, sizeof(uint16_t), C_MAP[n].size, f);
     }
 
     fclose(f);
@@ -49,18 +49,18 @@ editor_save(const char *path)
     uint16_t n;
 
     if ((f = fopen(path, "wb")) == NULL) {
-	perror(path);
-	return 0;
+        perror(path);
+        return 0;
     }
 
     fwrite(level.static_map, sizeof(uint8_t), SIZE_3, f);
 
     for (n = 0; n < SIZE_3; ++n) {
-	if (C_MAP[n].tree) {
-	    fwrite(&n, sizeof(uint16_t), 1, f);
-	    fwrite(&C_MAP[n].size, sizeof(uint16_t), 1, f);
-	    fwrite(C_MAP[n].tree, sizeof(uint16_t), C_MAP[n].size, f);
-	}
+        if (C_MAP[n].tree) {
+            fwrite(&n, sizeof(uint16_t), 1, f);
+            fwrite(&C_MAP[n].size, sizeof(uint16_t), 1, f);
+            fwrite(C_MAP[n].tree, sizeof(uint16_t), C_MAP[n].size, f);
+        }
     }
 
     fclose(f);
@@ -73,7 +73,7 @@ editor_destroy(void)
     int i;
 
     for (i = 0; i < SIZE_3; ++i) 
-	if (C_MAP[i].tree) 
-	    free(C_MAP[i].tree);
+        if (C_MAP[i].tree) 
+            free(C_MAP[i].tree);
 }
 
