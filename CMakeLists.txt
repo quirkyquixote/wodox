@@ -23,17 +23,25 @@ find_package(SDL_gfx)
 find_library(M_LIB m)
 
 include_directories (
-  ${WODOX_SOURCE_DIR}
-  ${SDL_INCLUDE_DIR}
-  ${SDLIMAGE_INCLUDE_DIR}
-  ${SDLMIXER_INCLUDE_DIR}
-  ${SDLTTF_INCLUDE_DIR}
-  ${SDL_gfx_INCLUDE_DIR}
+    ${WODOX_SOURCE_DIR}
+    ${SDL_INCLUDE_DIR}
+    ${SDLIMAGE_INCLUDE_DIR}
+    ${SDLMIXER_INCLUDE_DIR}
+    ${SDLTTF_INCLUDE_DIR}
+    ${SDL_gfx_INCLUDE_DIR}
 ) 
-
 
 # Recurse into the "src" and "data" subdirectories. This does not actually 
 # cause another cmake executable to run. The same process will walk through 
 # the project's entire directory structure. 
 add_subdirectory (src) 
-add_subdirectory (data) 
+add_subdirectory (data)
+
+# uninstall target
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    IMMEDIATE @ONLY)
+
+add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
