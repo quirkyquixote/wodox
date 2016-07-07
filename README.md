@@ -1,5 +1,5 @@
 Wodox - A puzzle game influenced by Sokoban
-====================
+===========================================
 
 Requirements
 ------------
@@ -23,11 +23,11 @@ Wodox provides CMake scripts. To build from scratch execute the following:
     make install
 
 Running 
--------------
-Usage: wodox --help
-       wodox --version
-       wodox [<options>] --edit <file> ...
-       wodox [<options>] --play <file> ...
-       wodox [<options>]
+-------
 
-See aditional options with wodox --help
+    Usage: wodox --help wodox --version
+           wodox [<options>] --edit <file> ...
+           wodox [<options>] --play <file> ...
+           wodox [<options>]
+    
+    See aditional options with wodox --help
